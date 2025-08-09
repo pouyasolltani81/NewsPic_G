@@ -1,0 +1,419 @@
+{# templates/ui/base.html #}
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html id='main' lang="{{ LANGUAGE_CODE }}" dir='ltr' class='oveerflow-y-hidden'>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="timezone" content="Asia/Tehran">
+  <title>{% block title %}Workflow UI{% endblock %}</title>
+  {% comment %} <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" /> {% endcomment %}
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.10.0/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      corePlugins: {
+        preflight: true,
+      },
+      variants: {
+        extend: {
+          margin: ['rtl'],
+          padding: ['rtl'],
+          space: ['rtl'],
+        }
+      }
+    }
+  </script>
+
+  {% block extra_css %}
+  {% if block.super %}{{ block.super }}{% endif %}
+  {% endblock %}
+  <style>
+  {% comment %} {% include 'partials/calender.css'%} {% endcomment %}
+  /* === Neo-Minimalist Persian Datepicker === */
+  #plotId {
+    background-color: #ffffff;
+    color: #111827;
+    border-radius: 1rem;
+    padding: 1.2rem;
+    min-width: 300px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .dark #plotId {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-color: #1e293b;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* === Header: Month/Year Navigator === */
+  .datepicker-navigator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+  }
+  
+  .dark .datepicker-navigator {
+    border-color: #334155;
+    color: #f8fafc;
+  }
+  
+  /* === Table Styles === */
+  #plotId table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 6px;
+    margin-top: 0.75rem;
+  }
+  
+  #plotId th {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+  }
+  
+  .dark #plotId th {
+    color: #94a3b8;
+  }
+  
+  #plotId td {
+    text-align: center;
+    padding: 0;
+    font-size: 0.9rem;
+    border-radius: 0.5rem;
+    position: relative;
+  }
+  
+  /* === Day Cell Content === */
+  #plotId td span {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.6rem 0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: inherit;
+    color: inherit;
+  }
+  
+  /* === Day States === */
+  .table-days td:not(.disabled):not(.selected) span:hover {
+    background-color: #f1f5f9;
+    color: #1e40af;
+  }
+  
+  .dark .table-days td:not(.disabled):not(.selected) span:hover {
+    background-color: #1e293b;
+    color: #60a5fa;
+  }
+  
+  /* === Selected Day === */
+  .table-days .selected span {
+    background-color: #2563eb !important;
+    color: white !important;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  }
+  
+  .dark .table-days .selected span {
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.7);
+    background-color: #3b82f6 !important;
+  }
+  
+  /* === Today's Date === */
+  .table-days .today:not(.selected) span {
+    border: 2px solid #3b82f6;
+    color: #1e40af;
+    font-weight: 500;
+    background-color: transparent;
+  }
+  
+  .dark .table-days .today:not(.selected) span {
+    border-color: #60a5fa;
+    color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.1);
+  }
+  
+  /* === Disabled Days === */
+  .table-days .disabled span {
+    color: #cbd5e1;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .dark .table-days .disabled span {
+    color: #64748b;
+    opacity: 0.4;
+  }
+  
+  /* === Navigation Buttons === */
+  .pwt-btn-next,
+  .pwt-btn-prev {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #475569;
+    cursor: pointer;
+    padding: 0.35rem 0.7rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    line-height: 1;
+  }
+  
+  .pwt-btn-next:hover,
+  .pwt-btn-prev:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+  }
+  
+  .dark .pwt-btn-next,
+  .dark .pwt-btn-prev {
+    color: #94a3b8;
+  }
+  
+  .dark .pwt-btn-next:hover,
+  .dark .pwt-btn-prev:hover {
+    background-color: #1e293b;
+    color: #e2e8f0;
+  }
+  
+  /* === Footer Buttons === */
+  .pwt-btn-submit,
+  .pwt-btn-today {
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  
+  .pwt-btn-submit {
+    background-color: #2563eb;
+    color: white;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  }
+  
+  .pwt-btn-submit:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(29, 78, 216, 0.25);
+  }
+  
+  .dark .pwt-btn-submit {
+    background-color: #3b82f6;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+  }
+  
+  .dark .pwt-btn-submit:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.4);
+  }
+  
+  .pwt-btn-today {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .pwt-btn-today:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .dark .pwt-btn-today {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+  }
+  
+  .dark .pwt-btn-today:hover {
+    background-color: #334155;
+    border-color: #475569;
+  }
+  
+  /* === Focus States === */
+  .pwt-btn-next:focus-visible,
+  .pwt-btn-prev:focus-visible,
+  .table-days td span:focus-visible,
+  .pwt-btn-submit:focus-visible,
+  .pwt-btn-today:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  .dark .pwt-btn-next:focus-visible,
+  .dark .pwt-btn-prev:focus-visible,
+  .dark .table-days td span:focus-visible,
+  .dark .pwt-btn-submit:focus-visible,
+  .dark .pwt-btn-today:focus-visible {
+    outline-color: #60a5fa;
+  }
+  .right-to-left {
+    direction: rtl;
+  }
+
+  .left-to-right {
+    direction: ltr;
+  }
+</style>
+    
+
+</head>
+
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-4  space-y-2 z-50 rtl:right-4 ltr:right-4"></div>
+
+<!-- Modal Overlay -->
+<div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+<!-- Modal Container -->
+<div id="modal-container" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-screen-lg p-6 space-y-4">
+    <div class="flex justify-between items-center">
+      <div id="modal-title" class="text-lg font-semibold text-gray-800 dark:text-white"></div>
+      <button onclick="hideModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div>
+      <div id="modal-content" class="text-gray-700 dark:text-gray-300 rtl:right-to-left ltr:left-to-right"></div>
+      <div class="pt-2" id='close_modal'>
+        <button onclick="hideModal()" class="w-full text-sm font-medium py-2.5 px-4 rounded-md border border-blue-700 dark:border-blue-300 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors">
+          {% trans 'close' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% comment %} notifications  {% endcomment %}
+
+
+        <!-- Notification Dropdown Box -->
+        <div id="notif-box"
+        class="fixed z-50 top-[5rem] ltr:right-32 rtl:left-32  w-80 max-h-96 overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 hidden"
+        >
+        </div>
+
+
+<body class="bg-gray-50 dark:bg-gray-900 h-screen overflow-hidden transition-colors duration-300" data-user-id="{{ request.user.id }}">
+  <div class="flex h-full">
+
+    <!-- Sidebar -->
+    <nav id="navigationMain"
+      class="hidden md:block w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-colors duration-300">
+    </nav>
+
+    <!-- Main area -->
+    <div class="flex-1 flex flex-col">
+
+      <!-- Header -->
+      <header
+        class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between transition-colors duration-300">
+        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+          <button id="nav-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+            <i data-lucide="menu" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
+          </button>
+          <h2 id="page-title" class="text-2xl font-semibold text-gray-800 dark:text-white">
+            {% block page_heading %}Page Title{% endblock %}
+          </h2>
+        </div>
+
+        <!-- Buttons  -->
+        {% include "ui/partials/header_buttons.html" %}
+
+        <!-- QA toggle (mobile) -->
+        <button id="qa-toggle"
+          class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ml-4 rtl:ml-0 rtl:mr-4">
+          <i data-lucide="more-vertical" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
+        </button>
+      </header>
+
+      <!-- Main content -->
+      <div class="flex-1 flex overflow-hidden   ">
+        <aside id="quickAction"
+          class="hidden   md:block w-80 bg-white dark:bg-gray-800 border-x border-2 border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 overflow-auto">
+        </aside>
+
+        <main id='main_content' class="flex-1  overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Includes -->
+  <script src="{% static 'ui/script.js' %}"></script>
+  <script src="{% static 'ui/navigationMain.js' %}"></script>
+  <script src="{% static 'ui/quickAction.js' %}"></script>
+
+  <script>
+    lucide.createIcons();
+
+   
+
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('navigationMain').classList.toggle('hidden');
+    });
+
+    // Load saved direction
+    const savedDir = localStorage.getItem('ui-dir');
+    if (savedDir) {
+      document.documentElement.setAttribute('dir', savedDir);
+    }
+
+    // Toggle RTL / LTR
+    document.getElementById('dir-toggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const newDir = html.getAttribute('dir') === 'rtl' ? 'ltr' : 'rtl';
+      html.setAttribute('dir', newDir);
+      localStorage.setItem('ui-dir', newDir);
+    });
+  </script>
+  <script>
+    window.translations = {
+      noMessages: "{{ _('no_new_messages') }}",
+      newNotification: "{{ _('new_notification') }}",
+      noContent: "{{ _('no_content_available') }}",
+      showAll: "{{ _('navigation.messages.show_all_messages') }}"
+      
+    };
+  </script>
+  <script src="{% static 'ui/buttonActions.js' %}" defer></script>
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script> {% endcomment %}
+  
+
+
+  {% block extra_js %}
+  {% if block.super %}{{ block.super }}{% endif %}
+  {% endblock %}
+</body>
+
+</html>

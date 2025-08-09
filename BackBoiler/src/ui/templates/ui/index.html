@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BackBoiler | Welcome</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <div class="bg-white shadow-lg rounded-2xl p-8 max-w-lg w-full text-center">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to <span class="text-blue-600">TempBoiler</span></h1>
+    <p class="text-gray-600 mb-6">Your backend is up and running 🚀</p>
+
+    <div class="space-y-3">
+      <a href="/swagger" class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition">
+        View APIs (Swagger)
+      </a>
+
+      <a href="/News_Picture_Generator/NewsDashboard/" class="block w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition">
+        View APIs (UI)
+      </a>
+
+      <a href="/admin" class="block w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition">
+        Admin Login
+      </a>
+      <a href="/Log/ShowLogs/" class="block w-full bg-gray-700 hover:bg-gray-800 text-white py-2 rounded-lg transition">
+        View Logs
+      </a>
+    </div>
+
+    <footer class="mt-8 text-sm text-gray-400">
+      &copy; <span id="year"></span> TempBoiler Project
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-16 11:56+0330\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:8
+msgid "Total Users"
+msgstr "Total Users"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:13
+msgid "Active Workflows"
+msgstr "Active Workflows"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:18
+msgid "Pending Tasks"
+msgstr "Pending Tasks"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:23
+msgid "System Uptime"
+msgstr "System Uptime"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:29
+msgid "Recent Activity"
+msgstr "Recent Activity"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:31
+msgid "Workflow “Import Data” completed 5 minutes ago."
+msgstr "Workflow “Import Data” completed 5 minutes ago."
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:32
+msgid "New user registered: alice@example.com."
+msgstr "New user registered: alice@example.com."
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:33
+msgid "Task “Generate Report” is pending review."
+msgstr "Task “Generate Report” is pending review."
+
+#: ui/templates/ui/user_base.html:125
+msgid "Dashboard"
+msgstr ""
+
+#: ui/templates/ui/user_base.html:126
+#, fuzzy
+#| msgid "Active Workflows"
+msgid "Workflows"
+msgstr "Active Workflows"
+
+#: ui/templates/ui/user_base.html:127
+msgid "Analytics"
+msgstr ""
+
+#: ui/templates/ui/user_base.html:128
+msgid "Inputs"
+msgstr ""
+
+#: ui/templates/ui/user_base.html:129
+msgid "Settings"
+msgstr ""
+
+#: ui/templates/ui/user_base.html:163
+msgid "no_new_messages"
+msgstr "No New Messages"
+
+#: ui/templates/ui/user_base.html:164
+msgid "new_notification"
+msgstr "New Notification"
+
+#: ui/templates/ui/user_base.html:165
+msgid "no_content_available"
+msgstr "No Content Available"
+
+# messages
+#: ui/templates/ui/user_base.html:166
+msgid "navigation.messages.show_all_messages"
+msgstr "Show all messages"
+
+ msgid "Change Language"
+ msgstr "Change Language"
+
+# quick navigation
+ msgid "quick.dashboard.title"
+ msgstr "Create Dashboard Item"
+
+ msgid "quick.dashboard.description"
+ msgstr "Add something to the dashboard."
+
+ msgid "quick.dashboard.summery"
+ msgstr "Added to dashboard"
+
+ msgid "quick.workflow.title"
+ msgstr "Create Workflow"
+
+ msgid "quick.workflow.description"
+ msgstr "Start a new workflow to automate your processes."
+
+ msgid "quick.workflow.summery"
+ msgstr "Started a new workflow"
+
+ msgid "quick.analytics.title"
+ msgstr "View Reports"
+
+ msgid "quick.analytics.description"
+ msgstr "Check your analytics and performance reports."
+
+ msgid "quick.analytics.summery"
+ msgstr "Viewed analytics"
+
+ msgid "quick.inputs.title"
+ msgstr "Import Data"
+
+ msgid "quick.inputs.description"
+ msgstr "Upload your data files to process them."
+
+ msgid "quick.inputs.summery"
+ msgstr "Uploaded data files"
+
+ msgid "quick.settings.title"
+ msgstr "Clear Settings"
+
+ msgid "quick.settings.description"
+ msgstr "Reset the recent actions log."
+
+ msgid "quick.settings.summery"
+ msgstr "Cleared action history"
+
+ msgid "Recent_Actions_Log"
+ msgstr "Recent Actions Log"
+
+
+ # calender
+ msgid "inputs.date.title"
+msgstr "Select a Jalali Date"
+
+msgid "inputs.date.jalali_label"
+msgstr "Jalali Date"
+
+msgid "inputs.date.submit"
+msgstr "Submit"
+
+msgid "inputs.date.selected_jalali"
+msgstr "Selected Jalali"
+
+msgid "inputs.date.selected_gregorian"
+msgstr "Selected Gregorian"
+ 
+
+ # messages
+ msgid "Messages"
+msgstr "Messages"
+ 
+msgid "Read"
+msgstr "Read"
+ 
+msgid "Device"
+msgstr "Device"
+ 
+msgid "Class"
+msgstr "Class"
+ 
+msgid "Type"
+msgstr "Type"
+ 
+msgid "Title"
+msgstr "Title"
+ 
+msgid "Created At"
+msgstr "Created At"
+ 
+msgid "Actions"
+msgstr "Actions"
+
+msgid "nonewmessages"
+msgstr "no new messages"

@@ -1,0 +1,117 @@
+{% extends "ui/user_base.html" %}
+{% load i18n %}
+
+
+{% block title %}Dashboard – Workflow UI{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+{% load jalali_tags %}
+
+{% block extra_css %}
+  {{ block.super }}
+
+  
+
+{% endblock %}
+
+
+{% block content %}
+  <div id="main-content" class='z-10'>
+    {# ─────────────────────── DASHBOARD TAB ─────────────────────── #}
+    {% include "dashboard/partials/dashboard_section.html" %}
+
+    
+
+    {# ─────────────────────── WORKFLOWS TAB ─────────────────────── #}
+    {% include "dashboard/partials/workflows_section.html" %}
+
+    {# ─────────────────────── ANALYTICS TAB ─────────────────────── #}
+    {% include "dashboard/partials/analytics_section.html" %}
+
+    {# ─────────────────────── INPUTS TAB ─────────────────────── #}
+    {% include "dashboard/partials/inputs_section.html" %}
+
+     {# ─────────────────────── messages TAB ─────────────────────── #}
+     {% include "dashboard/partials/messages_section.html" %}
+
+    {# ─────────────────────── SETTINGS TAB ─────────────────────── #}
+    {% include "dashboard/partials/setting_section.html" %}
+
+    
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+<!-- Persian Datepicker Dependencies -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+
+<script>
+
+  const navItems = [
+  { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
+  { key: '2', section: "workflows", label: "{{ _('Workflows') }}", icon: "workflow" },
+  { key: '3', section: "analytics", label: "{{ _('Analytics') }}", icon: "bar-chart-3" },
+  { key: '4', section: "inputs", label: "{{ _('Inputs') }}", icon: "calendar-fold" },
+  { key: '5', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
+  { key: '6', section: "settings", label: "{{ _('Settings') }}", icon: "settings" },
+
+];
+
+
+    const contentSections = {
+      dashboard: document.getElementById('dashboard-content'),
+      workflows: document.getElementById('workflows-content'),
+      analytics: document.getElementById('analytics-content'),
+      inputs: document.getElementById('inputs-content'),
+      messages: document.getElementById('messages-content'),
+      settings: document.getElementById('settings-content'),
+
+    };
+
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      const nav = new NavigationMain('navigationMain', navItems, contentSections);
+      window.nav = nav;
+      window.nav?.switchToSection?.('messages')
+    
+    });
+</script>
+
+
+
+<script>
+  $(document).ready(function () {
+    const $jalali = $('#jalali-date');
+    const $greg = $('#greg-date');
+
+
+    if ($jalali.length) {
+      $jalali.persianDatepicker({
+        format: 'YYYY/MM/DD',
+        altField: '#greg-date',
+        initialValue: true,
+        autoClose: true,
+        calendar: {
+          persian: { locale: 'fa' }
+        }
+  
+      });
+    }
+  });
+</script>
+
+
+<script>
+  {% include "dashboard/partials/quickactions.js" %}
+  {% include "dashboard/partials/messages.js" %}
+
+</script>
+
+
+
+
+  
+{% endblock %}

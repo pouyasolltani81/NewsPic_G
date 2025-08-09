@@ -1,0 +1,191 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-16 11:56+0330\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:8
+msgid "Total Users"
+msgstr "تعداد کاربران"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:13
+msgid "Active Workflows"
+msgstr "گردش‌کارهای فعال"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:18
+msgid "Pending Tasks"
+msgstr "وظایف در انتظار"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:23
+msgid "System Uptime"
+msgstr "زمان روشن بودن سیستم"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:29
+msgid "Recent Activity"
+msgstr "فعالیت اخیر"
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:31
+msgid "Workflow “Import Data” completed 5 minutes ago."
+msgstr "گردش‌کار «وارد کردن داده» پنج دقیقه پیش کامل شد."
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:32
+msgid "New user registered: alice@example.com."
+msgstr "کاربر جدید ثبت‌نام کرد: alice@example.com."
+
+#: LogModel/templates/dashboard/partials/dashboard_section.html:33
+msgid "Task “Generate Report” is pending review."
+msgstr "وظیفه «تولید گزارش» در انتظار بررسی است."
+
+# navigation 
+#: ui/templates/ui/user_base.html:125
+msgid "Dashboard"
+msgstr "داشبورد"
+
+#: ui/templates/ui/user_base.html:126
+msgid "Workflows"
+msgstr "گردش‌کارها"
+
+#: ui/templates/ui/user_base.html:127
+msgid "Analytics"
+msgstr "تحلیل‌ها"
+
+#: ui/templates/ui/user_base.html:128
+msgid "Inputs"
+msgstr "ورودی‌ها"
+
+#: ui/templates/ui/user_base.html:129
+msgid "Settings"
+msgstr "تنظیمات"
+
+# messages
+#: ui/templates/ui/user_base.html:163
+msgid "no_new_messages"
+msgstr "پیامی وجود ندارد"
+
+#: ui/templates/ui/user_base.html:164
+msgid "new_notification"
+msgstr "اعلان جدید"
+
+#: ui/templates/ui/user_base.html:165
+msgid "no_content_available"
+msgstr "محتوایی در دسترس نیست"
+
+#: ui/templates/ui/user_base.html:166
+msgid "navigation.messages.show_all_messages"
+msgstr "نمایش تمام پیام‌ها"
+
+#~ msgid "Change Language"
+#~ msgstr "تغییر زبان"
+
+# Quick action
+ msgid "quick.dashboard.title"
+ msgstr "ایجاد آیتم داشبورد"
+
+ msgid "quick.dashboard.description"
+ msgstr "افزودن آیتمی به داشبورد."
+
+ msgid "quick.dashboard.summery"
+ msgstr "به داشبورد اضافه شد"
+
+ msgid "quick.workflow.title"
+ msgstr "ایجاد گردش‌کار"
+
+ msgid "quick.workflow.description"
+ msgstr "یک گردش‌کار جدید برای خودکارسازی فرایندها ایجاد کنید."
+
+ msgid "quick.workflow.summery"
+ msgstr "گردش‌کار جدید شروع شد"
+
+ msgid "quick.analytics.title"
+ msgstr "مشاهده گزارش‌ها"
+
+ msgid "quick.analytics.description"
+ msgstr "گزارش‌های تحلیلی و عملکرد خود را بررسی کنید."
+
+ msgid "quick.analytics.summery"
+ msgstr "تحلیل‌ها مشاهده شد"
+
+ msgid "quick.inputs.title"
+ msgstr "وارد کردن داده‌ها"
+
+ msgid "quick.inputs.description"
+ msgstr "فایل‌های داده خود را بارگذاری کنید تا پردازش شوند."
+
+ msgid "quick.inputs.summery"
+ msgstr "فایل‌های داده بارگذاری شد"
+
+ msgid "quick.settings.title"
+ msgstr "پاک کردن تنظیمات"
+
+ msgid "quick.settings.description"
+ msgstr "پاک کردن تاریخچه اقدامات اخیر."
+
+ msgid "quick.settings.summery"
+ msgstr "تاریخچه اقدامات پاک شد"
+
+ msgid "Recent_Actions_Log"
+ msgstr "لاگ های جدید"
+
+
+
+ # calender
+
+
+ msgid "inputs.date.title"
+msgstr "انتخاب تاریخ جلالی"
+
+msgid "inputs.date.jalali_label"
+msgstr "تاریخ جلالی"
+
+msgid "inputs.date.submit"
+msgstr "ثبت"
+
+msgid "inputs.date.selected_jalali"
+msgstr "تاریخ جلالی انتخاب‌شده"
+
+msgid "inputs.date.selected_gregorian"
+msgstr "تاریخ میلادی انتخاب‌شده"
+
+
+# messages 
+msgid "Messages"
+msgstr "پیام‌ها"
+ 
+msgid "Read"
+msgstr "خوانده‌شده؟"
+ 
+msgid "Device"
+msgstr "دستگاه"
+ 
+msgid "Class"
+msgstr "کلاس"
+ 
+msgid "Type"
+msgstr "نوع"
+ 
+msgid "Title"
+msgstr "عنوان"
+ 
+msgid "Created At"
+msgstr "تاریخ ایجاد"
+ 
+msgid "Actions"
+msgstr "عملیات"
+
+msgid "nonewmessages"
+msgstr "بدون پیغام جدید"
+ 

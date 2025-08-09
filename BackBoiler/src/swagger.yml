@@ -1,0 +1,833 @@
+openapi: 3.0.3
+info:
+  title: BackBoiler Model API
+  version: 1.1.0
+  description: BackBoiler framework for every Django Project needs.
+paths:
+  /Auth/CheckUserAuth/:
+    post:
+      operationId: Auth_CheckUserAuth_create
+      description: <br><br> <b> App Credential </b>
+      summary: Check user auth token, auth user hash shows session is valid or not.
+        if session is invalid or expired then auth user hash was removed
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_token:
+                  type: string
+                  default: ''
+              required:
+              - user_token
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: true
+          description: ''
+  /Connect/ChangeConnectionStatus/:
+    post:
+      operationId: Connect_ChangeConnectionStatus_create
+      description: Change connection active status (is_active)<br><br> <b>Admin Credential</b>
+      summary: active or disactive a connection
+      tags:
+      - Connect
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                  description: app UUID of the connection to update
+                is_active:
+                  type: boolean
+                  default: true
+                  description: Set to true to enable or false to disable the connection
+              required:
+              - uuid
+              - is_active
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: Connection status updated successfully
+  /Connect/CreateConnection/:
+    post:
+      operationId: Connect_CreateConnection_create
+      description: Create new app connection interface (to be used by other apps)
+        with name and token<br><br> <b>Admin Credential</b>
+      summary: Create new connection for other service access
+      tags:
+      - Connect
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  default: ''
+                desc:
+                  type: string
+                  default: ''
+              required:
+              - name
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: Connection created successfully
+  /Connect/GetConnections/:
+    get:
+      operationId: Connect_GetConnections_retrieve
+      description: Get all app active connections<br><br> <b>Admin Credential</b>
+      summary: List all app active connections for service access
+      tags:
+      - Connect
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: List of all active connections
+  /Connect/GetCredential/:
+    post:
+      operationId: Connect_GetCredential_create
+      description: Get or retrun connection credential for uuid of [app, user, admin]
+        typefor app get from connect; for user and admin get from user and user auth<br><br>
+        <b> App Credential</b>
+      summary: get connection credentials. for [app, user, admin] types.
+      tags:
+      - Connect
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  default: app
+                  enum:
+                  - app
+                  - admin
+                  - user
+                  - none
+                uuid:
+                  type: string
+                  format: uuid
+                  default: ''
+                  description: if type in [app, user, admin] then need app_uuid or
+                    user_uuid
+              required:
+              - type
+              - uuid
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: Connection processed successfully
+  /Connect/RequestToExec/:
+    post:
+      operationId: Connect_RequestToExec_create
+      description: 'Execute a service route with provided parameters<br> <b> route
+        </b> to execute (e.g., "/api/connect/get-connections/")<br> <b> method </b>
+        to execute (e.g., "GET", "POST", "PUT", "DELETE")<br> <b> params </b> to pass
+        to the service, i.e: "uuid":"1234" <br> <b> headers </b> to include in the
+        request, i.e: "key":"1234" Authorization header is required for all requests,
+        look at the route credential then for [app] is app_token and for [admin,user]
+        credential is user_token<br><br> <b>Admin Credential</b>'
+      summary: Dynamic service execution
+      tags:
+      - Connect
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                asp_uuid:
+                  type: string
+                  format: uuid
+                  description: UUID of the ASP to execute the service on
+                route:
+                  type: string
+                  description: Service route to execute (e.g., "/api/connect/get-connections/")
+                  default: ''
+                method:
+                  type: string
+                  enum:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  default: POST
+                params:
+                  type: dict
+                  description: 'string of parameters to pass to the service, i.e:
+                    "uuid":"1234" '
+                  default: '{}'
+                headers:
+                  type: dict
+                  description: 'string of headers to include in the request, i.e:
+                    "key":"1234"'
+                  default: '{"Content-Type": "application/json", "Authorization":""}'
+              required:
+              - route
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: Service execution result
+  /Log/DeleteAllLogs/:
+    get:
+      operationId: Log_DeleteAllLogs_retrieve
+      description: Delete All Logs
+      summary: 'Delete logs '
+      tags:
+      - Log
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: Empty Logs Database
+  /Log/GetLogs/:
+    post:
+      operationId: Log_GetLogs_create
+      description: Retrieve logs from a given timestamp until now.
+      summary: Get logs within a specific time range
+      tags:
+      - Log
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                  default: '2025-08-01 07:04:15'
+                  description: Start timestamp for log retrieval
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Log'
+          description: List of logs from the given timestamp until now
+  /RateLimit/GetBlacklist/:
+    post:
+      operationId: RateLimit_GetBlacklist_create
+      description: 'Get paginated list of blacklist records<br><br> <b>Admin Credential</b><br><br>
+        <b>Parameters</b>: This endpoint supports <br> pagination parameters (page,
+        page_size), <br> filter parameters (ip_address, user_id, blacklist_type, reason,
+        is_active, is_permanent, created_by), and sorting (order_by). <br> <b> order_by
+        </b> is a string that can be one of the following: created_at, updated_at,
+        expires_at, violation_count, last_violation.<br> <b> blacklist_type </b> can
+        be one of the following: ip, user, both.<br> <b> is_permanent </b> is a boolean
+        that filters permanent blacklists.'
+      summary: Get blacklist records with pagination
+      tags:
+      - RateLimit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  default: 1
+                  description: Page number
+                page_size:
+                  type: integer
+                  default: 20
+                  description: Number of records per page (max 100)
+                ip_address:
+                  type: string
+                  default: ''
+                  description: Filter by IP address
+                user_id:
+                  type: string
+                  default: ''
+                  description: Filter by user ID
+                blacklist_type:
+                  type: string
+                  default: ''
+                  description: Filter by blacklist type (ip, user, both)
+                reason:
+                  type: string
+                  default: ''
+                  description: Filter by reason
+                is_active:
+                  type: boolean
+                  default: true
+                  description: Filter by active status
+                is_permanent:
+                  type: boolean
+                  default: null
+                  description: Filter by permanent status
+                created_by:
+                  type: string
+                  default: ''
+                  description: Filter by creator
+                order_by:
+                  type: string
+                  default: -created_at
+                  description: Order by field
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                blacklists: list
+                pagination: dict
+                filters: dict
+                statistics: dict
+          description: Blacklist records retrieved successfully
+  /RateLimit/GetRateLimitList/:
+    post:
+      operationId: RateLimit_GetRateLimitList_create
+      description: 'Get paginated list of rate limit records<br><br> <b>Admin Credential</b><br><br>
+        <b>Parameters</b>: This endpoint supports <br> pagination parameters (page,
+        page_size), <br> filter parameters (ip_address, user_id, endpoint, window_minutes),
+        and sorting (order_by). <br> <b> window_minutes </b> is an integer that filters
+        records within the last X minutes (0 for all records). <br> <b> ip_address
+        </b> is a string that filters records by IP address.<br> <b> user_id </b>
+        is an integer that filters records by user ID.<br> <b> endpoint </b> is a
+        string that filters records by endpoint and is one of the following: api_general,
+        login_rate, register_rate, password_reset_rate, profile_update_rate, user_uuid_rate,
+        data_fetch_rate, data_upload_rate, api_search_rate, api_user_auth_rate<br>
+        <b> order_by </b> is a string that can be one of the following: window_start,
+        -window_start, request_count, -request_count, created_at, -created_at, updated_at,
+        -updated_at.'
+      summary: Get rate limit records with pagination
+      tags:
+      - RateLimit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  default: 1
+                  description: Page number
+                page_size:
+                  type: integer
+                  default: 20
+                  description: Number of records per page (max 100)
+                ip_address:
+                  type: string
+                  default: ''
+                  description: Filter by IP address
+                user_id:
+                  type: string
+                  default: ''
+                  description: Filter by user ID
+                endpoint:
+                  type: string
+                  default: ''
+                  description: Filter by endpoint
+                window_minutes:
+                  type: integer
+                  default: 0
+                  description: Filter records within last X minutes (0 for all)
+                order_by:
+                  type: string
+                  default: -window_start
+                  description: Order by field (window_start, -window_start, request_count,
+                    -request_count)
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                rate_limits: list
+                pagination: dict
+                filters: dict
+          description: Rate limit records retrieved successfully
+  /RateLimit/GetWhitelist/:
+    post:
+      operationId: RateLimit_GetWhitelist_create
+      description: 'Get paginated list of whitelist records<br><br> <b>Admin Credential</b><br><br>
+        <b>Parameters</b>: This endpoint supports <br> pagination parameters (page,
+        page_size), <br> filter parameters (ip_address, user_id, whitelist_type, reason,
+        is_active, is_permanent, bypass_rate_limits), and sorting (order_by). <br>
+        <b> whitelist_type </b> can be one of the following: ip, user, both.<br> <b>
+        is_permanent </b> is a boolean that filters permanent whitelists.<br> <b>
+        bypass_rate_limits </b> is a boolean that filters whitelists that bypass rate
+        limits.<br> <b> order_by </b> is a string that can be one of the following:
+        -created_at, -updated_at, -expires_at, -violation_count, -last_violation.'
+      summary: Get whitelist records with pagination
+      tags:
+      - RateLimit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  default: 1
+                  description: Page number
+                page_size:
+                  type: integer
+                  default: 20
+                  description: Number of records per page (max 100)
+                ip_address:
+                  type: string
+                  default: ''
+                  description: Filter by IP address
+                user_id:
+                  type: string
+                  default: ''
+                  description: Filter by user ID
+                whitelist_type:
+                  type: string
+                  default: ''
+                  description: Filter by whitelist type (ip, user, both)
+                reason:
+                  type: string
+                  default: ''
+                  description: Filter by reason
+                is_active:
+                  type: boolean
+                  default: true
+                  description: Filter by active status
+                is_permanent:
+                  type: boolean
+                  default: null
+                  description: Filter by permanent status
+                bypass_rate_limits:
+                  type: boolean
+                  default: null
+                  description: Filter by rate limit bypass status
+                created_by:
+                  type: string
+                  default: ''
+                  description: Filter by creator
+                order_by:
+                  type: string
+                  default: -created_at
+                  description: Order by field
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                whitelists: list
+                pagination: dict
+                filters: dict
+                statistics: dict
+          description: Whitelist records retrieved successfully
+  /Sso/ChangeASPActivation/:
+    post:
+      operationId: Sso_ChangeASPActivation_create
+      description: Change App Service Provider Status<br><br> <b>Admin Credential</b>
+      summary: Toggle active status of service provider
+      tags:
+      - Sso
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                asp_uuid:
+                  type: string
+                  format: uuid
+              required:
+              - asp_uuid
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                provider: dict
+          description: Status changed successfully
+  /Sso/ChangeUserActivation/:
+    post:
+      operationId: Sso_ChangeUserActivation_create
+      description: Change SSO User Activation Status<br><br> <b>Admin Credential</b>
+      summary: Toggle SSO user active status
+      tags:
+      - Sso
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  default: ''
+                  description: User ID to get ASPs, if not provided, current user
+                    will be used
+                asp_uuid:
+                  type: string
+                  format: uuid
+              required:
+              - asp_uuid
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                message: string
+                sso_user: dict
+          description: Status changed successfully
+  /Sso/CreateASP/:
+    post:
+      operationId: Sso_CreateASP_create
+      description: Create App Service Provider interface connection with route<br><br>
+        <b>Admin Credential</b>
+      summary: Create new service provider in SSO system
+      tags:
+      - Sso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_uuid:
+                  type: string
+                  format: uuid
+                  description: uuid of the ASP, get it from remote ASP GetConnections
+                    API
+                name:
+                  type: string
+                  default: ''
+                desc:
+                  type: string
+                  default: ''
+                app_token:
+                  type: string
+                  default: ''
+                route_config:
+                  type: dict
+                  default:
+                    machine_name: hetz no.1
+                    ip: ''
+                    http_url: ''
+                    https_url: ''
+              required:
+              - app_uuid
+              - name
+              - app_token
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                asp: dict
+          description: Successful creation
+  /Sso/GetASPUserbyUserId/:
+    post:
+      operationId: Sso_GetASPUserbyUserId_create
+      description: Which ASP user i am connected<br><br> <b>User Credential</b>
+      summary: Which ASP user i am connected
+      tags:
+      - Sso
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                asp_uuid:
+                  type: string
+                  format: uuid
+                  description: ASP UUID to get credential
+                user_id:
+                  type: string
+                  default: ''
+                  description: User ID to get connected ASPs, if not provided, current
+                    user will be used
+              required:
+              - asp_uuid
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                credential: dict
+          description: ASP credential details retrieved successfully
+  /Sso/GetAspCredential/:
+    post:
+      operationId: Sso_GetAspCredential_create
+      description: Get ASP Credential details, it invokes the ASP GetCredential for
+        [app, user, admin] types with details. app for ASP and user and admin for
+        sso users related to destination connect<br><br> <b>User Credential</b>
+      summary: Get ASP credential details
+      tags:
+      - Sso
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                asp_uuid:
+                  type: string
+                  format: uuid
+                  description: ASP UUID to get credential
+                credential_type:
+                  type: string
+                  enum:
+                  - app
+                  - admin
+                  - user
+                  - none
+                  default: user
+                  description: credential type
+                asp_user_uuid:
+                  type: string
+                  default: ''
+                  description: ASP user UUID to get credential if needed.
+              required:
+              - asp_uuid
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                credential: dict
+          description: ASP credential details retrieved successfully
+  /Sso/GetUserAsps/:
+    post:
+      operationId: Sso_GetUserAsps_create
+      description: Get current User ASPs<br><br> <b>User Credential</b><br><b>Note:</b>
+        this API only works for service logined users
+      summary: Get current user ASPs information
+      tags:
+      - Sso
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  default: ''
+                  description: User ID to get ASPs, if not provided, current user
+                    will be used
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                asps: dict
+          description: ASP user details retrieved successfully
+  /User/GetUserToken/:
+    post:
+      operationId: User_GetUserToken_create
+      description: With email and password get auth token to use services<br><br>
+        <b> App Credential </b>
+      summary: user to use services should login or has a auth token in request header
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  default: ''
+                password:
+                  type: string
+                  default: ''
+              required:
+              - username
+              - password
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: ''
+  /User/GetUserbyUUID/:
+    post:
+      operationId: User_GetUserbyUUID_create
+      description: Get user details by uuid<br><br> <b> App Credential </b>
+      summary: Get user details by uuid
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  default: ''
+                  format: uuid
+                  description: User uuid
+              required:
+              - uuid
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+          description: ''
+components:
+  schemas:
+    LevelEnum:
+      enum:
+      - error
+      - warning
+      - urgent error
+      - return
+      - info
+      type: string
+      description: |-
+        * `error` - Error
+        * `warning` - Warning
+        * `urgent error` - Urgent Error
+        * `return` - Return
+        * `info` - Info
+    Log:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        timestamp:
+          type: string
+          format: date-time
+        user:
+          type: integer
+          nullable: true
+        level:
+          $ref: '#/components/schemas/LevelEnum'
+        message:
+          type: string
+        exception_type:
+          type: string
+          maxLength: 255
+        file_path:
+          type: string
+          maxLength: 255
+        line_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        view_name:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - id
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

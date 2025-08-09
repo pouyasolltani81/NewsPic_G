@@ -1,0 +1,56 @@
+ 
+{% block message_tab %}
+{% load i18n %}
+
+<div id="messages-content" class="tab-content hidden bg-white w-full h-screen overflow-hidden">
+ 
+  <!-- 🔍 Search Input -->
+  <div class="mb-4 flex justify-between p-6">
+    <input
+      type="text"
+      id="message-search"
+      placeholder="{% trans 'Search messages...' %}"
+      class="w-full md:w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-800 dark:text-white"
+    />
+
+    <div class='flex gap-2 flex-row-reverse transition-all w-fit'>
+      <div id='show-notif' class=' z-10 cursor-pointer bg-slate-200  hover:bg-emerald-100 rounded-lg'>
+        <i id='shownotif_btn' class=' rounded-lg h-10 w-10 p-2' data-lucide="eye-off"></i>
+      </div>
+
+      <div id='delete_all' class='translate-x-12 z-0 transition-all cursor-pointer bg-slate-200 hover:bg-red-100 rounded-lg'>
+        <i class='h-10 w-10 p-2' data-lucide="trash"></i>
+      </div>
+  
+      <div id='message' class='translate-x-12 transition-all cursor-pointer bg-slate-200 hover:bg-blue-100 rounded-lg'>
+        <i class='h-10 w-10 p-2' data-lucide="mail-plus"></i>
+      </div>
+    </div>
+  </div>
+
+  <table class="w-full bg-white dark:bg-gray-800 text-base shadow overflow-hidden" id="messages-table">
+    <thead class="dark:bg-gray-700 border-b-2 border-gray-100 text-neutral-500 dark:text-gray-300">
+      <tr>
+        <th class="p-3 font-normal">
+          <div class='flex gap-2 justify-center items-center'> {% trans "Device/ID" %} </div>
+        </th>
+        <th class="p-3 font-normal select-none">{% trans "Sender" %}</th>
+        <th class="p-3 font-normal select-none">{% trans "Title" %}}</th>
+        <th class="p-3 font-normal select-none">{% trans "Status" %}</th>
+        <th class="p-3 font-normal select-none">{% trans "sent Time" %}</th>
+        <th class="p-3 font-normal select-none">{% trans "Message Type" %}</th>
+        <th class="p-3 font-normal select-none">{% trans "Message Class" %}</th>
+        <th class="p-3 font-normal select-none">{% trans "View" %}</th>
+
+      
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+ 
+  <div id='pagination' class="flex items-center justify-center space-x-2 p-4 text-sm text-gray-700 dark:text-white select-none">
+  </div>
+</div>
+
+{% endblock %}

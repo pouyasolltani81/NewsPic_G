@@ -1,0 +1,32 @@
+{% block dashboard_section_tab %}
+{% load i18n %}
+{% load static %}
+
+{% comment %}
+Assuming you pass the parsed JSON data as `news_items` context variable from your Django view.
+Each item has: title, prompt, negative_prompt, filepath
+{% endcomment %}
+
+<div id="dashboard-content" class="tab-content p-6 bg-gray-50 min-h-screen">
+  <h2 class="text-2xl font-semibold mb-6">Crypto News Gallery</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {% for item in news_items %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+        <img src="{{ item.filepath }}" alt="{{ item.title }}" />
+      <div class="p-4 flex flex-col flex-grow">
+        <h3 class="font-bold text-lg mb-2 truncate" title="{{ item.title }}">{{ item.title }}</h3>
+        <div class="text-sm text-gray-700 flex-grow overflow-auto mb-2">
+          <strong>Prompt:</strong> {{ item.prompt }}
+        </div>
+        <div class="text-sm text-red-600 overflow-auto">
+          <strong>Negative Prompt:</strong> {{ item.negative_prompt }}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p>No news items found.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

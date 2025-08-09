@@ -1,0 +1,25 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    <title>{% block title %} Market APIs {% endblock %}</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		{% tailwind_css %}
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+			}
+		</style>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		<script src="{% static 'prj/js/utils.js' %}"></script>
+	</head>
+
+	<body class="bg-gray-50 leading-normal tracking-normal" style="font-family: Arial, sans-serif;">
+		<div class="container max-w-full">
+			{% block content %}
+			{% endblock %}
+		</div>
+	</body>
+</html>

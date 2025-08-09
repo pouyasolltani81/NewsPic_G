@@ -1,0 +1,39 @@
+{% block dashboard_tab %}
+{% load i18n %}
+
+<div id="dashboard-content" class="tab-content">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Card 1: Total Users -->
+    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">{% trans "Total Users" %}</h3>
+      <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">1,254</p>
+    </div>
+    <!-- Card 2: Active Workflows -->
+    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">{% trans "Active Workflows" %}</h3>
+      <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">87</p>
+    </div>
+    <!-- Card 3: Pending Tasks -->
+    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">{% trans "Pending Tasks" %}</h3>
+      <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">34</p>
+    </div>
+    <!-- Card 4: System Uptime -->
+    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">{% trans "System Uptime" %}</h3>
+      <p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">99.98%</p>
+    </div>
+  </div>
+
+  <div class="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+    <h4 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">{% trans "Recent Activity" %}</h4>
+    <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+      <li>• {% trans 'Workflow “Import Data” completed 5 minutes ago.' %}</li>
+      <li>• {% trans 'New user registered: alice@example.com.' %}</li>
+      <li>• {% trans 'Task “Generate Report” is pending review.' %}</li>
+    </ul>
+  </div>
+
+  
+</div>
+{% endblock %}

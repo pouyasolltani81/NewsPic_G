@@ -1,0 +1,59 @@
+{% extends "ui/user_base.html" %}
+{% load i18n %}
+
+{% block title %}NewsDashboard –  UI{% endblock %}
+{% block page_heading %}NewsDashboard{% endblock %}
+
+{% block extra_css %}
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  <div id="main-content" class='z-10'>
+    {# ─────────────────────── DASHBOARD TAB ─────────────────────── #}
+    {% include "./partials/dashboard_section.html" %}
+
+  
+    
+     {# ─────────────────────── MESSAGES TAB ─────────────────────── #}
+    {% include "./partials/messages_section.html" %}
+
+   
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+
+  const navItems = [
+  { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
+  { key: '2', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
+
+
+];
+
+
+    const contentSections = {
+      dashboard: document.getElementById('dashboard-content'),
+      messages: document.getElementById('messages-content'),
+
+    };
+
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      const nav = new NavigationMain('navigationMain', navItems, contentSections);
+      window.nav = nav;
+ 
+    
+    });
+</script>
+
+
+<script>
+  {% include "./partials/quickactions.js" %}
+  {% include "./partials/messages.js" %}
+
+</script>
+
+{% endblock %}

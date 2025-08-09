@@ -1,0 +1,23 @@
+{% block settings_tab %}
+<div id="settings-content" class="tab-content hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Settings</h3>
+      <form class="space-y-4">
+        <div>
+          <label class="flex items-center">
+            <input type="checkbox" class="mr-2" checked>
+            Enable notifications
+          </label>
+        </div>
+        <div>
+          <label class="flex items-center">
+            <input type="checkbox" class="mr-2">
+            Dark mode by default
+          </label>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save Settings</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

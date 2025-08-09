@@ -1,0 +1,226 @@
+  /* === Neo-Minimalist Persian Datepicker === */
+  #plotId {
+    background-color: #ffffff;
+    color: #111827;
+    border-radius: 1rem;
+    padding: 1.2rem;
+    min-width: 300px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .dark #plotId {
+    background-color: #0f172a;
+    color: #e2e8f0;
+    border-color: #1e293b;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  /* === Header: Month/Year Navigator === */
+  .datepicker-navigator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+  }
+  
+  .dark .datepicker-navigator {
+    border-color: #334155;
+    color: #f8fafc;
+  }
+
+  /* === Table Styles === */
+  #plotId table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 6px;
+    margin-top: 0.75rem;
+  }
+  
+  #plotId th {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+  }
+  
+  .dark #plotId th {
+    color: #94a3b8;
+  }
+  
+   
+  #plotId td {
+    text-align: center;
+    padding: 0;
+    font-size: 0.9rem;
+    border-radius: 0.5rem;
+    position: relative;
+  }
+  
+  /* === Day Cell Content === */
+  #plotId td span {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.6rem 0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: inherit;
+    color: inherit;
+  }
+
+  /* === Day States === */
+  .table-days td:not(.disabled):not(.selected) span:hover {
+    background-color: #f1f5f9;
+    color: #1e40af;
+  }
+  
+  .dark .table-days td:not(.disabled):not(.selected) span:hover {
+    background-color: #1e293b;
+    color: #60a5fa;
+  }
+  
+  /* === Selected Day === */
+  .table-days .selected span {
+    background-color: #2563eb !important;
+    color: white !important;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  }
+  
+  .dark .table-days .selected span {
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+  }
+  
+  /* === Today's Date === */
+  .table-days .today:not(.selected) span {
+    border: 2px solid #3b82f6;
+    color: #1e40af;
+    font-weight: 500;
+    background-color: transparent;
+  }
+  
+  .dark .table-days .today:not(.selected) span {
+    border-color: #60a5fa;
+    color: #93c5fd;
+    background-color: transparent;
+  }
+  
+  /* === Disabled Days === */
+  .table-days .disabled span {
+    color: #cbd5e1;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .dark .table-days .disabled span {
+    color: #475569;
+  }
+
+  /* === Navigation Buttons === */
+  .pwt-btn-next,
+  .pwt-btn-prev {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #475569;
+    cursor: pointer;
+    padding: 0.35rem 0.7rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    line-height: 1;
+  }
+  
+  .pwt-btn-next:hover,
+  .pwt-btn-prev:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+  }
+  
+  .dark .pwt-btn-next,
+  .dark .pwt-btn-prev {
+    color: #94a3b8;
+  }
+  
+  .dark .pwt-btn-next:hover,
+  .dark .pwt-btn-prev:hover {
+    background-color: #1e293b;
+    color: #e2e8f0;
+  }
+
+  /* === Footer Buttons === */
+  .pwt-btn-submit,
+  .pwt-btn-today {
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  
+  .pwt-btn-submit {
+    background-color: #2563eb;
+    color: white;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  }
+  
+  .pwt-btn-submit:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(29, 78, 216, 0.25);
+  }
+  
+  .dark .pwt-btn-submit {
+    background-color: #3b82f6;
+  }
+  
+  .dark .pwt-btn-submit:hover {
+    background-color: #2563eb;
+  }
+  
+  .pwt-btn-today {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .pwt-btn-today:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .dark .pwt-btn-today {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+  }
+  
+  .dark .pwt-btn-today:hover {
+    background-color: #334155;
+  }
+
+  /* === Focus States === */
+  .pwt-btn-next:focus-visible,
+  .pwt-btn-prev:focus-visible,
+  .table-days td span:focus-visible,
+  .pwt-btn-submit:focus-visible,
+  .pwt-btn-today:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
+

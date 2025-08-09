@@ -1,0 +1,171 @@
+<!-- {# templates/ui/base.html #}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Workflow UI{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 h-screen overflow-hidden transition-colors duration-300">
+    <div class="flex h-full">
+
+        {# Navigation Sidebar: hidden on small screens #}
+        <nav id="navigationMain"
+            class="hidden md:block w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-colors duration-300">
+        </nav>
+
+        <div class="flex-1 flex flex-col">
+
+            <header
+                class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between transition-colors duration-300">
+                <div class="flex items-center space-x-4">
+                    {# Nav‑toggle hamburger (only on small screens) #}
+                    <button id="nav-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i data-lucide="menu" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
+                    </button>
+                    <h2 id="page-title" class="text-2xl font-semibold text-gray-800 dark:text-white">
+                        {% block page_heading %}Page Title{% endblock %}
+                    </h2>
+                </div>
+
+                {% include "ui/partials/header_buttons.html" %}
+
+                {# QuickAction‑toggle hamburger (only on small screens) #}
+                <button id="qa-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ml-4">
+                    <i data-lucide="more-vertical" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
+                </button>
+            </header>
+
+            <div class="flex-1 flex overflow-hidden">
+                {# Quick‑action panel hidden on small, slides in when toggled #}
+                <aside id="quickAction"
+                    class="hidden md:block w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 overflow-auto">
+                </aside>
+
+                <main class="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+                    {% block content %}{% endblock %}
+                </main>
+            </div>
+        </div>
+    </div>
+
+    {# scripts… #}
+    <script src="{% static 'ui/script.js' %}"></script>
+    <script src="{% static 'ui/navigationMain.js' %}"></script>
+    <script src="{% static 'ui/quickAction.js' %}"></script>
+    <script>
+
+
+        const quickActions = [
+            {
+                action: 'create-workflow',
+                icon: 'plus',
+                iconBg: 'bg-blue-100 dark:bg-blue-900/50',
+                iconColor: 'text-blue-600 dark:text-blue-400',
+                statusColor: 'blue',
+                title: 'Create Workflow',
+                description: 'Start a new workflow to automate your processes.',
+                summery: 'Started a new workflow',
+                function: () => console.log("Create workflow executed")
+            },
+            {
+                action: 'import-data',
+                icon: 'upload',
+                iconBg: 'bg-green-100 dark:bg-green-900/50',
+                iconColor: 'text-green-600 dark:text-green-400',
+                statusColor: 'green',
+                title: 'Import Data',
+                description: 'Upload your data files to process them.',
+                summery: 'Uploaded data files',
+                function: () => console.log("Import Data executed")
+            },
+            {
+                action: 'view-reports',
+                icon: 'file-text',
+                iconBg: 'bg-purple-100 dark:bg-purple-900/50',
+                iconColor: 'text-purple-600 dark:text-purple-400',
+                statusColor: 'purple',
+                title: 'View Reports',
+                description: 'Check your analytics and performance reports.',
+                summery: 'Viewed analytics',
+                function: () => console.log("View Reports executed")
+            },
+            {
+                action: 'clear-actions',
+                icon: 'trash-2',
+                iconBg: 'bg-red-100 dark:bg-red-900/50',
+                iconColor: 'text-red-600 dark:text-red-400',
+                statusColor: 'red',
+                title: 'Clear Recent Actions',
+                description: 'Reset the recent actions log.',
+                summery: 'Cleared action history',
+                function: (component) => component.clearRecentActions()
+            }
+        ];
+
+        // Instantiate the component
+        const quickAction = new QuickAction('quickAction', quickActions);
+
+
+
+
+
+        // External navigation items data
+        const navItems = [
+            { key: '1', section: "dashboard", label: "Dashboard", icon: "layout-dashboard", active: true },
+            { key: '2', section: "workflows", label: "Workflows", icon: "workflow" },
+            { key: '3', section: "analytics", label: "Analytics", icon: "bar-chart-3" },
+            { key: '4', section: "settings", label: "Settings", icon: "settings" },
+            { key: '5', section: "test", label: "AHHHHHH", icon: "apple" },
+            { key: '6', section: "test2", label: "Rahhhhh", icon: "bomb" },
+            { key: '7', section: "test3", label: "test3", icon: "angry" },
+
+
+
+        ];
+
+        // External content sections
+        const contentSections = {
+            dashboard: document.getElementById('dashboard-content'),
+            workflows: document.getElementById('workflows-content'),
+            analytics: document.getElementById('analytics-content'),
+            settings: document.getElementById('settings-content'),
+            test: document.getElementById('test-content'),
+            test2: document.getElementById('test2-content'),
+            test3: document.getElementById('test3-content'),
+
+
+
+        };
+
+
+
+        // Instantiate the component with external data
+        const navigationMain = new NavigationMain('navigationMain', navItems, contentSections);
+
+
+
+        // initialize your components
+        const nav = new NavigationMain('navigationMain', navItems, contentSections);
+        const qa = new QuickAction('quickAction', quickActions);
+
+        // responsive toggles:
+        document.getElementById('nav-toggle').addEventListener('click', () => {
+            document.getElementById('navigationMain').classList.toggle('hidden');
+        });
+        document.getElementById('qa-toggle').addEventListener('click', () => {
+            document.getElementById('quickAction').classList.toggle('hidden');
+        });
+    </script>
+</body>
+
+</html> -->
