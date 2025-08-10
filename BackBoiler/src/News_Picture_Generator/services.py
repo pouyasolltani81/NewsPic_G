@@ -923,7 +923,7 @@ from django.conf import settings
                 'logo_path': {
                     'type': 'string',
                     'description': 'Path to logo file (optional, uses default if not provided)',
-                    'example': '/path/to/logo.png',
+                    'example': '"/home/anews/PS/gan/my_concept/backgrand_logo.png"',
                     'nullable': True
                 },
                 'logo_size_percentage': {

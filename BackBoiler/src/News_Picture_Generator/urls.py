@@ -45,7 +45,7 @@ urlpatterns = [
     
     # LOGO 
     path('news-images/download-with-logo/', download_image_with_logo, name='download-news-image-with-logo'),
-    path('news-images/preview-logo/', preview_logo_placement, name='preview-logo-placement'),
+    # path('news-images/preview-logo/', preview_logo_placement, name='preview-logo-placement'),
 ]
 
 
