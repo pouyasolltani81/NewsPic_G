@@ -40,9 +40,12 @@
 
     };
 
+
+    const nav = new NavigationMain('navigationMain', navItems, contentSections);
+
     
     window.addEventListener('DOMContentLoaded', () => {
-      const nav = new NavigationMain('navigationMain', navItems, contentSections);
+      
       window.nav = nav;
  
     
@@ -51,7 +54,7 @@
 
 
 <script>
-  {% include "./partials/quickactions.js" %}
+  {% comment %} {% include "./partials/quickactions.js" %} {% endcomment %}
   {% include "./partials/messages.js" %}
 
 </script>

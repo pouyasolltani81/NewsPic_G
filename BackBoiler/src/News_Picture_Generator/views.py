@@ -11,17 +11,17 @@ def NewsDashboard_view(request):
     images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
 
     with open(json_path, 'r', encoding='utf-8') as f:
-        data_dict = json.load(f)  # dict of dicts
+        data_dict = json.load(f)
 
-    # Convert dict values to list for easier template iteration
-    data = list(data_dict.values())
+    # Convert to list and reverse so latest is first
+    data = list(data_dict.values())[::-1]  
 
-    # Adjust filepaths for image serving
+    # Adjust filepaths
     for item in data:
         filename = os.path.basename(item['filepath'])
         item['filepath'] = f"/crypto_news_images/{filename}"
 
-    # Pagination — show 9 items per page
+    # Paginate (9 items per page)
     paginator = Paginator(data, 9)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
