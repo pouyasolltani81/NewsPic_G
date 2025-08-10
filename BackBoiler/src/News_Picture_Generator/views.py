@@ -22,7 +22,7 @@ def NewsDashboard_view(request):
         item['filepath'] = f"/crypto_news_images/{filename}"
 
     # Paginate (9 items per page)
-    paginator = Paginator(data, 9)
+    paginator = Paginator(data, 6)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
