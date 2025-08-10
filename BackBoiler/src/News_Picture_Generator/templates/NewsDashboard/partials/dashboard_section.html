@@ -2,18 +2,13 @@
 {% load i18n %}
 {% load static %}
 
-{% comment %}
-Assuming you pass the parsed JSON data as `news_items` context variable from your Django view.
-Each item has: title, prompt, negative_prompt, filepath
-{% endcomment %}
-
 <div id="dashboard-content" class="tab-content p-6 bg-gray-50 min-h-screen">
   <h2 class="text-2xl font-semibold mb-6">Crypto News Gallery</h2>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-    {% for item in news_items %}
+    {% for item in page_obj %}
     <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
-        <img src="{{ item.filepath }}" alt="{{ item.title }}" />
+      <img src="{{ item.filepath }}" alt="{{ item.title }}" />
       <div class="p-4 flex flex-col flex-grow">
         <h3 class="font-bold text-lg mb-2 truncate" title="{{ item.title }}">{{ item.title }}</h3>
         <div class="text-sm text-gray-700 flex-grow overflow-auto mb-2">
@@ -27,6 +22,23 @@ Each item has: title, prompt, negative_prompt, filepath
     {% empty %}
     <p>No news items found.</p>
     {% endfor %}
+  </div>
+
+  <!-- Pagination controls -->
+  <div class="flex justify-center mt-6 space-x-2">
+    {% if page_obj.has_previous %}
+      <a href="?page=1" class="px-3 py-1 bg-gray-200 rounded">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded">Previous</a>
+    {% endif %}
+
+    <span class="px-3 py-1 bg-blue-500 text-white rounded">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded">Next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1 bg-gray-200 rounded">Last &raquo;</a>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

@@ -128,6 +128,8 @@ def check_image_exists(request):
             break
     
     if item:
+        filename = os.path.basename(item.get('filepath', ''))
+        image_url = request.build_absolute_uri(f'/crypto_news_images/{filename}')
         return Response({
             'exists': True,
             'metadata': {
@@ -136,7 +138,8 @@ def check_image_exists(request):
                 'tags': item.get('tags', []),
                 'cluster': item.get('cluster'),
                 'generated_at': item.get('generated_at'),
-                'filename': os.path.basename(item.get('filepath', ''))
+                'filename': filename,
+                'url': image_url
             }
         })
     
@@ -145,6 +148,7 @@ def check_image_exists(request):
         'metadata': None,
         'message': 'Image will be generated in the next cycle (every 30 minutes)'
     })
+
 
 
 # Add this endpoint to list all available images
