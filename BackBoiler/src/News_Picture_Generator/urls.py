@@ -10,12 +10,33 @@ images_dir = os.path.join(app_dir, 'crypto_news_images')
 
 from . import services
 
+from .services import (
+    download_image_by_title,
+    check_image_exists,
+    list_generated_images,
+    generate_custom_image,
+    list_custom_images,
+    download_custom_image,
+    search_custom_images,
+    custom_image_stats,
+    delete_custom_image
+)
 
 urlpatterns = [
-    path('download-image/', services.download_image_by_title, name='download_image_by_title'),
-    path('check-image/', services.check_image_exists, name='check_image_exists'),
-    path('list-images/', services.list_generated_images, name='list_generated_images'),
+    # Existing news image endpoints
+    path('news-images/download/', download_image_by_title, name='download-news-image'),
+    path('news-images/check/', check_image_exists, name='check-news-image'),
+    path('news-images/list/', list_generated_images, name='list-news-images'),
+    
+    # Custom image generation endpoints
+    path('custom-images/generate/', generate_custom_image, name='generate-custom-image'),
+    path('custom-images/list/', list_custom_images, name='list-custom-images'),
+    path('custom-images/download/', download_custom_image, name='download-custom-image'),
+    path('custom-images/search/', search_custom_images, name='search-custom-images'),
+    path('custom-images/stats/', custom_image_stats, name='custom-image-stats'),
+    path('custom-images/delete/', delete_custom_image, name='delete-custom-image'),
 ]
+
 
 urlpatterns += [
     path('NewsDashboard/', views.NewsDashboard_view, name='NewsDashboard'),

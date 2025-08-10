@@ -15,6 +15,8 @@ BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
 
 json_path = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
 images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
+custom_images_dir = os.path.join(BASE_EXTERNAL_PATH, 'custom_images')
+
 
 # images_dir = os.path.join(src_dir, 'News_Picture_Generator', 'crypto_news_images')
 
@@ -39,6 +41,8 @@ urlpatterns = [
     
     path('', include('ui.urls')),  
     path('crypto_news_images/<path:path>/', serve, {'document_root': images_dir}),
+    path('custom_images/<path:path>/', serve, {'document_root': custom_images_dir}),
+    
    
     path('i18n/', include('django.conf.urls.i18n')),  
     
