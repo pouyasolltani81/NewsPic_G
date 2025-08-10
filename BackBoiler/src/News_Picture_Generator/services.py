@@ -898,3 +898,373 @@ def delete_custom_image(request):
     })
 
 
+
+
+# ===== CUSTOM LOGO  ENDPOINTS =====
+
+
+from PIL import Image, ImageDraw
+import io
+from django.conf import settings
+
+@extend_schema(
+    description='Download news image with logo overlay',
+    summary='Download news image with a logo placed on the top-left corner',
+    methods=['POST'],
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'title': {
+                    'type': 'string',
+                    'description': 'Exact title of the news item',
+                    'example': 'Bitcoin Reaches New All-Time High'
+                },
+                'logo_path': {
+                    'type': 'string',
+                    'description': 'Path to logo file (optional, uses default if not provided)',
+                    'example': '/path/to/logo.png',
+                    'nullable': True
+                },
+                'logo_size_percentage': {
+                    'type': 'integer',
+                    'description': 'Logo size as percentage of image width (5-30)',
+                    'example': 15,
+                    'default': 15
+                },
+                'logo_opacity': {
+                    'type': 'number',
+                    'description': 'Logo opacity (0.0-1.0)',
+                    'example': 0.8,
+                    'default': 0.8
+                },
+                'logo_padding': {
+                    'type': 'integer',
+                    'description': 'Padding from edges in pixels',
+                    'example': 20,
+                    'default': 20
+                },
+                'output_format': {
+                    'type': 'string',
+                    'description': 'Output format (png or jpg)',
+                    'example': 'png',
+                    'default': 'png',
+                    'enum': ['png', 'jpg']
+                },
+                'output_quality': {
+                    'type': 'integer',
+                    'description': 'Output quality for JPG (1-100)',
+                    'example': 95,
+                    'default': 95
+                }
+            },
+            'required': ['title'],
+        }
+    },
+    responses={
+        200: OpenApiResponse(description='Image file with logo overlay'),
+        400: OpenApiResponse(description='Bad request - invalid parameters'),
+        404: OpenApiResponse(description='Not found - image or logo not found'),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def download_image_with_logo(request):
+    """Download news image with logo overlay"""
+    title = request.data.get('title', '').strip()
+    if not title:
+        return Response({'error': "Missing 'title' parameter"}, status=400)
+    
+    # Get parameters
+    logo_path = request.data.get('logo_path')
+    logo_size_percentage = request.data.get('logo_size_percentage', 15)
+    logo_opacity = request.data.get('logo_opacity', 0.8)
+    logo_padding = request.data.get('logo_padding', 20)
+    output_format = request.data.get('output_format', 'png').lower()
+    output_quality = request.data.get('output_quality', 95)
+    
+    # Validate parameters
+    try:
+        logo_size_percentage = int(logo_size_percentage)
+        if not 5 <= logo_size_percentage <= 30:
+            return Response({'error': "logo_size_percentage must be between 5 and 30"}, status=400)
+    except ValueError:
+        return Response({'error': "logo_size_percentage must be an integer"}, status=400)
+    
+    try:
+        logo_opacity = float(logo_opacity)
+        if not 0.0 <= logo_opacity <= 1.0:
+            return Response({'error': "logo_opacity must be between 0.0 and 1.0"}, status=400)
+    except ValueError:
+        return Response({'error': "logo_opacity must be a number"}, status=400)
+    
+    try:
+        logo_padding = int(logo_padding)
+        if logo_padding < 0:
+            return Response({'error': "logo_padding must be non-negative"}, status=400)
+    except ValueError:
+        return Response({'error': "logo_padding must be an integer"}, status=400)
+    
+    if output_format not in ['png', 'jpg']:
+        return Response({'error': "output_format must be 'png' or 'jpg'"}, status=400)
+    
+    try:
+        output_quality = int(output_quality)
+        if not 1 <= output_quality <= 100:
+            return Response({'error': "output_quality must be between 1 and 100"}, status=400)
+    except ValueError:
+        return Response({'error': "output_quality must be an integer"}, status=400)
+    
+    # Reload the JSON file to get latest data
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data_dict = json.load(f)
+    
+    # Search for the news item
+    item = None
+    for entry in data_dict.values():
+        if entry['title'].lower() == title.lower():
+            item = entry
+            break
+    
+    if not item:
+        return Response({'error': "Image with the given title not found"}, status=404)
+    
+    # Get the original image
+    filename = os.path.basename(item['filepath'])
+    image_path = os.path.join(images_dir, filename)
+    
+    if not os.path.exists(image_path):
+        return Response({'error': "Image file not found on server"}, status=404)
+    
+    # Set default logo path if not provided
+    if not logo_path:
+        # Try to find a default logo in common locations
+        possible_logo_paths = [
+            os.path.join(settings.STATIC_ROOT, 'images', 'logo.png'),
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo.png'),
+            os.path.join(os.path.dirname(app_dir), 'static', 'logo.png'),
+            os.path.join(app_dir, 'logo.png'),
+        ]
+        
+        logo_path = None
+        for path in possible_logo_paths:
+            if os.path.exists(path):
+                logo_path = path
+                break
+        
+        if not logo_path:
+            return Response({
+                'error': "No logo file found. Please provide logo_path or place logo.png in static/images/"
+            }, status=404)
+    else:
+        # Validate provided logo path
+        if not os.path.exists(logo_path):
+            return Response({'error': f"Logo file not found at: {logo_path}"}, status=404)
+    
+    try:
+        # Open the main image
+        main_image = Image.open(image_path).convert('RGBA')
+        main_width, main_height = main_image.size
+        
+        # Open the logo
+        logo = Image.open(logo_path).convert('RGBA')
+        logo_width, logo_height = logo.size
+        
+        # Calculate new logo size (maintaining aspect ratio)
+        new_logo_width = int(main_width * (logo_size_percentage / 100))
+        aspect_ratio = logo_height / logo_width
+        new_logo_height = int(new_logo_width * aspect_ratio)
+        
+        # Ensure logo doesn't exceed image bounds
+        max_width = main_width - (2 * logo_padding)
+        max_height = main_height - (2 * logo_padding)
+        
+        if new_logo_width > max_width:
+            new_logo_width = max_width
+            new_logo_height = int(new_logo_width * aspect_ratio)
+        
+        if new_logo_height > max_height:
+            new_logo_height = max_height
+            new_logo_width = int(new_logo_height / aspect_ratio)
+        
+        # Resize logo
+        logo = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
+        
+        # Apply opacity to logo
+        if logo_opacity < 1.0:
+            # Create a new image with adjusted alpha
+            logo_with_opacity = Image.new('RGBA', logo.size, (0, 0, 0, 0))
+            for x in range(logo.width):
+                for y in range(logo.height):
+                    r, g, b, a = logo.getpixel((x, y))
+                    logo_with_opacity.putpixel((x, y), (r, g, b, int(a * logo_opacity)))
+            logo = logo_with_opacity
+        
+        # Create a copy of the main image to avoid modifying the original
+        output_image = main_image.copy()
+        
+        # Calculate position (top-left with padding)
+        logo_position = (logo_padding, logo_padding)
+        
+        # Paste logo onto the image
+        output_image.paste(logo, logo_position, logo)
+        
+        # Convert to RGB if saving as JPG
+        if output_format == 'jpg':
+            # Create white background
+            rgb_image = Image.new('RGB', output_image.size, (255, 255, 255))
+            rgb_image.paste(output_image, mask=output_image.split()[3] if len(output_image.split()) == 4 else None)
+            output_image = rgb_image
+        
+        # Save to BytesIO
+        img_io = io.BytesIO()
+        save_kwargs = {'format': output_format.upper()}
+        if output_format == 'jpg':
+            save_kwargs['quality'] = output_quality
+            save_kwargs['optimize'] = True
+        
+        output_image.save(img_io, **save_kwargs)
+        img_io.seek(0)
+        
+        # Prepare response
+        content_type = f'image/{output_format}'
+        original_name = os.path.splitext(filename)[0]
+        new_filename = f"{original_name}_with_logo.{output_format}"
+        
+        response = FileResponse(img_io, content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{new_filename}"'
+        
+        # Add metadata headers
+        response['X-Logo-Size'] = f"{new_logo_width}x{new_logo_height}"
+        response['X-Logo-Position'] = f"{logo_position[0]},{logo_position[1]}"
+        response['X-Original-Size'] = f"{main_width}x{main_height}"
+        
+        return response
+        
+    except Exception as e:
+        return Response({
+            'error': f"Failed to process image: {str(e)}",
+            'type': type(e).__name__
+        }, status=500)
+
+
+@extend_schema(
+    description='Preview news image with logo overlay',
+    summary='Preview how the logo will look on the image without downloading',
+    methods=['POST'],
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'title': {
+                    'type': 'string',
+                    'description': 'Exact title of the news item',
+                    'example': 'Bitcoin Reaches New All-Time High'
+                },
+                'logo_size_percentage': {
+                    'type': 'integer',
+                    'description': 'Logo size as percentage of image width (5-30)',
+                    'example': 15,
+                    'default': 15
+                },
+                'logo_padding': {
+                    'type': 'integer',
+                    'description': 'Padding from edges in pixels',
+                    'example': 20,
+                    'default': 20
+                }
+            },
+            'required': ['title'],
+        }
+    },
+    responses={
+        200: OpenApiResponse(
+            description='Preview information',
+            response={
+                'type': 'object',
+                'properties': {
+                    'original_size': {'type': 'object'},
+                    'logo_size': {'type': 'object'},
+                    'logo_position': {'type': 'object'},
+                    'preview_url': {'type': 'string', 'nullable': True}
+                }
+            }
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def preview_logo_placement(request):
+    """Preview logo placement on image"""
+    title = request.data.get('title', '').strip()
+    if not title:
+        return Response({'error': "Missing 'title' parameter"}, status=400)
+    
+    logo_size_percentage = request.data.get('logo_size_percentage', 15)
+    logo_padding = request.data.get('logo_padding', 20)
+    
+    # Validate parameters
+    try:
+        logo_size_percentage = int(logo_size_percentage)
+        if not 5 <= logo_size_percentage <= 30:
+            return Response({'error': "logo_size_percentage must be between 5 and 30"}, status=400)
+    except ValueError:
+        return Response({'error': "logo_size_percentage must be an integer"}, status=400)
+    
+    # Find the image
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data_dict = json.load(f)
+    
+    item = None
+    for entry in data_dict.values():
+        if entry['title'].lower() == title.lower():
+            item = entry
+            break
+    
+    if not item:
+        return Response({'error': "Image with the given title not found"}, status=404)
+    
+    # Get image dimensions
+    filename = os.path.basename(item['filepath'])
+    image_path = os.path.join(images_dir, filename)
+    
+    if not os.path.exists(image_path):
+        return Response({'error': "Image file not found on server"}, status=404)
+    
+    try:
+        with Image.open(image_path) as img:
+            main_width, main_height = img.size
+        
+        # Calculate logo dimensions (assuming 1:1 aspect ratio for preview)
+        new_logo_width = int(main_width * (logo_size_percentage / 100))
+        new_logo_height = new_logo_width  # Assume square logo for preview
+        
+        # Ensure logo doesn't exceed bounds
+        max_size = min(main_width - (2 * logo_padding), main_height - (2 * logo_padding))
+        if new_logo_width > max_size:
+            new_logo_width = new_logo_height = max_size
+        
+        return Response({
+            'original_size': {
+                'width': main_width,
+                'height': main_height
+            },
+            'logo_size': {
+                'width': new_logo_width,
+                'height': new_logo_height,
+                'percentage_of_width': round((new_logo_width / main_width) * 100, 2)
+            },
+            'logo_position': {
+                'x': logo_padding,
+                'y': logo_padding,
+                'corner': 'top-left'
+            },
+            'filename': filename
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': f"Failed to read image: {str(e)}"
+        }, status=500)
+
+

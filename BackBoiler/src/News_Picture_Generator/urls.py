@@ -20,7 +20,9 @@ from .services import (
     search_custom_images,
     custom_image_stats,
     delete_custom_image,
-    news_image_stats
+    news_image_stats,
+    download_image_with_logo,
+    preview_logo_placement
 )
 
 urlpatterns = [
@@ -37,7 +39,13 @@ urlpatterns = [
     path('custom-images/download/', download_custom_image, name='download-custom-image'),
     path('custom-images/search/', search_custom_images, name='search-custom-images'),
     path('custom-images/stats/', custom_image_stats, name='custom-image-stats'),
-    path('custom-images/delete/', delete_custom_image, name='delete-custom-image'),
+    # path('custom-images/delete/', delete_custom_image, name='delete-custom-image'),
+    
+    
+    
+    # LOGO 
+    path('news-images/download-with-logo/', download_image_with_logo, name='download-news-image-with-logo'),
+    path('news-images/preview-logo/', preview_logo_placement, name='preview-logo-placement'),
 ]
 
 
