@@ -901,15 +901,14 @@ def delete_custom_image(request):
 
 
 # ===== CUSTOM LOGO  ENDPOINTS =====
-
-
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont, ImageStat
 import io
 from django.conf import settings
+import numpy as np
 
 @extend_schema(
-    description='Download news image with logo overlay',
-    summary='Download news image with a logo placed on the top-left corner',
+    description='Download news image with adaptive vertical logo overlay',
+    summary='Download news image with a vertical logo that adapts to background brightness',
     methods=['POST'],
     request={
         'application/json': {
@@ -920,29 +919,47 @@ from django.conf import settings
                     'description': 'Exact title of the news item',
                     'example': 'Bitcoin Reaches New All-Time High'
                 },
-                'logo_path': {
+                'light_logo_path': {
                     'type': 'string',
-                    'description': 'Path to logo file (optional, uses default if not provided)',
-                    'example': '/home/anews/PS/gan/my_concept/backgrand_logo.png',
+                    'description': 'Path to light mode logo (for dark backgrounds)',
+                    'example': '/home/anews/PS/gan/my_concept/logo_light.png',
                     'nullable': True
                 },
-                'logo_size_percentage': {
+                'dark_logo_path': {
+                    'type': 'string',
+                    'description': 'Path to dark mode logo (for light backgrounds)',
+                    'example': '/home/anews/PS/gan/my_concept/logo_dark.png',
+                    'nullable': True
+                },
+                'strip_width_percentage': {
                     'type': 'integer',
-                    'description': 'Logo size as percentage of image width (5-30)',
-                    'example': 15,
-                    'default': 15
+                    'description': 'Width of the vertical strip as percentage of image width (3-15)',
+                    'example': 8,
+                    'default': 8
                 },
                 'logo_opacity': {
                     'type': 'number',
-                    'description': 'Logo opacity (0.0-1.0)',
-                    'example': 0.8,
-                    'default': 0.8
+                    'description': 'Logo and text opacity (0.0-1.0)',
+                    'example': 0.9,
+                    'default': 0.9
                 },
-                'logo_padding': {
+                'strip_opacity': {
+                    'type': 'number',
+                    'description': 'Strip background opacity (0.0-1.0)',
+                    'example': 0.7,
+                    'default': 0.7
+                },
+                'font_size_percentage': {
                     'type': 'integer',
-                    'description': 'Padding from edges in pixels',
-                    'example': 20,
-                    'default': 20
+                    'description': 'Font size as percentage of strip width (40-80)',
+                    'example': 60,
+                    'default': 60
+                },
+                'brightness_threshold': {
+                    'type': 'integer',
+                    'description': 'Brightness threshold (0-255) to determine dark/light background',
+                    'example': 128,
+                    'default': 128
                 },
                 'output_format': {
                     'type': 'string',
@@ -962,7 +979,7 @@ from django.conf import settings
         }
     },
     responses={
-        200: OpenApiResponse(description='Image file with logo overlay'),
+        200: OpenApiResponse(description='Image file with adaptive vertical logo overlay'),
         400: OpenApiResponse(description='Bad request - invalid parameters'),
         404: OpenApiResponse(description='Not found - image or logo not found'),
     }
@@ -970,40 +987,51 @@ from django.conf import settings
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def download_image_with_logo(request):
-    """Download news image with logo overlay"""
+    """Download news image with adaptive vertical logo overlay"""
     title = request.data.get('title', '').strip()
     if not title:
         return Response({'error': "Missing 'title' parameter"}, status=400)
     
     # Get parameters
-    logo_path = request.data.get('logo_path')
-    logo_size_percentage = request.data.get('logo_size_percentage', 15)
-    logo_opacity = request.data.get('logo_opacity', 0.8)
-    logo_padding = request.data.get('logo_padding', 20)
+    light_logo_path = request.data.get('light_logo_path')
+    dark_logo_path = request.data.get('dark_logo_path')
+    strip_width_percentage = request.data.get('strip_width_percentage', 8)
+    logo_opacity = request.data.get('logo_opacity', 0.9)
+    strip_opacity = request.data.get('strip_opacity', 0.7)
+    font_size_percentage = request.data.get('font_size_percentage', 60)
+    brightness_threshold = request.data.get('brightness_threshold', 128)
     output_format = request.data.get('output_format', 'png').lower()
     output_quality = request.data.get('output_quality', 95)
     
     # Validate parameters
     try:
-        logo_size_percentage = int(logo_size_percentage)
-        if not 5 <= logo_size_percentage <= 30:
-            return Response({'error': "logo_size_percentage must be between 5 and 30"}, status=400)
+        strip_width_percentage = int(strip_width_percentage)
+        if not 3 <= strip_width_percentage <= 15:
+            return Response({'error': "strip_width_percentage must be between 3 and 15"}, status=400)
     except ValueError:
-        return Response({'error': "logo_size_percentage must be an integer"}, status=400)
+        return Response({'error': "strip_width_percentage must be an integer"}, status=400)
     
     try:
         logo_opacity = float(logo_opacity)
-        if not 0.0 <= logo_opacity <= 1.0:
-            return Response({'error': "logo_opacity must be between 0.0 and 1.0"}, status=400)
+        strip_opacity = float(strip_opacity)
+        if not 0.0 <= logo_opacity <= 1.0 or not 0.0 <= strip_opacity <= 1.0:
+            return Response({'error': "opacity values must be between 0.0 and 1.0"}, status=400)
     except ValueError:
-        return Response({'error': "logo_opacity must be a number"}, status=400)
+        return Response({'error': "opacity must be a number"}, status=400)
     
     try:
-        logo_padding = int(logo_padding)
-        if logo_padding < 0:
-            return Response({'error': "logo_padding must be non-negative"}, status=400)
+        font_size_percentage = int(font_size_percentage)
+        if not 40 <= font_size_percentage <= 80:
+            return Response({'error': "font_size_percentage must be between 40 and 80"}, status=400)
     except ValueError:
-        return Response({'error': "logo_padding must be an integer"}, status=400)
+        return Response({'error': "font_size_percentage must be an integer"}, status=400)
+    
+    try:
+        brightness_threshold = int(brightness_threshold)
+        if not 0 <= brightness_threshold <= 255:
+            return Response({'error': "brightness_threshold must be between 0 and 255"}, status=400)
+    except ValueError:
+        return Response({'error': "brightness_threshold must be an integer"}, status=400)
     
     if output_format not in ['png', 'jpg']:
         return Response({'error': "output_format must be 'png' or 'jpg'"}, status=400)
@@ -1036,82 +1064,200 @@ def download_image_with_logo(request):
     if not os.path.exists(image_path):
         return Response({'error': "Image file not found on server"}, status=404)
     
-    # Set default logo path if not provided
-    if not logo_path:
-        # Try to find a default logo in common locations
-        possible_logo_paths = [
-            os.path.join(settings.STATIC_ROOT, 'images', 'logo.png'),
-            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo.png'),
-            os.path.join(os.path.dirname(app_dir), 'static', 'logo.png'),
-            os.path.join(app_dir, 'logo.png'),
+    # Set default logo paths if not provided
+    if not light_logo_path or not dark_logo_path:
+        # Try to find default logos
+        possible_light_paths = [
+            '/home/anews/PS/gan/my_concept/logo_light.png',
+            os.path.join(settings.STATIC_ROOT, 'images', 'logo_light.png'),
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo_light.png'),
         ]
         
-        logo_path = None
-        for path in possible_logo_paths:
-            if os.path.exists(path):
-                logo_path = path
-                break
+        possible_dark_paths = [
+            '/home/anews/PS/gan/my_concept/logo_dark.png',
+            os.path.join(settings.STATIC_ROOT, 'images', 'logo_dark.png'),
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo_dark.png'),
+        ]
         
-        if not logo_path:
-            return Response({
-                'error': "No logo file found. Please provide logo_path or place logo.png in static/images/"
-            }, status=404)
-    else:
-        # Validate provided logo path
-        if not os.path.exists(logo_path):
-            return Response({'error': f"Logo file not found at: {logo_path}"}, status=404)
+        if not light_logo_path:
+            for path in possible_light_paths:
+                if os.path.exists(path):
+                    light_logo_path = path
+                    break
+        
+        if not dark_logo_path:
+            for path in possible_dark_paths:
+                if os.path.exists(path):
+                    dark_logo_path = path
+                    break
+        
+        if not light_logo_path or not dark_logo_path:
+            # If only one logo is found, use it for both
+            if light_logo_path and not dark_logo_path:
+                dark_logo_path = light_logo_path
+            elif dark_logo_path and not light_logo_path:
+                light_logo_path = dark_logo_path
+            else:
+                return Response({
+                    'error': "No logo files found. Please provide both light_logo_path and dark_logo_path"
+                }, status=404)
+    
+    # Validate logo paths
+    if not os.path.exists(light_logo_path):
+        return Response({'error': f"Light logo file not found at: {light_logo_path}"}, status=404)
+    if not os.path.exists(dark_logo_path):
+        return Response({'error': f"Dark logo file not found at: {dark_logo_path}"}, status=404)
     
     try:
         # Open the main image
         main_image = Image.open(image_path).convert('RGBA')
         main_width, main_height = main_image.size
         
-        # Open the logo
+        # Calculate strip width
+        strip_width = int(main_width * (strip_width_percentage / 100))
+        
+        # Analyze the brightness of the left edge where the strip will be
+        left_edge = main_image.crop((0, 0, strip_width, main_height))
+        
+        # Convert to grayscale for brightness analysis
+        gray_edge = left_edge.convert('L')
+        
+        # Calculate average brightness
+        stat = ImageStat.Stat(gray_edge)
+        avg_brightness = stat.mean[0]
+        
+        # Determine if background is dark or light
+        is_dark_background = avg_brightness < brightness_threshold
+        
+        # Select appropriate logo and colors
+        if is_dark_background:
+            # Dark background: use light logo and white text
+            logo_path = light_logo_path
+            text_color = '#FFFFFF'
+            strip_color = '#000000'  # Black strip for contrast
+        else:
+            # Light background: use dark logo and dark text
+            logo_path = dark_logo_path
+            text_color = '#1F1E2E'
+            strip_color = '#FFFFFF'  # White strip for contrast
+        
+        # Create a copy of the main image
+        output_image = main_image.copy()
+        
+        # Create a semi-transparent strip overlay
+        strip = Image.new('RGBA', (strip_width, main_height), (0, 0, 0, 0))
+        strip_draw = ImageDraw.Draw(strip)
+        
+        # Parse strip color
+        if strip_color.startswith('#'):
+            r = int(strip_color[1:3], 16)
+            g = int(strip_color[3:5], 16)
+            b = int(strip_color[5:7], 16)
+        else:
+            r, g, b = 0, 0, 0
+        
+        # Draw semi-transparent background
+        strip_draw.rectangle(
+            [(0, 0), (strip_width, main_height)],
+            fill=(r, g, b, int(255 * strip_opacity))
+        )
+        
+        # Open and resize logo
         logo = Image.open(logo_path).convert('RGBA')
-        logo_width, logo_height = logo.size
+        logo_size = int(strip_width * 0.8)  # Logo takes 80% of strip width
+        logo_aspect = logo.height / logo.width
+        logo_height = int(logo_size * logo_aspect)
         
-        # Calculate new logo size (maintaining aspect ratio)
-        new_logo_width = int(main_width * (logo_size_percentage / 100))
-        aspect_ratio = logo_height / logo_width
-        new_logo_height = int(new_logo_width * aspect_ratio)
+        # Ensure logo fits in the strip
+        if logo_height > logo_size:
+            logo_height = logo_size
+            logo_size = int(logo_height / logo_aspect)
         
-        # Ensure logo doesn't exceed image bounds
-        max_width = main_width - (2 * logo_padding)
-        max_height = main_height - (2 * logo_padding)
-        
-        if new_logo_width > max_width:
-            new_logo_width = max_width
-            new_logo_height = int(new_logo_width * aspect_ratio)
-        
-        if new_logo_height > max_height:
-            new_logo_height = max_height
-            new_logo_width = int(new_logo_height / aspect_ratio)
-        
-        # Resize logo
-        logo = logo.resize((new_logo_width, new_logo_height), Image.Resampling.LANCZOS)
+        logo = logo.resize((logo_size, logo_height), Image.Resampling.LANCZOS)
         
         # Apply opacity to logo
         if logo_opacity < 1.0:
-            # Create a new image with adjusted alpha
             logo_with_opacity = Image.new('RGBA', logo.size, (0, 0, 0, 0))
-            for x in range(logo.width):
-                for y in range(logo.height):
-                    r, g, b, a = logo.getpixel((x, y))
-                    logo_with_opacity.putpixel((x, y), (r, g, b, int(a * logo_opacity)))
-            logo = logo_with_opacity
+            logo_with_opacity.paste(logo, (0, 0))
+            logo_array = logo_with_opacity.split()
+            if len(logo_array) == 4:
+                alpha = logo_array[3]
+                alpha = alpha.point(lambda p: p * logo_opacity)
+                logo_with_opacity.putalpha(alpha)
+                logo = logo_with_opacity
         
-        # Create a copy of the main image to avoid modifying the original
-        output_image = main_image.copy()
+        # Position logo at the top of the strip
+        logo_x = (strip_width - logo_size) // 2
+        logo_y = 20  # Padding from top
+        strip.paste(logo, (logo_x, logo_y), logo)
         
-        # Calculate position (top-left with padding)
-        logo_position = (logo_padding, logo_padding)
+        # Add "Aimoonhub" text vertically
+        text = "Aimoonhub"
         
-        # Paste logo onto the image
-        output_image.paste(logo, logo_position, logo)
+        # Try to load a font
+        font_size = int(strip_width * (font_size_percentage / 100))
+        try:
+            font_paths = [
+                '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                '/System/Library/Fonts/Helvetica.ttc',
+                'C:\\Windows\\Fonts\\Arial.ttf',
+            ]
+            font = None
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    font = ImageFont.truetype(font_path, font_size)
+                    break
+            if not font:
+                font = ImageFont.load_default()
+        except:
+            font = ImageFont.load_default()
+        
+        # Create a temporary image for vertical text
+        text_img = Image.new('RGBA', (main_height, strip_width), (0, 0, 0, 0))
+        text_draw = ImageDraw.Draw(text_img)
+        
+        # Calculate text position
+        text_bbox = text_draw.textbbox((0, 0), text, font=font)
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+        
+        # Position text below logo
+        text_start_y = logo_y + logo_height + 30
+        available_height = main_height - text_start_y - 20
+        
+        if text_width <= available_height:
+            # Center the text in available space
+            text_x = text_start_y + (available_height - text_width) // 2
+            text_y = (strip_width - text_height) // 2
+            
+            # Parse text color
+            if text_color.startswith('#'):
+                tr = int(text_color[1:3], 16)
+                tg = int(text_color[3:5], 16)
+                tb = int(text_color[5:7], 16)
+            else:
+                tr, tg, tb = 255, 255, 255
+            
+            # Draw text
+            text_draw.text(
+                (text_x, text_y),
+                text,
+                fill=(tr, tg, tb, int(255 * logo_opacity)),
+                font=font
+            )
+            
+            # Rotate text image 90 degrees clockwise
+            text_img = text_img.rotate(-90, expand=True)
+            
+            # Paste rotated text onto strip
+            strip.paste(text_img, (0, 0), text_img)
+        
+        # Paste the strip onto the main image
+        output_image.paste(strip, (0, 0), strip)
         
         # Convert to RGB if saving as JPG
         if output_format == 'jpg':
-            # Create white background
             rgb_image = Image.new('RGB', output_image.size, (255, 255, 255))
             rgb_image.paste(output_image, mask=output_image.split()[3] if len(output_image.split()) == 4 else None)
             output_image = rgb_image
@@ -1129,15 +1275,19 @@ def download_image_with_logo(request):
         # Prepare response
         content_type = f'image/{output_format}'
         original_name = os.path.splitext(filename)[0]
-        new_filename = f"{original_name}_with_logo.{output_format}"
+        new_filename = f"{original_name}_with_adaptive_logo.{output_format}"
         
         response = FileResponse(img_io, content_type=content_type)
         response['Content-Disposition'] = f'attachment; filename="{new_filename}"'
         
         # Add metadata headers
-        response['X-Logo-Size'] = f"{new_logo_width}x{new_logo_height}"
-        response['X-Logo-Position'] = f"{logo_position[0]},{logo_position[1]}"
+        response['X-Strip-Width'] = str(strip_width)
+        response['X-Logo-Size'] = f"{logo_size}x{logo_height}"
         response['X-Original-Size'] = f"{main_width}x{main_height}"
+        response['X-Background-Type'] = 'dark' if is_dark_background else 'light'
+        response['X-Average-Brightness'] = str(round(avg_brightness, 2))
+        response['X-Logo-Used'] = 'light' if is_dark_background else 'dark'
+        response['X-Text-Color'] = text_color
         
         return response
         
@@ -1146,6 +1296,159 @@ def download_image_with_logo(request):
             'error': f"Failed to process image: {str(e)}",
             'type': type(e).__name__
         }, status=500)
+
+
+@extend_schema(
+    description='Analyze image brightness and preview adaptive logo settings',
+    summary='Check which logo and colors will be used based on image brightness',
+    methods=['POST'],
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'title': {
+                    'type': 'string',
+                    'description': 'Exact title of the news item',
+                    'example': 'Bitcoin Reaches New All-Time High'
+                },
+                'strip_width_percentage': {
+                    'type': 'integer',
+                    'description': 'Width of the vertical strip as percentage of image width (3-15)',
+                    'example': 8,
+                    'default': 8
+                },
+                'brightness_threshold': {
+                    'type': 'integer',
+                    'description': 'Brightness threshold (0-255) to determine dark/light background',
+                    'example': 128,
+                    'default': 128
+                }
+            },
+            'required': ['title'],
+        }
+    },
+    responses={
+        200: OpenApiResponse(
+            description='Brightness analysis results',
+            response={
+                'type': 'object',
+                'properties': {
+                    'average_brightness': {'type': 'number'},
+                    'is_dark_background': {'type': 'boolean'},
+                    'recommended_logo': {'type': 'string'},
+                    'recommended_text_color': {'type': 'string'},
+                    'brightness_map': {'type': 'object'}
+                }
+            }
+        ),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def analyze_image_brightness(request):
+    """Analyze image brightness for adaptive logo placement"""
+    title = request.data.get('title', '').strip()
+    if not title:
+        return Response({'error': "Missing 'title' parameter"}, status=400)
+    
+    strip_width_percentage = request.data.get('strip_width_percentage', 8)
+    brightness_threshold = request.data.get('brightness_threshold', 128)
+    
+    # Validate parameters
+    try:
+        strip_width_percentage = int(strip_width_percentage)
+        if not 3 <= strip_width_percentage <= 15:
+            return Response({'error': "strip_width_percentage must be between 3 and 15"}, status=400)
+    except ValueError:
+        return Response({'error': "strip_width_percentage must be an integer"}, status=400)
+    
+    try:
+        brightness_threshold = int(brightness_threshold)
+        if not 0 <= brightness_threshold <= 255:
+            return Response({'error': "brightness_threshold must be between 0 and 255"}, status=400)
+    except ValueError:
+        return Response({'error': "brightness_threshold must be an integer"}, status=400)
+    
+    # Find the image
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data_dict = json.load(f)
+    
+    item = None
+    for entry in data_dict.values():
+        if entry['title'].lower() == title.lower():
+            item = entry
+            break
+    
+    if not item:
+        return Response({'error': "Image with the given title not found"}, status=404)
+    
+    # Get image path
+    filename = os.path.basename(item['filepath'])
+    image_path = os.path.join(images_dir, filename)
+    
+    if not os.path.exists(image_path):
+        return Response({'error': "Image file not found on server"}, status=404)
+    
+    try:
+        # Open the image
+        image = Image.open(image_path).convert('RGBA')
+        width, height = image.size
+        
+        # Calculate strip width
+        strip_width = int(width * (strip_width_percentage / 100))
+        
+        # Analyze the left edge
+        left_edge = image.crop((0, 0, strip_width, height))
+        gray_edge = left_edge.convert('L')
+        
+        # Get brightness statistics
+        stat = ImageStat.Stat(gray_edge)
+        avg_brightness = stat.mean[0]
+        min_brightness = stat.extrema[0][0]
+        max_brightness = stat.extrema[0][1]
+        
+        # Determine if background is dark or light
+        is_dark_background = avg_brightness < brightness_threshold
+        
+        # Analyze brightness in sections (top, middle, bottom)
+        section_height = height // 3
+        sections = {
+            'top': gray_edge.crop((0, 0, strip_width, section_height)),
+            'middle': gray_edge.crop((0, section_height, strip_width, 2 * section_height)),
+            'bottom': gray_edge.crop((0, 2 * section_height, strip_width, height))
+        }
+        
+        brightness_map = {}
+        for name, section in sections.items():
+            section_stat = ImageStat.Stat(section)
+            brightness_map[name] = {
+                'average': round(section_stat.mean[0], 2),
+                'min': section_stat.extrema[0][0],
+                'max': section_stat.extrema[0][1]
+            }
+        
+        return Response({
+            'average_brightness': round(avg_brightness, 2),
+            'min_brightness': min_brightness,
+            'max_brightness': max_brightness,
+            'brightness_threshold': brightness_threshold,
+            'is_dark_background': is_dark_background,
+            'recommended_logo': 'light' if is_dark_background else 'dark',
+            'recommended_text_color': '#FFFFFF' if is_dark_background else '#1F1E2E',
+            'recommended_strip_color': '#000000' if is_dark_background else '#FFFFFF',
+            'strip_width_pixels': strip_width,
+            'brightness_map': brightness_map,
+            'filename': filename,
+            'image_size': {'width': width, 'height': height}
+        })
+        
+    except Exception as e:
+        return Response({
+            'error': f"Failed to analyze image: {str(e)}"
+        }, status=500)
+
+
+
 
 
 @extend_schema(

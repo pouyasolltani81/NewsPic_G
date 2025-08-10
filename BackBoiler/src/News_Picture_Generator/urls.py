@@ -22,7 +22,8 @@ from .services import (
     delete_custom_image,
     news_image_stats,
     download_image_with_logo,
-    preview_logo_placement
+    preview_logo_placement,
+    analyze_image_brightness
 )
 
 urlpatterns = [
@@ -44,7 +45,9 @@ urlpatterns = [
     
     
     # LOGO 
-    path('news-images/download-with-logo/', download_image_with_logo, name='download-news-image-with-logo'),
+  
+    path('api/news-images/download-with-logo/', download_image_with_logo, name='download-news-image-with-logo'),
+    path('api/news-images/analyze-brightness/', analyze_image_brightness, name='analyze-image-brightness'),
     # path('news-images/preview-logo/', preview_logo_placement, name='preview-logo-placement'),
 ]
 

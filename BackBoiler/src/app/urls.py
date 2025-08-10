@@ -7,18 +7,14 @@ from django.conf.urls.i18n import i18n_patterns
 import os
 from django.views.static import serve
 
-app_dir = os.path.dirname(os.path.abspath(__file__))
-app_dir = os.path.dirname(os.path.abspath(__file__))  # .../src/app
-src_dir = os.path.dirname(app_dir)                    # .../src
+from django.conf import settings
+from django.conf.urls.static import static
 
 BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
 
 json_path = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
 images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
 custom_images_dir = os.path.join(BASE_EXTERNAL_PATH, 'custom_images')
-
-
-# images_dir = os.path.join(src_dir, 'News_Picture_Generator', 'crypto_news_images')
 
 
 
@@ -47,3 +43,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),  
     
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
