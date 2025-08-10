@@ -1,6 +1,8 @@
 class NavigationMain {
   constructor(containerId, navItems, contentSections) {
     this.container = document.getElementById(containerId);
+    console.log('here');
+    
     if (!this.container) {
       console.error(`Container with ID ${containerId} not found.`);
       return;
