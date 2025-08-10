@@ -1164,21 +1164,22 @@ def download_image_with_logo(request):
         
         # Open and resize logo
         logo = Image.open(logo_path).convert('RGBA')
-        logo_size = int(strip_width * 0.3)  # Logo takes 80% of strip width
+        logo_size = int(strip_width * 0.3)  # Small - 30% of strip width
         logo_aspect = logo.height / logo.width
         logo_height = int(logo_size * logo_aspect)
-        
+
         # Ensure logo fits in the strip
         if logo_height > logo_size:
             logo_height = logo_size
             logo_size = int(logo_height / logo_aspect)
-        
+
         logo = logo.resize((logo_size, logo_height), Image.Resampling.LANCZOS)
-        
+
+        # Rotate logo 90 degrees to the right
         logo = logo.rotate(-90, expand=True)
         # Swap dimensions after rotation
         logo_size, logo_height = logo_height, logo_size
-        
+
         # Apply opacity to logo
         if logo_opacity < 1.0:
             logo_with_opacity = Image.new('RGBA', logo.size, (0, 0, 0, 0))
@@ -1189,18 +1190,20 @@ def download_image_with_logo(request):
                 alpha = alpha.point(lambda p: p * logo_opacity)
                 logo_with_opacity.putalpha(alpha)
                 logo = logo_with_opacity
-        
-        # Position logo at the top of the strip
-        # Change positioning to account for rotated dimensions:
-        logo_x = (strip_width - logo_size) // 2
-        logo_y = 20  # Keep padding from top
+
+        # Increase top padding
+        top_padding = 50  # Increased from 20
+
+        # Position logo at the top with more padding
+        logo_x = (strip_width - logo_size) // 2  # Center horizontally
+        logo_y = top_padding
         strip.paste(logo, (logo_x, logo_y), logo)
-        
-        # Add "Aimoonhub" text vertically
+
+        # Add "Aimoonhub" text vertically, RIGHT BELOW the logo with NO gap
         text = "Aimoonhub"
-        
-        # Try to load a font
-        font_size = int(strip_width * (font_size_percentage / 100) * 0.5)
+
+        # Load font (keep existing font loading code)
+        font_size = int(strip_width * (font_size_percentage / 100))
         try:
             font_paths = [
                 '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
@@ -1217,24 +1220,24 @@ def download_image_with_logo(request):
                 font = ImageFont.load_default()
         except:
             font = ImageFont.load_default()
-        
+
         # Create a temporary image for vertical text
         text_img = Image.new('RGBA', (main_height, strip_width), (0, 0, 0, 0))
         text_draw = ImageDraw.Draw(text_img)
-        
-        # Calculate text position
+
+        # Calculate text dimensions
         text_bbox = text_draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
         text_height = text_bbox[3] - text_bbox[1]
-        
-        # Position text below logo
-        text_start_y = logo_y + logo_height + 30
+
+        # Position text RIGHT AFTER the logo ends (no gap)
+        text_start_y = logo_y + logo_height  # Start immediately after logo
         available_height = main_height - text_start_y - 20
-        
+
         if text_width <= available_height:
-            # Center the text in available space
-            text_x = text_start_y + (available_height - text_width) // 2
-            text_y = (strip_width - text_height) // 2
+            # Position text starting right after logo
+            text_x = text_start_y  # Start where logo ends
+            text_y = (strip_width - text_height) // 2  # Center horizontally in strip
             
             # Parse text color
             if text_color.startswith('#'):
@@ -1257,7 +1260,7 @@ def download_image_with_logo(request):
             
             # Paste rotated text onto strip
             strip.paste(text_img, (0, 0), text_img)
-        
+
         # Paste the strip onto the main image
         output_image.paste(strip, (0, 0), strip)
         
