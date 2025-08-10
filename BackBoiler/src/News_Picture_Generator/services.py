@@ -386,9 +386,9 @@ def news_image_stats(request):
                 },
                 'guidance_scale': {
                     'type': 'number',
-                    'description': 'Guidance scale (default: 7.5)',
-                    'example': 7.5,
-                    'default': 7.5
+                    'description': 'Guidance scale (default: 4.5)',
+                    'example': 4.5,
+                    'default': 4.5
                 }
             },
             'required': ['prompt', 'width', 'height'],
@@ -440,13 +440,22 @@ def generate_custom_image(request):
     negative_prompt = request.data.get('negative_prompt', '')
     seed = request.data.get('seed')
     steps = request.data.get('steps', 20)
-    guidance_scale = request.data.get('guidance_scale', 7.5)
+    guidance_scale = request.data.get('guidance_scale', 4.5)
     
     # Generate unique ID for this generation
     generation_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{hash(prompt) % 10000}"
     
-    # Build command
-    script_path = os.path.join(os.path.dirname(app_dir), 'News_Picture_Generator', 'custom_image_gen.py')
+    # Build command - FIX: Define app_dir properly
+    current_dir = os.path.dirname(os.path.abspath(__file__))  # This is the News_Picture_Generator directory
+    script_path = os.path.join(current_dir, 'custom_image_gen.py')
+    
+    # Check if script exists
+    if not os.path.exists(script_path):
+        return Response({
+            'error': f"Generation script not found at {script_path}",
+            'hint': "Make sure custom_image_gen.py is in the News_Picture_Generator directory"
+        }, status=500)
+    
     cmd = [
         'python', script_path,
         prompt, str(width), str(height),
@@ -460,12 +469,18 @@ def generate_custom_image(request):
     if seed is not None:
         cmd.extend(['--seed', str(seed)])
     
+    # Ensure custom images directory exists
+    if not os.path.exists(custom_images_dir):
+        os.makedirs(custom_images_dir, exist_ok=True)
+    
     # Run generation in background thread
     def run_generation():
         try:
-            subprocess.run(cmd, check=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            print(f"Generation completed: {result.stdout}")
         except subprocess.CalledProcessError as e:
             print(f"Generation failed: {e}")
+            print(f"Error output: {e.stderr}")
     
     thread = threading.Thread(target=run_generation)
     thread.start()
@@ -474,9 +489,9 @@ def generate_custom_image(request):
         'status': 'started',
         'message': 'Image generation started. Check status or list custom images to see results.',
         'generation_id': generation_id,
-        'estimated_time': '30-60 seconds'
+        'estimated_time': '30-60 seconds',
+        'command': ' '.join(cmd)  # For debugging, remove in production
     }, status=202)
-
 
 @extend_schema(
     description='List all custom generated images',
