@@ -646,50 +646,6 @@ def download_custom_image(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
-@extend_schema(
-    description='Search custom images by various criteria',
-    summary='Search custom generated images by prompt text or generation ID',
-    methods=['POST'],
-    request={
-        'application/json': {
-            'type': 'object',
-            'properties': {
-                'search_text': {
-                    'type': 'string',
-                    'description': 'Text to search in prompts (optional)',
-                    'example': 'sunset',
-                    'nullable': True
-                },
-                'generation_id': {
-                    'type': 'string',
-                    'description': 'Generation ID to search for (optional)',
-                    'example': '20240115143022_1234',
-                    'nullable': True
-                },
-                'include_negative': {
-                    'type': 'boolean',
-                    'description': 'Also search in negative prompts (only for text search)',
-                    'default': False
-                }
-            }
-        }
-    },
-    responses={
-        200: OpenApiResponse(
-            description='Search results',
-            response={
-                'type': 'object',
-                'properties': {
-                    'count': {'type': 'integer'},
-                    'results': {
-                        'type': 'array',
-                        'items': {'type': 'object'}
-                    }
-                }
-            }
-        ),
-    }
-)
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def search_custom_images(request):
@@ -717,26 +673,52 @@ def search_custom_images(request):
     
     if generation_id:
         # Search by generation_id
-        for gen in custom_data.get('generations', []):
-            filename = gen.get('filename', '')
-            if filename:
-                parts = filename.split('_')
-                if len(parts) >= 3:
-                    file_gen_id = f"{parts[0]}_{parts[1]}_{parts[2]}"
-                    if file_gen_id == generation_id or generation_id in filename:
-                        results.append(gen)
-                        break
+        # Extract the timestamp part from generation_id (before the underscore)
+        gen_id_parts = generation_id.split('_')
+        if gen_id_parts:
+            gen_timestamp = gen_id_parts[0]  # This is "20250810144624"
             
-            if gen.get('generation_id') == generation_id:
-                results.append(gen)
-                break
+            # Convert to the format used in filename: YYYYMMDD_HHMMSS
+            if len(gen_timestamp) == 14:  # Format: YYYYMMDDHHMMSS
+                gen_date = gen_timestamp[:8]  # 20250810
+                gen_time = gen_timestamp[8:]  # 144624
+                
+                for gen in custom_data.get('generations', []):
+                    filename = gen.get('filename', '')
+                    
+                    # Check if the filename starts with the same date and has similar time
+                    # The filename format is: YYYYMMDD_HHMMSS_hash_dimensions.png
+                    if filename.startswith(gen_date):
+                        # Extract time from filename
+                        filename_parts = filename.split('_')
+                        if len(filename_parts) >= 2:
+                            file_time = filename_parts[1]  # This is "144643"
+                            
+                            # Check if times are close (within a minute or so)
+                            # Or check if this entry was created around the same time
+                            if abs(int(file_time) - int(gen_time)) < 100:  # Within 1 minute
+                                results.append(gen)
+                                break
+                    
+                    # Also check timestamp field if it exists
+                    if gen.get('timestamp'):
+                        # Parse ISO timestamp and compare
+                        import datetime
+                        try:
+                            entry_time = datetime.datetime.fromisoformat(gen['timestamp'].replace('Z', '+00:00'))
+                            gen_datetime = datetime.datetime.strptime(gen_timestamp, '%Y%m%d%H%M%S')
+                            
+                            # If within 1 minute
+                            if abs((entry_time - gen_datetime).total_seconds()) < 60:
+                                results.append(gen)
+                                break
+                        except:
+                            pass
     else:
-        # Search by text
+        # Search by text (keep existing logic)
         for gen in custom_data.get('generations', []):
-            # Search in prompt
             if search_text in gen.get('prompt', '').lower():
                 results.append(gen)
-            # Search in negative prompt if requested
             elif include_negative and search_text in gen.get('negative_prompt', '').lower():
                 results.append(gen)
     
@@ -749,16 +731,9 @@ def search_custom_images(request):
         filename = os.path.basename(gen.get('filepath', ''))
         image_url = request.build_absolute_uri(f'/custom_images/{filename}')
         
-        # Extract generation_id from filename if not stored
-        gen_id = gen.get('generation_id')
-        if not gen_id and filename:
-            parts = filename.split('_')
-            if len(parts) >= 3:
-                gen_id = f"{parts[0]}_{parts[1]}_{parts[2]}"
-        
         formatted_results.append({
             'filename': gen.get('filename'),
-            'generation_id': gen_id,
+            'generation_id': generation_id if generation_id else None,
             'prompt': gen.get('prompt'),
             'negative_prompt': gen.get('negative_prompt'),
             'width': gen.get('width'),
