@@ -1157,14 +1157,14 @@ def download_image_with_logo(request):
             r, g, b = 0, 0, 0
         
         # Draw semi-transparent background
-        strip_draw.rectangle(
-            [(0, 0), (strip_width, main_height)],
-            fill=(r, g, b, int(255 * strip_opacity))
-        )
+        # strip_draw.rectangle(
+        #     [(0, 0), (strip_width, main_height)],
+        #     fill=(r, g, b, int(255 * strip_opacity))
+        # )
         
         # Open and resize logo
         logo = Image.open(logo_path).convert('RGBA')
-        logo_size = int(strip_width * 0.8)  # Logo takes 80% of strip width
+        logo_size = int(strip_width * 0.3)  # Logo takes 80% of strip width
         logo_aspect = logo.height / logo.width
         logo_height = int(logo_size * logo_aspect)
         
@@ -1174,6 +1174,10 @@ def download_image_with_logo(request):
             logo_size = int(logo_height / logo_aspect)
         
         logo = logo.resize((logo_size, logo_height), Image.Resampling.LANCZOS)
+        
+        logo = logo.rotate(-90, expand=True)
+        # Swap dimensions after rotation
+        logo_size, logo_height = logo_height, logo_size
         
         # Apply opacity to logo
         if logo_opacity < 1.0:
@@ -1187,15 +1191,16 @@ def download_image_with_logo(request):
                 logo = logo_with_opacity
         
         # Position logo at the top of the strip
+        # Change positioning to account for rotated dimensions:
         logo_x = (strip_width - logo_size) // 2
-        logo_y = 20  # Padding from top
+        logo_y = 20  # Keep padding from top
         strip.paste(logo, (logo_x, logo_y), logo)
         
         # Add "Aimoonhub" text vertically
         text = "Aimoonhub"
         
         # Try to load a font
-        font_size = int(strip_width * (font_size_percentage / 100))
+        font_size = int(strip_width * (font_size_percentage / 100) * 0.5)
         try:
             font_paths = [
                 '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
