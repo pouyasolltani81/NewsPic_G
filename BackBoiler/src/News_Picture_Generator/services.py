@@ -444,10 +444,8 @@ def generate_custom_image(request):
     
     # Generate unique ID for this generation
     generation_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{hash(prompt) % 10000}"
-    
-    # Build command - FIX: Define app_dir properly
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # This is the News_Picture_Generator directory
-    script_path = os.path.join(current_dir, 'custom_image_gen.py')
+ 
+    script_path = os.path.join(BASE_EXTERNAL_PATH, 'custom_image_gen.py')
     
     # Check if script exists
     if not os.path.exists(script_path):
