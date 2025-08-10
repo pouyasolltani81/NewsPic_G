@@ -3,12 +3,23 @@ import json
 from django.conf import settings
 from django.templatetags.static import static
 import os
-# Create your views here.
 
+
+
+# BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
+
+# json_path = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
+# images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
 
 def NewsDashboard_view(request):
-    app_dir = os.path.dirname(os.path.abspath(__file__))
-    json_path = os.path.join(app_dir, 'generated_history.json')
+
+
+    BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
+
+    json_path = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
+    images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
+ #   app_dir = os.path.dirname(os.path.abspath(__file__))
+ #   json_path = os.path.join(app_dir, 'generated_history.json')
     
     with open(json_path, 'r', encoding='utf-8') as f:
         data_dict = json.load(f)  # dict of dicts

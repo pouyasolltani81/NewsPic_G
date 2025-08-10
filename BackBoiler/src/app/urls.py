@@ -11,7 +11,12 @@ app_dir = os.path.dirname(os.path.abspath(__file__))
 app_dir = os.path.dirname(os.path.abspath(__file__))  # .../src/app
 src_dir = os.path.dirname(app_dir)                    # .../src
 
-images_dir = os.path.join(src_dir, 'News_Picture_Generator', 'crypto_news_images')
+BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
+
+json_path = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
+images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
+
+# images_dir = os.path.join(src_dir, 'News_Picture_Generator', 'crypto_news_images')
 
 
 
