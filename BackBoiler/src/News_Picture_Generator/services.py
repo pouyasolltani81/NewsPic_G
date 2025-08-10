@@ -646,10 +646,9 @@ def download_custom_image(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
-
 @extend_schema(
-    description='Search custom images by prompt',
-    summary='Search custom generated images by prompt text',
+    description='Search custom images by various criteria',
+    summary='Search custom generated images by prompt text or generation ID',
     methods=['POST'],
     request={
         'application/json': {
@@ -657,16 +656,22 @@ def download_custom_image(request):
             'properties': {
                 'search_text': {
                     'type': 'string',
-                    'description': 'Text to search in prompts',
-                    'example': 'sunset'
+                    'description': 'Text to search in prompts (optional)',
+                    'example': 'sunset',
+                    'nullable': True
+                },
+                'generation_id': {
+                    'type': 'string',
+                    'description': 'Generation ID to search for (optional)',
+                    'example': '20240115143022_1234',
+                    'nullable': True
                 },
                 'include_negative': {
                     'type': 'boolean',
-                    'description': 'Also search in negative prompts',
+                    'description': 'Also search in negative prompts (only for text search)',
                     'default': False
                 }
-            },
-            'required': ['search_text'],
+            }
         }
     },
     responses={
@@ -688,12 +693,13 @@ def download_custom_image(request):
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def search_custom_images(request):
-    """Search custom images by prompt text"""
+    """Search custom images by prompt text or generation ID"""
     search_text = request.data.get('search_text', '').strip().lower()
+    generation_id = request.data.get('generation_id', '').strip()
     include_negative = request.data.get('include_negative', False)
     
-    if not search_text:
-        return Response({'error': "Missing 'search_text' parameter"}, status=400)
+    if not search_text and not generation_id:
+        return Response({'error': "Must provide either 'search_text' or 'generation_id'"}, status=400)
     
     # Check if custom_pics.json exists
     if not os.path.exists(custom_json_path):
@@ -708,13 +714,31 @@ def search_custom_images(request):
         custom_data = json.load(f)
     
     results = []
-    for gen in custom_data.get('generations', []):
-        # Search in prompt
-        if search_text in gen.get('prompt', '').lower():
-            results.append(gen)
-        # Search in negative prompt if requested
-        elif include_negative and search_text in gen.get('negative_prompt', '').lower():
-            results.append(gen)
+    
+    if generation_id:
+        # Search by generation_id
+        for gen in custom_data.get('generations', []):
+            filename = gen.get('filename', '')
+            if filename:
+                parts = filename.split('_')
+                if len(parts) >= 3:
+                    file_gen_id = f"{parts[0]}_{parts[1]}_{parts[2]}"
+                    if file_gen_id == generation_id or generation_id in filename:
+                        results.append(gen)
+                        break
+            
+            if gen.get('generation_id') == generation_id:
+                results.append(gen)
+                break
+    else:
+        # Search by text
+        for gen in custom_data.get('generations', []):
+            # Search in prompt
+            if search_text in gen.get('prompt', '').lower():
+                results.append(gen)
+            # Search in negative prompt if requested
+            elif include_negative and search_text in gen.get('negative_prompt', '').lower():
+                results.append(gen)
     
     # Sort by timestamp (newest first)
     results.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
@@ -722,28 +746,36 @@ def search_custom_images(request):
     # Format response
     formatted_results = []
     for gen in results:
-        
         filename = os.path.basename(gen.get('filepath', ''))
         image_url = request.build_absolute_uri(f'/custom_images/{filename}')
-   
+        
+        # Extract generation_id from filename if not stored
+        gen_id = gen.get('generation_id')
+        if not gen_id and filename:
+            parts = filename.split('_')
+            if len(parts) >= 3:
+                gen_id = f"{parts[0]}_{parts[1]}_{parts[2]}"
+        
         formatted_results.append({
             'filename': gen.get('filename'),
+            'generation_id': gen_id,
             'prompt': gen.get('prompt'),
             'negative_prompt': gen.get('negative_prompt'),
             'width': gen.get('width'),
             'height': gen.get('height'),
             'seed': gen.get('seed'),
             'generated_at': gen.get('generated_at'),
-            'url' : image_url
+            'url': image_url
         })
     
     return Response({
         'count': len(formatted_results),
-        'search_text': search_text,
+        'search_criteria': {
+            'text': search_text if search_text else None,
+            'generation_id': generation_id if generation_id else None
+        },
         'results': formatted_results
     })
-
-
 @extend_schema(
     description='Get custom image generation statistics',
     summary='Get statistics about custom image generation',
