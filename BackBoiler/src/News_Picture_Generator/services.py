@@ -1231,7 +1231,7 @@ def download_image_with_logo(request):
         text_height = text_bbox[3] - text_bbox[1]
 
         # Position text RIGHT AFTER the logo ends (no gap)
-        text_start_y = logo_y + logo_height  # Start immediately after logo
+        text_start_y = logo_y + logo_height + 10 # Start immediately after logo
         available_height = main_height - text_start_y - 20
 
         if text_width <= available_height:
