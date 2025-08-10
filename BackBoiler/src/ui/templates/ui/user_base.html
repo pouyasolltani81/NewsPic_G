@@ -416,34 +416,6 @@
   {% endblock %}
 
 
-  <script>
-
-    const navItems = [
-    { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
-    { key: '2', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
-  
-  
-  ];
-  
-  
-      const contentSections = {
-        dashboard: document.getElementById('dashboard-content'),
-        messages: document.getElementById('messages-content'),
-  
-      };
-  
-      console.log('heloooo')
-      const nav = new NavigationMain('navigationMain', navItems, contentSections);
-  
-      
-      window.addEventListener('DOMContentLoaded', () => {
-        
-        window.nav = nav;
-   
-      
-      });
-  </script>
-  
 </body>
 
 </html>
