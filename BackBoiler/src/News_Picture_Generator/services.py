@@ -440,11 +440,13 @@ def generate_custom_image(request):
     negative_prompt = request.data.get('negative_prompt', '')
     seed = request.data.get('seed')
     steps = request.data.get('steps', 20)
-    guidance_scale = request.data.get('guidance_scale', 4.5)
+    guidance_scale = request.data.get('guidance_scale', 7.5)
     
     # Generate unique ID for this generation
     generation_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{hash(prompt) % 10000}"
- 
+    
+    # Build command - FIX: Define app_dir properly
+    current_dir = BASE_EXTERNAL_PATH
     script_path = os.path.join(BASE_EXTERNAL_PATH, 'custom_image_gen.py')
     
     # Check if script exists
@@ -454,9 +456,14 @@ def generate_custom_image(request):
             'hint': "Make sure custom_image_gen.py is in the News_Picture_Generator directory"
         }, status=500)
     
+    # Build command with proper argument handling
+    import sys
     cmd = [
-        'python', script_path,
-        prompt, str(width), str(height),
+        sys.executable,  # Use the same Python interpreter as Django
+        script_path,
+        prompt,  # This will be properly quoted by subprocess
+        str(width),
+        str(height),
         '--steps', str(steps),
         '--guidance', str(guidance_scale)
     ]
@@ -467,6 +474,12 @@ def generate_custom_image(request):
     if seed is not None:
         cmd.extend(['--seed', str(seed)])
     
+    # Add output and history paths
+    cmd.extend([
+        '--output', custom_images_dir,
+        '--history', custom_json_path
+    ])
+    
     # Ensure custom images directory exists
     if not os.path.exists(custom_images_dir):
         os.makedirs(custom_images_dir, exist_ok=True)
@@ -474,13 +487,26 @@ def generate_custom_image(request):
     # Run generation in background thread
     def run_generation():
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            print(f"Generation completed: {result.stdout}")
+            # Use subprocess.run with proper argument handling
+            result = subprocess.run(
+                cmd, 
+                capture_output=True, 
+                text=True, 
+                check=True,
+                cwd=current_dir  # Set working directory
+            )
+            print(f"Generation completed successfully")
+            if result.stdout:
+                print(f"Output: {result.stdout}")
         except subprocess.CalledProcessError as e:
-            print(f"Generation failed: {e}")
+            print(f"Generation failed with exit code {e.returncode}")
             print(f"Error output: {e.stderr}")
+            print(f"Standard output: {e.stdout}")
+        except Exception as e:
+            print(f"Unexpected error: {type(e).__name__}: {e}")
     
     thread = threading.Thread(target=run_generation)
+    thread.daemon = True  # Make thread daemon so it doesn't block server shutdown
     thread.start()
     
     return Response({
@@ -488,7 +514,8 @@ def generate_custom_image(request):
         'message': 'Image generation started. Check status or list custom images to see results.',
         'generation_id': generation_id,
         'estimated_time': '30-60 seconds',
-        'command': ' '.join(cmd)  # For debugging, remove in production
+        'prompt': prompt,
+        'dimensions': f"{width}x{height}"
     }, status=202)
 
 @extend_schema(
