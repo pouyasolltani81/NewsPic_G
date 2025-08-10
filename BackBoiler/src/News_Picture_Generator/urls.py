@@ -19,7 +19,8 @@ from .services import (
     download_custom_image,
     search_custom_images,
     custom_image_stats,
-    delete_custom_image
+    delete_custom_image,
+    news_image_stats
 )
 
 urlpatterns = [
@@ -27,6 +28,8 @@ urlpatterns = [
     path('news-images/download/', download_image_by_title, name='download-news-image'),
     path('news-images/check/', check_image_exists, name='check-news-image'),
     path('news-images/list/', list_generated_images, name='list-news-images'),
+    path('news-images/stats/', news_image_stats, name='news-image-stats'),
+    
     
     # Custom image generation endpoints
     path('custom-images/generate/', generate_custom_image, name='generate-custom-image'),

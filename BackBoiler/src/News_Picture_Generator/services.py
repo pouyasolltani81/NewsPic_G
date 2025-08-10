@@ -201,6 +201,146 @@ def list_generated_images(request):
     })
 
 
+
+@extend_schema(
+    description='Get news image generation statistics',
+    summary='Get statistics about news image generation',
+    methods=['GET'],
+    responses={
+        200: OpenApiResponse(
+            description='Generation statistics',
+            response={
+                'type': 'object',
+                'properties': {
+                    'total_images': {'type': 'integer'},
+                    'total_size_mb': {'type': 'number'},
+                    'unique_clusters': {'type': 'array'},
+                    'most_common_tags': {'type': 'array'},
+                    'generation_by_date': {'type': 'object'},
+                    'average_images_per_day': {'type': 'number'}
+                }
+            }
+        ),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def news_image_stats(request):
+    """Get statistics about news image generation"""
+    
+    # Check if generated_history.json exists
+    if not os.path.exists(json_path):
+        return Response({
+            'total_images': 0,
+            'total_size_mb': 0,
+            'unique_clusters': [],
+            'most_common_tags': [],
+            'generation_by_date': {},
+            'average_images_per_day': 0,
+            'message': 'No news images generated yet'
+        })
+    
+    # Load news images data
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data_dict = json.load(f)
+    
+    if not data_dict:
+        return Response({
+            'total_images': 0,
+            'total_size_mb': 0,
+            'unique_clusters': [],
+            'most_common_tags': [],
+            'generation_by_date': {},
+            'average_images_per_day': 0
+        })
+    
+    # Calculate statistics
+    total_size = 0
+    clusters_count = {}
+    tags_count = {}
+    generation_dates = {}
+    earliest_date = None
+    latest_date = None
+    
+    for entry in data_dict.values():
+        # Calculate file size
+        filename = os.path.basename(entry.get('filepath', ''))
+        filepath = os.path.join(images_dir, filename)
+        if os.path.exists(filepath):
+            total_size += os.path.getsize(filepath)
+        
+        # Count clusters
+        cluster = entry.get('cluster', 'uncategorized')
+        clusters_count[cluster] = clusters_count.get(cluster, 0) + 1
+        
+        # Count tags
+        for tag in entry.get('tags', []):
+            tags_count[tag] = tags_count.get(tag, 0) + 1
+        
+        # Count by date
+        generated_at = entry.get('generated_at', '')
+        if generated_at:
+            date_only = generated_at.split(' ')[0]  # Extract date part
+            generation_dates[date_only] = generation_dates.get(date_only, 0) + 1
+            
+            # Track earliest and latest dates
+            if not earliest_date or date_only < earliest_date:
+                earliest_date = date_only
+            if not latest_date or date_only > latest_date:
+                latest_date = date_only
+    
+    # Sort clusters by count
+    sorted_clusters = sorted(clusters_count.items(), key=lambda x: x[1], reverse=True)
+    unique_clusters = [{'cluster': k, 'count': v} for k, v in sorted_clusters]
+    
+    # Sort tags by count (top 20)
+    sorted_tags = sorted(tags_count.items(), key=lambda x: x[1], reverse=True)[:20]
+    most_common_tags = [{'tag': k, 'count': v} for k, v in sorted_tags]
+    
+    # Sort generation dates
+    sorted_dates = sorted(generation_dates.items())
+    generation_by_date_list = [{'date': k, 'count': v} for k, v in sorted_dates[-30:]]  # Last 30 days
+    
+    # Calculate average images per day
+    avg_per_day = 0
+    if earliest_date and latest_date:
+        from datetime import datetime
+        try:
+            start = datetime.strptime(earliest_date, '%Y-%m-%d')
+            end = datetime.strptime(latest_date, '%Y-%m-%d')
+            days_diff = (end - start).days + 1
+            avg_per_day = round(len(data_dict) / days_diff, 2)
+        except:
+            pass
+    
+    # Get file format distribution
+    format_count = {}
+    for entry in data_dict.values():
+        filename = os.path.basename(entry.get('filepath', ''))
+        ext = filename.split('.')[-1].lower() if '.' in filename else 'unknown'
+        format_count[ext] = format_count.get(ext, 0) + 1
+    
+    return Response({
+        'total_images': len(data_dict),
+        'total_size_mb': round(total_size / (1024 * 1024), 2),
+        'total_size_gb': round(total_size / (1024 * 1024 * 1024), 2),
+        'average_size_mb': round((total_size / len(data_dict)) / (1024 * 1024), 2) if data_dict else 0,
+        'unique_clusters': unique_clusters,
+        'total_unique_clusters': len(clusters_count),
+        'most_common_tags': most_common_tags,
+        'total_unique_tags': len(tags_count),
+        'generation_by_date': generation_by_date_list,
+        'average_images_per_day': avg_per_day,
+        'date_range': {
+            'earliest': earliest_date,
+            'latest': latest_date
+        },
+        'file_formats': format_count,
+        'storage_location': images_dir
+    })
+
+
+
 # ===== CUSTOM IMAGE GENERATION ENDPOINTS =====
 
 @extend_schema(
@@ -542,6 +682,10 @@ def search_custom_images(request):
     # Format response
     formatted_results = []
     for gen in results:
+        
+        filename = os.path.basename(gen.get('filepath', ''))
+        image_url = request.build_absolute_uri(f'/custom_images/{filename}')
+   
         formatted_results.append({
             'filename': gen.get('filename'),
             'prompt': gen.get('prompt'),
@@ -549,7 +693,8 @@ def search_custom_images(request):
             'width': gen.get('width'),
             'height': gen.get('height'),
             'seed': gen.get('seed'),
-            'generated_at': gen.get('generated_at')
+            'generated_at': gen.get('generated_at'),
+            'url' : image_url
         })
     
     return Response({
@@ -711,4 +856,5 @@ def delete_custom_image(request):
         'status': 'success',
         'message': f'Image {filename} deleted successfully'
     })
+
 
