@@ -1203,7 +1203,7 @@ def download_image_with_logo(request):
         text = "Aimoonhub"
 
         # Load font (keep existing font loading code)
-        font_size = int(strip_width * (font_size_percentage / 100))
+        font_size = int(strip_width * (font_size_percentage / 200))
         try:
             font_paths = [
                 '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
