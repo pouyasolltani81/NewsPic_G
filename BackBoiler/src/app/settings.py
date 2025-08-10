@@ -226,6 +226,8 @@ SPECTACULAR_SETTINGS = {
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
+    BASE_DIR / "ui" /"static",
+    
 ]
 
 # If you're using collectstatic for production
