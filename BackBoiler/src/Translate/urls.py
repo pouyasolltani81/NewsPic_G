@@ -3,9 +3,8 @@ from django.views.static import serve
 import os
 from . import services
 
-app_dir = os.path.dirname(os.path.abspath(__file__))
-images_dir = os.path.join(app_dir, 'crypto_news_images')
 
+app_name = 'translator'
 
 from .services import (
     translate_text,
@@ -13,9 +12,6 @@ from .services import (
 )
 
 urlpatterns = [
-    # Existing news image endpoints
-    path('trnaslate/normal/', translate_text, name='translate_text'),
-    path('trnaslate/list_of_langs/', list_supported_languages, name='list_supported_languages'),
-    
+    path('translate/', translate_text, name='translate-text'),
+    path('translate/languages/', list_supported_languages, name='list-languages'),
 ]
-
