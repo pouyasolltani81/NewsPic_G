@@ -76,7 +76,7 @@ INSTALLED_APPS = [
     'AuthModel',
     'SsoModel',    
     'ui',
-    'News_Picture_Generator'
+    'News_Picture_Generator',
     'Translate'
     
 ]
