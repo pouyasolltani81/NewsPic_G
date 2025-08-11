@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     'SsoModel',    
     'ui',
     'News_Picture_Generator'
+    'Translate'
+    
 ]
 
 # CORS Headers
