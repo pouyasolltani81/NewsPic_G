@@ -646,6 +646,56 @@ def download_custom_image(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
+
+
+
+
+
+
+@extend_schema(
+    description='Search custom images by various criteria',
+    summary='Search custom generated images by prompt text or generation ID',
+    methods=['POST'],
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'search_text': {
+                    'type': 'string',
+                    'description': 'Text to search in prompts (optional)',
+                    'example': 'sunset',
+                    'nullable': True
+                },
+                'generation_id': {
+                    'type': 'string',
+                    'description': 'Generation ID to search for (optional)',
+                    'example': '20240115143022_1234',
+                    'nullable': True
+                },
+                'include_negative': {
+                    'type': 'boolean',
+                    'description': 'Also search in negative prompts (only for text search)',
+                    'default': False
+                }
+            }
+        }
+    },
+    responses={
+        200: OpenApiResponse(
+            description='Search results',
+            response={
+                'type': 'object',
+                'properties': {
+                    'count': {'type': 'integer'},
+                    'results': {
+                        'type': 'array',
+                        'items': {'type': 'object'}
+                    }
+                }
+            }
+        ),
+    }
+)
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def search_custom_images(request):
