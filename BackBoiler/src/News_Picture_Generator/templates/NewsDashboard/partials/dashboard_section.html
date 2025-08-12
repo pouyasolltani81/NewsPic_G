@@ -31,14 +31,14 @@
   <div id="imageGallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in page_obj %}
     <div class="image-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg" 
-         data-title="{{ item.prompt|lower }}" 
+         data-title="{{ item.title|lower }}" 
          data-prompt="{{ item.prompt|lower }}">
       <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
-        <img src="{{ item.filepath }}" alt="{{ item.prompt }}" class="w-full h-full object-cover" loading="lazy" />
+        <img src="{{ item.filepath }}" alt="{{ item.title }}" class="w-full h-full object-cover" loading="lazy" />
       </div>
       <div class="p-4 flex flex-col flex-grow">
-        <h3 class="font-bold text-lg mb-2 truncate text-gray-900 dark:text-white" title="{{ item.prompt }}">
-          {{ item.prompt }}
+        <h3 class="font-bold text-lg mb-2 truncate text-gray-900 dark:text-white" title="{{ item.title }}">
+          {{ item.title }}
         </h3>
         <div class="text-sm text-gray-700 dark:text-gray-300 flex-grow overflow-auto mb-2 max-h-20">
           <strong>Prompt:</strong> {{ item.prompt }}
