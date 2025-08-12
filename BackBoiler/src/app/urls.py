@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path
+from django.urls import re_path
 from django.urls import include
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -42,7 +43,12 @@ urlpatterns = [
     path('custom_images/<path:path>/', serve, {'document_root': custom_images_dir}),
     
    
-    path('i18n/', include('django.conf.urls.i18n')),  
+    path('i18n/', include('django.conf.urls.i18n')),
+    
+    
+    re_path(r'^static/(?P<path>.*)$', serve, {
+        'document_root': '/home/anews/NewsPic_G/BackBoiler/src/static',
+    }),  
     
 ] + static('/static/', document_root='/home/anews/NewsPic_G/BackBoiler/src/static')
 
