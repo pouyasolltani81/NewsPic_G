@@ -12,6 +12,10 @@ def NewsDashboard_view(request):
         context.update({
             'user_id': request.user.id,
             'username': request.user.username,
+            # Optional extra fields:
+            # 'user_email': request.user.email,
+            # 'first_name': request.user.first_name,
+            # 'last_name': request.user.last_name,
         })
 
     # ===== NEWS DATA =====
@@ -25,45 +29,17 @@ def NewsDashboard_view(request):
     # Reverse order (latest first)
     data = list(data_dict.values())[::-1]
 
-    # Adjust image filepaths and add metadata for filtering
+    # Adjust image filepaths
     for item in data:
         filename = os.path.basename(item['filepath'])
         item['filepath'] = f"/crypto_news_images/{filename}"
-        
-        # Add timestamp if available for "recent" filter
-        if 'timestamp' in item:
-            item['timestamp'] = item['timestamp']
-        else:
-            # You might want to extract this from the filename or add it to your JSON
-            item['timestamp'] = None
-
-    # Apply filter if provided
-    filter_type = request.GET.get('filter', 'all')
-    if filter_type != 'all':
-        filtered_data = []
-        for item in data:
-            title_lower = item.get('title', '').lower()
-            prompt_lower = item.get('prompt', '').lower()
-            
-            if filter_type == 'bitcoin' and ('bitcoin' in title_lower or 'bitcoin' in prompt_lower or 'btc' in title_lower):
-                filtered_data.append(item)
-            elif filter_type == 'ethereum' and ('ethereum' in title_lower or 'ethereum' in prompt_lower or 'eth' in title_lower):
-                filtered_data.append(item)
-            elif filter_type == 'defi' and ('defi' in title_lower or 'defi' in prompt_lower or 'decentralized' in title_lower):
-                filtered_data.append(item)
-            elif filter_type == 'recent':
-                # Implement recent logic based on timestamp
-                filtered_data.append(item)
-        
-        data = filtered_data
 
     # Pagination (6 items per page)
     paginator = Paginator(data, 6)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
-    # Add pagination and filter to context
+    # Add pagination to context
     context['page_obj'] = page_obj
-    context['current_filter'] = filter_type
 
     return render(request, 'NewsDashboard/NewsDashboard.html', context)
