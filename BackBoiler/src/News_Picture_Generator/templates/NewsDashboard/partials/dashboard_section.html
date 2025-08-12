@@ -11,6 +11,8 @@
       <!-- Filter dropdown -->
       <select id="imageFilter" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         <option value="all">All Images</option>
+        <option value="crypto_images">Crypto Images</option>
+        <option value="custom_images">Custom Images</option>
         <option value="recent">Recent (Last 7 days)</option>
         <option value="bitcoin">Bitcoin Related</option>
         <option value="ethereum">Ethereum Related</option>
@@ -31,8 +33,9 @@
   <div id="imageGallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in page_obj %}
     <div class="image-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg" 
-         data-title="{{ item.title|lower }}" 
-         data-prompt="{{ item.prompt|lower }}">
+     data-title="{{ item.title|lower }}" 
+     data-prompt="{{ item.prompt|lower }}"
+     data-image-source="{{ item.image_source }}">
       <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
         <img src="{{ item.filepath }}" alt="{{ item.title }}" class="w-full h-full object-cover" loading="lazy" />
       </div>
