@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gd)b6%djxlp0g1zw#@5v3_w#d%pu4%g7)-!288)@m(1kz*w+n6'
 
 
-ALLOWED_HOSTS = ['79.175.177.113']
+ALLOWED_HOSTS = ['79.175.177.113','*']
 
 APP_NAME = 'backboiler'
 APP_URL = 'http://127.0.0.1:8000'
@@ -22,13 +22,6 @@ APP_URL = 'http://127.0.0.1:8000'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-
-ALLOWED_HOSTS = ['*']
-
-APP_NAME = 'backboiler'
-APP_URL = 'http://127.0.0.1:8000'
-
-
 
 # transltations 
 USE_I18N = True
@@ -87,12 +80,71 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost',
+    'http://localhost:8000',
+    'http://79.175.177.113',
+    'http://79.175.177.113:8000',
+    'http://79.175.177.113:20300',
+    'https://79.175.177.113:20300',
+    'http://5.232.48.6',
+    'http://2.180.249.205',
     'http://79.175.177.113:16300',
+    'http://79.175.177.113:24300',
+    'http://localhost:3333',
+    'http://217.219.245.139',
+    'http://217.219.245.139:20300',
+    'http://aimoonhub.ir:20300',
+    'https://aimoonhub.ir:20300',
+    'http://aimoonhub.ir',
+    'https://aimoonhub.ir',
+    'https://news.imoonex.ir',
+    "https://aimoonhub.imoonex.ir",
+    "https://aimoonhub.ir",
+    "https://aimoonhub.com",
+    'http://79.175.177.113:29300',   
+    'https://79.175.177.113:29800', 
+    'http://aimoonhub.ir:29300', 
+    'https://aimoonhub.ir:29800',
+    'http://5.125.28.18:3333',
+    'https://news.imoonex.ir',
+    'http://news.imoonex.ir',
+    #'http://5.126.123.184/3000'
+    
+
+
+   
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost',
+    'http://localhost:8000',
+    'http://79.175.177.113',
+    'http://79.175.177.113:8000',
+    'http://79.175.177.113:20300',
+    'https://79.175.177.113:20300',
+    'http://5.232.48.6',
+    'http://2.180.249.205',
+    'http://79.175.177.113:16300',
+    'http://79.175.177.113:24300',
+    'http://localhost:3333',
+    'http://217.219.245.139',
+    'http://217.219.245.139:20300',
+    'http://79.175.177.113:29300',   
+    'https://79.175.177.113:29800', 
+    'http://aimoonhub.ir:29300', 
+    'https://aimoonhub.ir:29800',
+    'http://aimoonhub.ir:20300', 
+    'https://aimoonhub.ir:20300',
+    'http://aimoonhub.ir',
+    'https://aimoonhub.ir',
+    'https://news.imoonex.ir',
+    'http://news.imoonex.ir',
+    "https://aimoonhub.imoonex.ir",
+    "https://aimoonhub.ir",
+    "https://aimoonhub.com",
+    'http://5.125.28.18:3333'
 ]
+
 CORS_ALLOW_HEADERS = [ "accept", "referer", "accept-encoding", "authorization", "content-type", "dnt", "origin", "user-agent", "x-csrftoken", "x-sessionid", "x-requested-with"]
 CORS_ALLOW_METHODS = [
     'GET',
