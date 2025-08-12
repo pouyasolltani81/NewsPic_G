@@ -14,10 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gd)b6%djxlp0g1zw#@5v3_w#d%pu4%g7)-!288)@m(1kz*w+n6'
 
 
-ALLOWED_HOSTS = ['79.175.177.113','*']
+ALLOWED_HOSTS = ['79.175.177.113' , 'aimoonhub.ir' ,'*']
 
 APP_NAME = 'backboiler'
-APP_URL = 'http://127.0.0.1:8000'
+APP_URL = 'http://79.175.177.113:19800'
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -157,7 +157,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Tailwind Settings
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = [
-    "127.0.0.1",
+    "79.175.177.113",
 ]
 # NPM_BIN_PATH = 'C:/Program Files/nodejs/npm.cmd'
 from .app_lib import Find_npm_bin
