@@ -44,7 +44,7 @@ urlpatterns = [
    
     path('i18n/', include('django.conf.urls.i18n')),  
     
-] + static('/static/', document_root='/home/pouya/Desktop/Work/Git/NewsPic_G/NewsPic_G/BackBoiler/src/static')
+] + static('/static/', document_root='/home/anews/NewsPic_G/BackBoiler/src/static')
 
 
 # if settings.DEBUG:
