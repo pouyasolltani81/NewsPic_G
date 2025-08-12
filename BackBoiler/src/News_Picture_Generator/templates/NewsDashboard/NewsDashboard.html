@@ -149,37 +149,35 @@
       // Filter functionality
       imageFilter.addEventListener('change', (e) => {
         const filterValue = e.target.value.toLowerCase();
-
+        const now = Date.now() / 1000; // seconds
+        const sevenDaysSec = 7 * 24 * 3600;
+    
         imageCards.forEach(card => {
-            const title = card.dataset.title.toLowerCase();
-            const prompt = card.dataset.prompt.toLowerCase();
-            const imageSource = card.dataset.imageSource?.toLowerCase() || ''; // e.g., "custom" or "crypto"
-
+            const title = (card.dataset.title || '').toLowerCase();
+            const prompt = (card.dataset.prompt || '').toLowerCase();
+            const imageSource = (card.dataset.imageSource || '').toLowerCase(); // 'custom', 'crypto', 'both', etc.
+            const ts = card.dataset.timestamp ? parseFloat(card.dataset.timestamp) : null;
+    
+            let show = false;
+    
             if (filterValue === 'all') {
-                card.style.display = '';
-
+                show = true;
             } else if (filterValue === 'recent') {
-                // You'll need to implement recent logic using a data-date attribute
-                card.style.display = '';
-
-            } else if (filterValue === 'custom_images') {
-                card.style.display = (imageSource === 'custom') ? '' : 'none';
-
+                if (ts && (ts >= (now - sevenDaysSec))) show = true;
             } else if (filterValue === 'crypto_images') {
-                card.style.display = (imageSource === 'crypto') ? '' : 'none';
-
+                if (imageSource === 'crypto' || imageSource === 'both') show = true;
+            } else if (filterValue === 'custom_images') {
+                if (imageSource === 'custom' || imageSource === 'both') show = true;
             } else {
-                // Keyword-based filter
-                if (title.includes(filterValue) || prompt.includes(filterValue)) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
+                // keyword filter (bitcoin/ethereum/defi etc.)
+                if (title.includes(filterValue) || prompt.includes(filterValue)) show = true;
             }
+    
+            card.style.display = show ? '' : 'none';
         });
-      });
-
-            
+    });
+    
+      
       // Helper function to get CSRF token
       function getCookie(name) {
           let cookieValue = null;
