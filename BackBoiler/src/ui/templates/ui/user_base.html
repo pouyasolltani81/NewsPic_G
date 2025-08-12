@@ -286,16 +286,16 @@
 
 
 <!-- Toast Container -->
-<div id="toast-container" class="fixed bottom-4  space-y-2 z-50 rtl:right-4 ltr:right-4"></div>
+<div id="toast-container" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-sm space-y-2 z-50"></div>
 
 <!-- Modal Overlay -->
 <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
 
 <!-- Modal Container -->
-<div id="modal-container" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-screen-lg p-6 space-y-4">
+<div id="modal-container" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-screen-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4">
     <div class="flex justify-between items-center">
-      <div id="modal-title" class="text-lg font-semibold text-gray-800 dark:text-white"></div>
+      <div id="modal-title" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white"></div>
       <button onclick="hideModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -318,7 +318,7 @@
 
         <!-- Notification Dropdown Box -->
         <div id="notif-box"
-        class="fixed z-50 top-[5rem] ltr:right-32 rtl:left-32  w-80 max-h-96 overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 hidden"
+        class="fixed z-50 top-[5rem] right-4 sm:right-8 md:right-16 lg:right-32 w-[calc(100vw-2rem)] sm:w-80 max-h-96 overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 hidden"
         >
         </div>
 
@@ -328,7 +328,7 @@
 
     <!-- Sidebar -->
     <nav id="navigationMain"
-      class="hidden md:block w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-colors duration-300">
+      class="fixed md:relative inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-all duration-300 transform -translate-x-full md:translate-x-0">
     </nav>
 
     <!-- Main area -->
@@ -336,12 +336,12 @@
 
       <!-- Header -->
       <header
-        class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between transition-colors duration-300">
-        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+        class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between transition-colors duration-300">
+        <div class="flex items-center space-x-2 sm:space-x-4 rtl:space-x-reverse">
           <button id="nav-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
             <i data-lucide="menu" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
           </button>
-          <h2 id="page-title" class="text-2xl font-semibold text-gray-800 dark:text-white">
+          <h2 id="page-title" class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 dark:text-white truncate">
             {% block page_heading %}Page Title{% endblock %}
           </h2>
         </div>
@@ -351,18 +351,18 @@
 
         <!-- QA toggle (mobile) -->
         <button id="qa-toggle"
-          class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ml-4 rtl:ml-0 rtl:mr-4">
+          class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ml-2 sm:ml-4 rtl:ml-0 rtl:mr-2 sm:rtl:mr-4">
           <i data-lucide="more-vertical" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
         </button>
       </header>
 
       <!-- Main content -->
-      <div class="flex-1 flex overflow-hidden   ">
+      <div class="flex-1 flex overflow-hidden relative">
         <aside id="quickAction"
-          class="hidden   md:hidden w-80 bg-white dark:bg-gray-800 border-x border-2 border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 overflow-auto">
+          class="fixed md:relative inset-y-0 right-0 z-30 w-full sm:w-80 bg-white dark:bg-gray-800 border-l md:border-x md:border-2 border-gray-200 dark:border-gray-700 p-4 sm:p-6           transition-all duration-300 transform translate-x-full md:translate-x-0 overflow-auto">
         </aside>
 
-        <main id='main_content' class="flex-1  overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <main id='main_content' class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
           {% block content %}{% endblock %}
         </main>
       </div>
@@ -377,10 +377,34 @@
   <script>
     lucide.createIcons();
 
-   
+    // Mobile navigation toggle with overlay
+    const navToggle = document.getElementById('nav-toggle');
+    const navigationMain = document.getElementById('navigationMain');
+    const quickAction = document.getElementById('quickAction');
+    const qaToggle = document.getElementById('qa-toggle');
+    
+    // Create overlay for mobile navigation
+    const mobileOverlay = document.createElement('div');
+    mobileOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden';
+    document.body.appendChild(mobileOverlay);
 
-    document.getElementById('nav-toggle').addEventListener('click', () => {
-      document.getElementById('navigationMain').classList.toggle('hidden');
+    navToggle.addEventListener('click', () => {
+      navigationMain.classList.toggle('-translate-x-full');
+      mobileOverlay.classList.toggle('hidden');
+    });
+
+    qaToggle.addEventListener('click', () => {
+      quickAction.classList.toggle('translate-x-full');
+      quickAction.classList.toggle('hidden');
+      mobileOverlay.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when clicking overlay
+    mobileOverlay.addEventListener('click', () => {
+      navigationMain.classList.add('-translate-x-full');
+      quickAction.classList.add('translate-x-full');
+      quickAction.classList.add('hidden');
+      mobileOverlay.classList.add('hidden');
     });
 
     // Load saved direction
@@ -395,6 +419,20 @@
       const newDir = html.getAttribute('dir') === 'rtl' ? 'ltr' : 'rtl';
       html.setAttribute('dir', newDir);
       localStorage.setItem('ui-dir', newDir);
+    });
+
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (window.innerWidth >= 768) {
+          mobileOverlay.classList.add('hidden');
+          navigationMain.classList.remove('-translate-x-full');
+          quickAction.classList.add('translate-x-full');
+          quickAction.classList.add('hidden');
+        }
+      }, 250);
     });
   </script>
   <script>
