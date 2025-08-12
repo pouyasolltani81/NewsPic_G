@@ -19,7 +19,9 @@ def NewsDashboard_view(request):
     # json_path = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
     json_path = os.path.join(BASE_EXTERNAL_PATH, 'custom_pics.json')
     
-    images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
+    # images_dir = os.path.join(BASE_EXTERNAL_PATH, 'crypto_news_images')
+    images_dir = os.path.join(BASE_EXTERNAL_PATH, 'custom_images')
+    
 
     with open(json_path, 'r', encoding='utf-8') as f:
         data_dict = json.load(f)
