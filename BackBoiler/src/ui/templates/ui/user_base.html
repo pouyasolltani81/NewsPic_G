@@ -386,11 +386,15 @@
     mobileOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden';
     document.body.appendChild(mobileOverlay);
 
-    navToggle.addEventListener('click', () => {
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('navigationMain').classList.toggle('-translate-x-full');
+    });
+
+    {% comment %} navToggle.addEventListener('click', () => {
       navigationMain.classList.toggle('-translate-x-full');
       mobileOverlay.classList.toggle('hidden');
       document.getElementById('navigationMain').classList.toggle('-translate-x-full');
-    });
+    }); {% endcomment %}
 
     qaToggle.addEventListener('click', () => {
       quickAction.classList.toggle('translate-x-full');
