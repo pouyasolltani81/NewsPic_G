@@ -148,35 +148,29 @@
       
       // Filter functionality
       imageFilter.addEventListener('change', (e) => {
-        const filterValue = e.target.value.toLowerCase();
-        const now = Date.now() / 1000; // seconds
-        const sevenDaysSec = 7 * 24 * 3600;
+          const filterValue = e.target.value.toLowerCase();
+          
+          imageCards.forEach(card => {
+              const title = card.dataset.title;
+              const prompt = card.dataset.prompt;
+              
+              if (filterValue === 'all') {
+                  card.style.display = '';
     
-        imageCards.forEach(card => {
-            const title = (card.dataset.title || '').toLowerCase();
-            const prompt = (card.dataset.prompt || '').toLowerCase();
-            const imageSource = (card.dataset.imageSource || '').toLowerCase(); // 'custom', 'crypto', 'both', etc.
-            const ts = card.dataset.timestamp ? parseFloat(card.dataset.timestamp) : null;
-    
-            let show = false;
-    
-            if (filterValue === 'all') {
-                show = true;
-            } else if (filterValue === 'recent') {
-                if (ts && (ts >= (now - sevenDaysSec))) show = true;
-            } else if (filterValue === 'crypto_images') {
-                if (imageSource === 'crypto' || imageSource === 'both') show = true;
-            } else if (filterValue === 'custom_images') {
-                if (imageSource === 'custom' || imageSource === 'both') show = true;
-            } else {
-                // keyword filter (bitcoin/ethereum/defi etc.)
-                if (title.includes(filterValue) || prompt.includes(filterValue)) show = true;
-            }
-    
-            card.style.display = show ? '' : 'none';
-        });
-    });
-    
+                } else if (filterValue === 'recent') {
+                  // You'll need to add a data-date attribute to cards in the template
+                  // For now, just show all
+                  card.style.display = '';
+              } else {
+                  // Filter by keyword in title or prompt
+                  if (title.includes(filterValue) || prompt.includes(filterValue)) {
+                      card.style.display = '';
+                  } else {
+                      card.style.display = 'none';
+                  }
+              }
+          });
+      });
       
       // Helper function to get CSRF token
       function getCookie(name) {
