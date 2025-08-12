@@ -388,6 +388,8 @@
 
     document.getElementById('nav-toggle').addEventListener('click', () => {
       document.getElementById('navigationMain').classList.toggle('-translate-x-full');
+      document.getElementById('navigationMain').classList.toggle('hidden');
+
     });
 
     {% comment %} navToggle.addEventListener('click', () => {
