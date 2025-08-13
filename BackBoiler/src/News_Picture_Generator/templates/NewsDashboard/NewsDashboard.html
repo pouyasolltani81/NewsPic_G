@@ -272,25 +272,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressCurrent = document.getElementById('progress-current');
     const progressTotal = document.getElementById('progress-total');
     
-    // Collect all items that need translation
     const items = [];
     document.querySelectorAll('.news-item').forEach(item => {
         const titleElement = item.querySelector('.news-title');
-        const originalTitle = titleElement.dataset.originalTitle;
+        const originalTitle = titleElement?.dataset?.originalTitle;
+        console.log(`Checking item ID=${item.dataset.itemId}, originalTitle=`, originalTitle);
+
         if (originalTitle) {
             items.push({
                 id: item.dataset.itemId,
                 title: originalTitle,
                 element: titleElement
             });
+        } else {
+            console.warn(`Item ID=${item.dataset.itemId} skipped — no originalTitle found`);
         }
     });
-    
+
+    console.log(`Collected ${items.length} items for translation`);
     progressTotal.textContent = items.length;
-    
-    // Function to translate a single item
+
     async function translateSingle(item) {
-        console.log('Translating:', item.title, 'to', targetLang);
+        console.log(`[REQ] Translating "${item.title}" (ID=${item.id}) to ${targetLang}`);
         
         try {
             const response = await fetch('http://79.175.177.113:19800/Translate/translate/', {
@@ -302,98 +305,76 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     text: item.title,
                     target_lang: targetLang,
-                    source_lang: ''  // auto-detect
+                    source_lang: ''
                 })
             });
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Translation response:', data);
-                
-                if (data.success && data.data && data.data.translated_text) {
-                    return {
-                        id: item.id,
-                        translated_title: data.data.translated_text
-                    };
-                } else if (data.success && data.translated_text) {
-                    // Handle flat response structure
-                    return {
-                        id: item.id,
-                        translated_title: data.translated_text
-                    };
-                }
+
+            if (!response.ok) {
+                console.error(`[ERR] HTTP ${response.status} for "${item.title}"`);
+                return { id: item.id, translated_title: item.title };
             }
-            
-            console.error('Translation failed for:', item.title);
-            return {
-                id: item.id,
-                translated_title: item.title  // Return original on failure
-            };
-            
+
+            const data = await response.json();
+            console.log(`[RES] Response for ID=${item.id}:`, data);
+
+            if (data.success && data.data?.translated_text) {
+                return { id: item.id, translated_title: data.data.translated_text };
+            } 
+            if (data.success && data.translated_text) {
+                return { id: item.id, translated_title: data.translated_text };
+            }
+
+            console.warn(`[WARN] No translated_text in response for ID=${item.id}`);
+            return { id: item.id, translated_title: item.title };
+
         } catch (error) {
-            console.error('Translation error:', error);
-            return {
-                id: item.id,
-                translated_title: item.title  // Return original on error
-            };
+            console.error(`[ERR] Translation error for ID=${item.id}:`, error);
+            return { id: item.id, translated_title: item.title };
         }
     }
-    
-    // Function to translate items in batches
+
     async function translateBatch(batch) {
-        console.log('Processing batch of', batch.length, 'items');
-        
-        // Translate all items in the batch concurrently
-        const translationPromises = batch.map(item => translateSingle(item));
-        const translations = await Promise.all(translationPromises);
-        
-        return translations;
+        console.log(`Processing batch of ${batch.length} items:`, batch.map(i => i.id));
+        return Promise.all(batch.map(translateSingle));
     }
-    
-    // Translate items progressively
+
     async function translateAll() {
-        const batchSize = 3; // Process 3 items at a time
+        const batchSize = 3;
         let translated = 0;
-        
+
         for (let i = 0; i < items.length; i += batchSize) {
             const batch = items.slice(i, i + batchSize);
-            
-            // Add translating class
             batch.forEach(item => item.element.classList.add('translating'));
-            
+
             const translations = await translateBatch(batch);
-            console.log('Batch translations:', translations);
-            
-            // Apply translations
+            console.log(`[INFO] Batch translations:`, translations);
+
             translations.forEach(trans => {
                 const item = items.find(it => it.id === trans.id);
                 if (item) {
+                    console.log(`[UPD] Replacing title for ID=${item.id} → "${trans.translated_title}"`);
                     item.element.textContent = trans.translated_title;
-                    item.element.classList.remove('translating');
-                    translated++;
-                    
-                    // Update progress
-                    progressCurrent.textContent = translated;
-                    progressBar.style.width = (translated / items.length * 100) + '%';
+                } else {
+                    console.error(`[MISS] Could not find matching item for ID=${trans.id}`);
                 }
+                item?.element.classList.remove('translating');
+                translated++;
+                progressCurrent.textContent = translated;
+                progressBar.style.width = (translated / items.length * 100) + '%';
             });
-            
-            // Small delay between batches to avoid overwhelming the server
+
             if (i + batchSize < items.length) {
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
         }
-        
-        // Hide overlay when done
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 500);
+
+        setTimeout(() => { overlay.style.display = 'none'; }, 500);
     }
-    
-    // Start translation
+
     if (items.length > 0) {
         translateAll();
     } else {
+        console.warn("No items to translate — hiding overlay");
         overlay.style.display = 'none';
     }
 });
