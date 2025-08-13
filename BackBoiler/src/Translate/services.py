@@ -52,8 +52,10 @@ from django.apps import apps
 )
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # or [AllowAny] depending on your needs
 def translate_text(request):
-    """Translate text using small100 multilingual model"""
+    """Translate text using M2M100 multilingual model"""
     
     # Get parameters
     text = request.data.get('text', '').strip()
@@ -62,12 +64,18 @@ def translate_text(request):
     
     # Validate parameters
     if not text:
-        return Response({'error': "Missing 'text' parameter"}, status=400)
+        return Response({
+            'success': False,
+            'error': "Missing 'text' parameter"
+        }, status=400)
     
     if not target_lang:
-        return Response({'error': "Missing 'target_lang' parameter"}, status=400)
+        return Response({
+            'success': False,
+            'error': "Missing 'target_lang' parameter"
+        }, status=400)
     
-    # List of supported language codes
+    # List of supported language codes for M2M100
     supported_langs = [
         'af', 'am', 'ar', 'ast', 'az', 'ba', 'be', 'bg', 'bn', 'br', 'bs', 'ca', 'ceb', 'cs', 'cy', 'da', 
         'de', 'el', 'en', 'es', 'et', 'fa', 'ff', 'fi', 'fr', 'fy', 'ga', 'gd', 'gl', 'gu', 'ha', 'he', 
@@ -80,73 +88,90 @@ def translate_text(request):
     
     if target_lang not in supported_langs:
         return Response({
-            'return': False,
+            'success': False,
             'error': f"Unsupported target language: {target_lang}",
             'supported_languages': supported_langs
         }, status=400)
     
     if source_lang and source_lang not in supported_langs:
         return Response({
-            'return': False,
+            'success': False,
             'error': f"Unsupported source language: {source_lang}",
             'supported_languages': supported_langs
         }, status=400)
     
     try:
-        # Get the pre-loaded model and tokenizer
-        app_config = apps.get_app_config('Translate')  # Replace with your app name
-        model = app_config.model
-        tokenizer = app_config.tokenizer
+        # Get the pre-loaded model and tokenizer using lazy loading
+        app_config = apps.get_app_config('Translate')
+        model, tokenizer = app_config.get_model_and_tokenizer()
         
-        if  tokenizer is None:
+        if model is None or tokenizer is None:
             return Response({
-                'return': False,
+                'success': False,
                 'error': "Translation model not loaded. Please restart the server."
             }, status=500)
         
-        # Create a copy of the tokenizer to avoid thread safety issues
-        tokenizer_copy = tokenizer.__class__.from_pretrained(tokenizer.name_or_path)
+        # Create a fresh tokenizer instance for thread safety
+        from transformers import M2M100Tokenizer
+        tokenizer_fresh = M2M100Tokenizer.from_pretrained(tokenizer.name_or_path)
         
-        # Set target language
-        tokenizer_copy.tgt_lang = target_lang
-        
-        # If source language is provided, set it
+        # Set source language (default to 'en' if not provided)
         if source_lang:
-            tokenizer_copy.src_lang = source_lang
+            tokenizer_fresh.src_lang = source_lang
+        else:
+            tokenizer_fresh.src_lang = 'en'  # Default source language
         
-        # Tokenize and translate
-        encoded_text = tokenizer_copy(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        # Tokenize the input text
+        encoded_text = tokenizer_fresh(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
         
-        # Generate translation
+        # Get the target language ID for forced_bos_token_id
+        target_lang_id = tokenizer_fresh.get_lang_id(target_lang)
+        
+        # Generate translation with forced target language
         generated_tokens = model.generate(
             **encoded_text,
+            forced_bos_token_id=target_lang_id,
             max_length=512,
             num_beams=5,
             length_penalty=1.0,
-            early_stopping=True
+            early_stopping=True,
+            no_repeat_ngram_size=3,  # Prevent repetition
+            temperature=1.0,  # Control randomness
         )
         
         # Decode the translation
-        translated_text = tokenizer_copy.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+        translated_text = tokenizer_fresh.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+        
+        # Log for debugging
+        print(f"Translation: '{text}' ({tokenizer_fresh.src_lang}) -> '{translated_text}' ({target_lang})")
         
         return Response({
-            'return': True,
+            'retuen': True,
             'data': {
                 'original_text': text,
                 'translated_text': translated_text,
-                'source_lang': source_lang if source_lang else 'auto-detected',
+                'source_lang': source_lang if source_lang else tokenizer_fresh.src_lang,
                 'target_lang': target_lang,
-                'model_used': 'small100'
+                'model_used': 'm2m100_418M'
             }
         }, status=200)
         
-    except Exception as e:
+    except AttributeError as e:
+        print(f"AttributeError: {e}")
         return Response({
-            'return': False,
+            'retuen': False,
+            'error': f"Model configuration error: {str(e)}. Make sure you're using M2M100 model and tokenizer."
+        }, status=500)
+        
+    except Exception as e:
+        print(f"Translation error: {e}")
+        import traceback
+        traceback.print_exc()
+        return Response({
+            'retuen': False,
             'error': f"Translation failed: {str(e)}"
         }, status=500)
-
-
+        
 # Optional: Add a service to list supported languages
 @extend_schema(
     description='Get list of supported languages for translation',
