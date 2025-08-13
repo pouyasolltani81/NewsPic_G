@@ -75,7 +75,7 @@ class NewsItem(BaseModel):
     """Model for individual news items"""
     id: str = Field(..., alias="_id")
     title: str = Field(..., min_length=10)
-    summery: str = Field(..., min_length=10)
+    summaryEn: str = Field(..., min_length=10)
     
     link: Optional[str] = Field(default=None)  # Add this field
     keywords: List[str] = Field(default_factory=list, alias="keywords")  # Note: API uses 'keywords' not 'tag'
@@ -484,12 +484,12 @@ class HistoryManager:
         """Check if title has been generated before"""
         return self.get_title_hash(title) in self.history
     
-    def add_entry(self, title: str, summery: str, prompt: str, negative_prompt: str, tags: List[str], cluster: str, filepath: str):
+    def add_entry(self, title: str, summaryEn: str, prompt: str, negative_prompt: str, tags: List[str], cluster: str, filepath: str):
         """Add a new entry to history with all metadata"""
         title_hash = self.get_title_hash(title)
         self.history[title_hash] = {
             "title": title,
-            "summery": summery,
+            "summaryEn": summaryEn,
             "prompt": prompt,
             "negative_prompt": negative_prompt,
             "tags": tags,
@@ -851,7 +851,7 @@ class CryptoNewsImageGenerator:
                     # Save metadata to history
                     self.history_manager.add_entry(
                         title=news_item.title,
-                        summery=news_item.title,
+                        summaryEn=news_item.summaryEn,
                         
                         prompt=prompt,
                         negative_prompt=negative_prompt,

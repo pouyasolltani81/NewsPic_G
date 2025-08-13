@@ -53,6 +53,12 @@
           <strong>Negative Prompt:</strong> <span class="negative-prompt-text">{{ item.negative_prompt }}</span>
         </div>
         {% endif %}
+
+        {% if item.summaryEn %}
+        <div class="text-sm text-red-600 dark:text-red-400 overflow-auto max-h-16">
+          <strong>summaryEn :</strong> <span class="negative-prompt-text">{{ item.summaryEn }}</span>
+        </div>
+        {% endif %}
       </div>
     </div>
     {% empty %}

@@ -44,6 +44,9 @@ def NewsDashboard_view(request):
         
         # Store original title
         item['original_title'] = item.get('title', '')
+        item['summaryEn'] = item.get('summaryEn', '')
+        
+        
         
         # Normalize timestamp
         ts = item.get('timestamp')
@@ -122,118 +125,3 @@ def NewsDashboard_view(request):
 
     return render(request, 'NewsDashboard/NewsDashboard.html', context)
 
-
-@require_http_methods(["POST"])
-def translate_batch(request):
-    """AJAX endpoint for batch translation"""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
-    
-    items = json.loads(request.body).get('items', [])
-    target_lang = json.loads(request.body).get('target_lang', 'en')
-    
-    translated_items = []
-    
-    for item in items:
-        item_id = item.get('id')
-        title = item.get('title', '')
-        
-        if title and target_lang != 'en':
-            translated_title = translate_title(title, target_lang)
-            translated_items.append({
-                'id': item_id,
-                'translated_title': translated_title
-            })
-        else:
-            translated_items.append({
-                'id': item_id,
-                'translated_title': title
-            })
-    
-    return JsonResponse({'translations': translated_items})
-
-import sys
-import logging
-
-# Configure logging at the module level
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-def translate_title(title, target_lang='en', auth_token=None):
-    """Helper function to translate a title using the translation API"""
-    if not title:
-        return title
-    
-    try:
-        translate_url = getattr(settings, 'TRANSLATE_API_URL', 'http://79.175.177.113:19800/Translate/translate/')
-        
-        # Force flush output
-        print(f"\n=== TRANSLATION REQUEST ===", file=sys.stderr)
-        print(f"URL: {translate_url}", file=sys.stderr)
-        print(f"Title: {title}", file=sys.stderr)
-        print(f"Target Lang: {target_lang}", file=sys.stderr)
-        print(f"========================\n", file=sys.stderr)
-        sys.stderr.flush()
-        
-        # Also use logger
-        logger.info(f"Translating: '{title}' to '{target_lang}'")
-        
-        headers = {}
-        if auth_token:
-            headers['Authorization'] = f'Bearer {auth_token}'
-        
-        # Log the full request payload
-        request_payload = {
-            'text': title,
-            'target_lang': target_lang,
-            'source_lang': ''
-        }
-        print(f"Request Payload: {json.dumps(request_payload, indent=2)}", file=sys.stderr)
-        
-        response = requests.post(
-            translate_url,
-            json=request_payload,
-            headers=headers,
-            timeout=5
-        )
-        
-        # Log the response
-        print(f"\n=== TRANSLATION RESPONSE ===", file=sys.stderr)
-        print(f"Status Code: {response.status_code}", file=sys.stderr)
-        print(f"Response Headers: {dict(response.headers)}", file=sys.stderr)
-        print(f"Response Content: {response.text}", file=sys.stderr)
-        print(f"===========================\n", file=sys.stderr)
-        sys.stderr.flush()
-        
-        if response.status_code == 200:
-            result = response.json()
-            print(f"Parsed JSON: {json.dumps(result, indent=2)}", file=sys.stderr)
-            
-            if result.get('success'):
-                # Check the exact structure of the response
-                if 'data' in result and isinstance(result['data'], dict):
-                    translated_text = result['data'].get('translated_text', title)
-                else:
-                    # Maybe the structure is different?
-                    translated_text = result.get('translated_text', title)
-                
-                print(f"Translation successful: '{title}' -> '{translated_text}'", file=sys.stderr)
-                return translated_text
-            else:
-                print(f"Translation failed: success=False", file=sys.stderr)
-        else:
-            print(f"HTTP Error: {response.status_code}", file=sys.stderr)
-        
-        return title
-        
-    except requests.exceptions.Timeout:
-        print(f"TIMEOUT ERROR: Request timed out", file=sys.stderr)
-        return title
-    except requests.exceptions.RequestException as e:
-        print(f"REQUEST ERROR: {type(e).__name__}: {e}", file=sys.stderr)
-        return title
-    except Exception as e:
-        print(f"GENERAL ERROR: {type(e).__name__}: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc(file=sys.stderr)
-        return title
