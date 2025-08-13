@@ -17,11 +17,11 @@ class TranslationConfig(AppConfig):
     def _load_translation_model(self):
         try:
             # Add your custom path for small100 tokenizer
-            SMALL100_PATH = "/home/anews/PS/translate/small100"
+            # SMALL100_PATH = "/home/anews/PS/translate/small100"
             m2m100_418M_PATH = "/home/anews/PS/translate/m2m100_418M"
             
-            if SMALL100_PATH not in sys.path:
-                sys.path.append(SMALL100_PATH)
+            # if SMALL100_PATH not in sys.path:
+            #     sys.path.append(SMALL100_PATH)
                 
                 
             

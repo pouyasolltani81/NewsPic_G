@@ -98,7 +98,7 @@ def translate_text(request):
         model = app_config.model
         tokenizer = app_config.tokenizer
         
-        if model is None or tokenizer is None:
+        if model is None :
             return Response({
                 'return': False,
                 'error': "Translation model not loaded. Please restart the server."
