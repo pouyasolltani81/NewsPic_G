@@ -188,4 +188,11 @@ msgstr "عملیات"
 
 msgid "nonewmessages"
 msgstr "بدون پیغام جدید"
- 
+
+
+
+msgid "Translating content..."
+msgstr "در حال ترجمه محتوا..."
+
+msgid "items translated"
+msgstr "آیتم ترجمه شد"

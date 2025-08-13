@@ -186,3 +186,12 @@ msgstr "Actions"
 
 msgid "nonewmessages"
 msgstr "no new messages"
+
+
+
+msgid "Translating content..."
+msgstr "no new messages"
+
+
+msgid "items translated"
+msgstr "no new messages"
