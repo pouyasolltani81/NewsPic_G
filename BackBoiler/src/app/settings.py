@@ -283,3 +283,8 @@ STATICFILES_DIRS = [
 
 # If you're using collectstatic for production
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+
+
+TRANSLATE_API_URL = 'http://79.175.177.113:19800/Translate/translate/'
