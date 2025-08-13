@@ -18,14 +18,25 @@ class TranslationConfig(AppConfig):
         try:
             # Add your custom path for small100 tokenizer
             SMALL100_PATH = "/home/anews/PS/translate/small100"
+            m2m100_418M_PATH = "/home/anews/PS/translate/m2m100_418M"
+            
             if SMALL100_PATH not in sys.path:
                 sys.path.append(SMALL100_PATH)
+                
+                
             
-            from tokenization_small100 import SMALL100Tokenizer
+            if m2m100_418M_PATH not in sys.path:
+                sys.path.append(m2m100_418M_PATH)
+            
+            # from tokenization_small100 import SMALL100Tokenizer
+            from transformers import M2M100Tokenizer
             
             print("Loading translation model...")
-            TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(SMALL100_PATH)
-            TranslationConfig.tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
+            # TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(SMALL100_PATH)
+            # TranslationConfig.tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
+            
+            TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(m2m100_418M_PATH)
+            TranslationConfig.tokenizer = M2M100Tokenizer.from_pretrained(m2m100_418M_PATH)
             print("Translation model loaded successfully!")
             
         except Exception as e:
