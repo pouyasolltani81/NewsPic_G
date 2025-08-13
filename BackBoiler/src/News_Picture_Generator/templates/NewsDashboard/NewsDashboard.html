@@ -275,26 +275,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const items = [];
     document.querySelectorAll('.news-item').forEach(item => {
         const titleElement = item.querySelector('.news-title');
+        const summaryElement = item.querySelector('.summary-en-text');
+        
         const originalTitle = titleElement?.dataset?.originalTitle;
-        console.log(`Checking item ID=${item.dataset.itemId}, originalTitle=`, originalTitle);
+        const originalSummary = summaryElement?.dataset?.originalSummary;
 
-        if (originalTitle) {
+        console.log(`Checking item ID=${item.dataset.itemId}, title=`, originalTitle, ', summary=', originalSummary);
+
+        if (originalTitle || originalSummary) {
             items.push({
                 id: item.dataset.itemId,
-                title: originalTitle,
-                element: titleElement
+                title: originalTitle || '',
+                summary: originalSummary || '',
+                titleElement,
+                summaryElement
             });
         } else {
-            console.warn(`Item ID=${item.dataset.itemId} skipped — no originalTitle found`);
+            console.warn(`Item ID=${item.dataset.itemId} skipped — no original text found`);
         }
     });
 
     console.log(`Collected ${items.length} items for translation`);
     progressTotal.textContent = items.length;
 
-    async function translateSingle(item) {
-        console.log(`[REQ] Translating "${item.title}" (ID=${item.id}) to ${targetLang}`);
-        
+    async function translateText(text) {
+        if (!text) return '';
         try {
             const response = await fetch('http://79.175.177.113:19800/Translate/translate/', {
                 method: 'POST',
@@ -303,34 +308,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify({
-                    text: item.title,
+                    text,
                     target_lang: targetLang,
                     source_lang: ''
                 })
             });
 
             if (!response.ok) {
-                console.error(`[ERR] HTTP ${response.status} for "${item.title}"`);
-                return { id: item.id, translated_title: item.title };
+                console.error(`[ERR] HTTP ${response.status} for "${text}"`);
+                return text;
             }
 
             const data = await response.json();
-            console.log(`[RES] Response for ID=${item.id}:`, data);
+            if (data.return && data.data?.translated_text) return data.data.translated_text;
+            if (data.return && data.translated_text) return data.translated_text;
 
-            if (data.return && data.data?.translated_text) {
-                return { id: item.id, translated_title: data.data.translated_text };
-            } 
-            if (data.return && data.translated_text) {
-                return { id: item.id, translated_title: data.translated_text };
-            }
-
-            console.warn(`[WARN] No translated_text in response for ID=${item.id}`);
-            return { id: item.id, translated_title: item.title };
+            console.warn(`[WARN] No translated_text in response for "${text}"`);
+            return text;
 
         } catch (error) {
-            console.error(`[ERR] Translation error for ID=${item.id}:`, error);
-            return { id: item.id, translated_title: item.title };
+            console.error(`[ERR] Translation error:`, error);
+            return text;
         }
+    }
+
+    async function translateSingle(item) {
+        console.log(`[REQ] Translating ID=${item.id} to ${targetLang}`);
+        const [translatedTitle, translatedSummary] = await Promise.all([
+            translateText(item.title),
+            translateText(item.summary)
+        ]);
+        return { id: item.id, translatedTitle, translatedSummary };
     }
 
     async function translateBatch(batch) {
@@ -344,21 +352,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         for (let i = 0; i < items.length; i += batchSize) {
             const batch = items.slice(i, i + batchSize);
-            batch.forEach(item => item.element.classList.add('translating'));
+            batch.forEach(item => item.titleElement?.classList.add('translating'));
 
             const translations = await translateBatch(batch);
             console.log(`[INFO] Batch translations:`, translations);
 
             translations.forEach(trans => {
-    
                 const item = items.find(it => it.id === trans.id);
                 if (item) {
-                    console.log(`[UPD] Replacing title for ID=${item.id} → "${trans.translated_title}"`);
-                    item.element.textContent = trans.translated_title;
-                } else {
-                    console.error(`[MISS] Could not find matching item for ID=${trans.id}`);
+                    if (item.titleElement && trans.translatedTitle) {
+                        item.titleElement.textContent = trans.translatedTitle;
+                    }
+                    if (item.summaryElement && trans.translatedSummary) {
+                        item.summaryElement.textContent = trans.translatedSummary;
+                    }
                 }
-                item?.element.classList.remove('translating');
+                item?.titleElement?.classList.remove('translating');
                 translated++;
                 progressCurrent.textContent = translated;
                 progressBar.style.width = (translated / items.length * 100) + '%';
@@ -368,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
         }
-
         setTimeout(() => { overlay.style.display = 'none'; }, 500);
     }
 
@@ -395,5 +403,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 
 {% endblock %}
