@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 import sys
 import os
+from django.apps import apps
 
 @extend_schema(
     description='Translate text to target language using small100 multilingual model',
