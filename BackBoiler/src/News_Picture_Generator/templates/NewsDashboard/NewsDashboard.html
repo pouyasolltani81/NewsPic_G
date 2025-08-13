@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Translating:', item.title, 'to', targetLang);
         
         try {
-            const response = await fetch('http://79.175.177.113:19800/Translate/translate/', {
+            const response = await fetch('{% url "translate_text" %}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Function to translate items in batches (but calling single API)
+    // Function to translate items in batches
     async function translateBatch(batch) {
         console.log('Processing batch of', batch.length, 'items');
         
@@ -391,50 +391,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
     
-    // Alternative: Sequential translation (one at a time)
-    async function translateSequentially() {
-        let translated = 0;
-        
-        for (const item of items) {
-            // Add translating class
-            item.element.classList.add('translating');
-            
-            // Translate single item
-            const translation = await translateSingle(item);
-            
-            // Apply translation
-            item.element.textContent = translation.translated_title;
-            item.element.classList.remove('translating');
-            translated++;
-            
-            // Update progress
-            progressCurrent.textContent = translated;
-            progressBar.style.width = (translated / items.length * 100) + '%';
-            
-            // Small delay to avoid overwhelming the server
-            await new Promise(resolve => setTimeout(resolve, 50));
-        }
-        
-        // Hide overlay when done
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 500);
-    }
-    
     // Start translation
     if (items.length > 0) {
-        // Choose one of these methods:
-        
-        // Method 1: Batch processing (faster, processes multiple items concurrently)
         translateAll();
-        
-        // Method 2: Sequential processing (slower, but easier on the server)
-        // translateSequentially();
     } else {
         overlay.style.display = 'none';
     }
 });
 {% endif %}
+
+// Preserve filter selection when changing pages
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('imageFilter');
+    const currentFilter = '{{ current_filter }}';
+    
+    if (currentFilter && filterSelect) {
+        filterSelect.value = currentFilter;
+    }
+    
+    filterSelect.addEventListener('change', function() {
+        window.location.href = '?filter=' + this.value;
+    });
+});
 </script>
+
 
 {% endblock %}
