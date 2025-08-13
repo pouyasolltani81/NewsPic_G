@@ -50,7 +50,7 @@ import os
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])  # or [AllowAny] depending on your needs
+@permission_classes([IsAuthenticated])
 def translate_text(request):
     """Translate text using small100 multilingual model"""
     
@@ -66,7 +66,7 @@ def translate_text(request):
     if not target_lang:
         return Response({'error': "Missing 'target_lang' parameter"}, status=400)
     
-    # List of supported language codes (you can expand this)
+    # List of supported language codes
     supported_langs = [
         'af', 'am', 'ar', 'ast', 'az', 'ba', 'be', 'bg', 'bn', 'br', 'bs', 'ca', 'ceb', 'cs', 'cy', 'da', 
         'de', 'el', 'en', 'es', 'et', 'fa', 'ff', 'fi', 'fr', 'fy', 'ga', 'gd', 'gl', 'gu', 'ha', 'he', 
@@ -79,42 +79,42 @@ def translate_text(request):
     
     if target_lang not in supported_langs:
         return Response({
+            'return': False,
             'error': f"Unsupported target language: {target_lang}",
             'supported_languages': supported_langs
         }, status=400)
     
     if source_lang and source_lang not in supported_langs:
         return Response({
+            'return': False,
             'error': f"Unsupported source language: {source_lang}",
             'supported_languages': supported_langs
         }, status=400)
     
     try:
-        # Import required modules
-        import sys
-        from transformers import M2M100ForConditionalGeneration
+        # Get the pre-loaded model and tokenizer
+        app_config = apps.get_app_config('your_app_name')  # Replace with your app name
+        model = app_config.model
+        tokenizer = app_config.tokenizer
         
-        # Add your custom path for small100 tokenizer
-        SMALL100_PATH = "/home/anews/PS/translate/small100"  # Replace with your actual path
-        if SMALL100_PATH not in sys.path:
-            sys.path.append(SMALL100_PATH)
+        if model is None or tokenizer is None:
+            return Response({
+                'return': False,
+                'error': "Translation model not loaded. Please restart the server."
+            }, status=500)
         
-        from tokenization_small100 import SMALL100Tokenizer
-        
-        # Load model and tokenizer (consider caching these for better performance)
-        # You might want to load these once at startup rather than per request
-        model = M2M100ForConditionalGeneration.from_pretrained(SMALL100_PATH)
-        tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
+        # Create a copy of the tokenizer to avoid thread safety issues
+        tokenizer_copy = tokenizer.__class__.from_pretrained(tokenizer.name_or_path)
         
         # Set target language
-        tokenizer.tgt_lang = target_lang
+        tokenizer_copy.tgt_lang = target_lang
         
-        # If source language is provided, set it (optional)
+        # If source language is provided, set it
         if source_lang:
-            tokenizer.src_lang = source_lang
+            tokenizer_copy.src_lang = source_lang
         
         # Tokenize and translate
-        encoded_text = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        encoded_text = tokenizer_copy(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
         
         # Generate translation
         generated_tokens = model.generate(
@@ -126,24 +126,22 @@ def translate_text(request):
         )
         
         # Decode the translation
-        translated_text = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+        translated_text = tokenizer_copy.batch_decode(generated_tokens, skip_special_tokens=True)[0]
         
         return Response({
-            'original_text': text,
-            'translated_text': translated_text,
-            'source_lang': source_lang if source_lang else 'auto-detected',
-            'target_lang': target_lang,
-            'model_used': 'small100'
-        })
-        
-    except ImportError as e:
-        return Response({
-            'error': f"Failed to import required modules: {str(e)}",
-            'hint': "Make sure the small100 tokenizer path is correctly set"
-        }, status=500)
+            'return': True,
+            'data': {
+                'original_text': text,
+                'translated_text': translated_text,
+                'source_lang': source_lang if source_lang else 'auto-detected',
+                'target_lang': target_lang,
+                'model_used': 'small100'
+            }
+        }, status=200)
         
     except Exception as e:
         return Response({
+            'return': False,
             'error': f"Translation failed: {str(e)}"
         }, status=500)
 
@@ -212,6 +210,7 @@ def list_supported_languages(request):
     languages = [{'code': code, 'name': name} for code, name in language_map.items()]
     
     return Response({
+        'return': True,
         'languages': languages,
         'total': len(languages)
     })

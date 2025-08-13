@@ -13,13 +13,15 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel, Field, validator, HttpUrl, SecretStr
 from enum import Enum
 import gc
+from PIL import ImageDraw, ImageFont, ImageStat
+
 
 def clear_gpu_memory():
     """Clear GPU memory"""
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
-        gc.collect()
+    gc.collect()
 
 # Set memory allocation configuration
 import os
@@ -27,7 +29,6 @@ os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 
 # Clear memory before starting
 clear_gpu_memory()
-
 
 # =============================
 # Pydantic Models for News API
@@ -47,9 +48,7 @@ class NewsApiRequest(BaseModel):
     """Model for news API request parameters"""
     symbols: str = Field(default="all")
     startDate: int = Field(default=1716373411)
-    # category: NewsCategory = Field(default=NewsCategory.CRYPTOCURRENCIES)
     category: str = Field(default="cryptocurrencies")
-    
     llmOnly: bool = Field(default=True)
     language: str = Field(default="en", pattern="^[a-z]{2}$")
     page: int = Field(default=1, ge=1)
@@ -57,23 +56,44 @@ class NewsApiRequest(BaseModel):
     filterBy: str = Field(default="")
     filterValue: str = Field(default="")
     sortBy: str = Field(default="pubDate")
-    # sortValue: SortOrder = Field(default=SortOrder.DESCENDING)
     sortValue: str = Field(default="-1")
+    
+    
+    
+class UpdateNewsApiRequest(BaseModel):
+    id: str = Field(..., alias="_id")
+    image_url: str
+
+    class Config:
+        populate_by_name = True 
     
 class ClusterInfo(BaseModel):
     """Model for cluster information"""
     cluster_category: Optional[str] = Field(default=None)
-    # Add other cluster fields if needed
     
 class NewsItem(BaseModel):
     """Model for individual news items"""
+    id: str = Field(..., alias="_id")
     title: str = Field(..., min_length=10)
-    tag: List[str] = Field(default_factory=list)
+    summery: str = Field(..., min_length=10)
+    
+    link: Optional[str] = Field(default=None)  # Add this field
+    keywords: List[str] = Field(default_factory=list, alias="keywords")  # Note: API uses 'keywords' not 'tag'
+    tag: List[str] = Field(default_factory=list)  # Keep this for backward compatibility
     cluster_info: Optional[ClusterInfo] = Field(default=None)
+    
+    class Config:
+        extra = "allow"  # Allow extra fields
+        populate_by_name = True 
     
     @validator('title')
     def clean_title(cls, v):
         return v.strip()
+    
+    @property
+    def tags(self) -> List[str]:
+        """Get tags from either tag or keywords field"""
+        return self.tag or self.keywords or []
         
 class NewsApiResponse(BaseModel):
     """Model for news API response"""
@@ -126,6 +146,8 @@ class Config(BaseModel):
     """Configuration model"""
     # News API Configuration
     news_api_url: HttpUrl = Field(default="https://news.imoonex.ir/News/GetPaginatedData/")
+    update_news_api_url: HttpUrl = Field(default="https://news.imoonex.ir/News/UpdateNews/")
+    
     news_api_token: SecretStr = Field(..., description="Authentication token for news API")
     
     # Prompt Generation API Configuration
@@ -176,12 +198,10 @@ class NewsApiClient:
     def __init__(self, config: Config):
         self.config = config
         self.headers = {
-            # "Authorization": f"Bearer {config.news_api_token.get_secret_value()}",
-            # "Content-Type": "application/json"
-    "Accept": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json; charset=utf-8",
-    "Authorization": "d4735e3a265e16ee2393953",
+            "Accept": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "d4735e3a265e16ee2393953",
         }
     
     def fetch_news(self, request_params: NewsApiRequest) -> List[NewsItem]:
@@ -206,6 +226,46 @@ class NewsApiClient:
             
         except requests.exceptions.RequestException as e:
             print(f"Error fetching news: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response content: {e.response.text}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise
+        
+
+class UpdateNewsApiClient:
+    """Client for fetching news from the API"""
+    
+    def __init__(self, config: Config):
+        self.config = config
+        self.headers = {
+            "Accept": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "96fd30916bb6fafe293b182a0f400df8",
+        }
+    
+    def update_news(self, request_params: UpdateNewsApiRequest):  # Rename from fetch_news
+        """Update news item with image URL"""
+        try:
+            response = requests.post(
+                str(self.config.update_news_api_url),
+                headers=self.headers,
+                json=request_params.dict(),
+                timeout=self.config.timeout
+            )
+            response.raise_for_status()
+            
+            data = response.json()
+            if 'data' in data and 'message' in data['data']:
+                update_message = data['data']['message']
+                print(f"Update response: {update_message}")
+            else:
+                print(f"Update response: {data}")
+                
+        except requests.exceptions.RequestException as e:
+            print(f"Error updating news: {e}")
             if hasattr(e, 'response') and e.response is not None:
                 print(f"Response content: {e.response.text}")
             raise
@@ -424,16 +484,16 @@ class HistoryManager:
         """Check if title has been generated before"""
         return self.get_title_hash(title) in self.history
     
-    def add_entry(self, title: str, prompt: str, negative_prompt: str, tags: List[str],cluster: str, filepath: str):
+    def add_entry(self, title: str, summery: str, prompt: str, negative_prompt: str, tags: List[str], cluster: str, filepath: str):
         """Add a new entry to history with all metadata"""
         title_hash = self.get_title_hash(title)
         self.history[title_hash] = {
             "title": title,
+            "summery": summery,
             "prompt": prompt,
             "negative_prompt": negative_prompt,
             "tags": tags,
             "cluster": cluster,
-            
             "timestamp": datetime.now().isoformat(),
             "filepath": filepath,
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -444,114 +504,381 @@ class HistoryManager:
         """Get all entries sorted by timestamp"""
         entries = list(self.history.values())
         return sorted(entries, key=lambda x: x.get('timestamp', ''), reverse=True)
+
 # =============================
-# Main Application
+# Pipeline Manager (NEW)
+# =============================
+
+class PipelineManager:
+    """Manages loading and unloading of the diffusion pipeline"""
+    
+    def __init__(self, model_path: str = "./SANA1.5_4.8B_1024px_diffusers"):
+        self.model_path = model_path
+        self.pipe = None
+        
+    def load_pipeline(self):
+        """Load the diffusion pipeline"""
+        if self.pipe is not None:
+            print("Pipeline already loaded")
+            return self.pipe
+            
+        print("Loading diffusion model...")
+        from diffusers import SanaPipeline
+        
+        self.pipe = SanaPipeline.from_pretrained(
+            self.model_path,
+            torch_dtype=torch.bfloat16,
+        )
+        self.pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+        self.pipe.text_encoder.to(torch.bfloat16)
+        
+        print("Model loaded successfully")
+        return self.pipe
+    
+    def unload_pipeline(self):
+        """Unload the pipeline and free memory"""
+        if self.pipe is None:
+            print("No pipeline to unload")
+            return
+            
+        print("Unloading pipeline and freeing memory...")
+        
+        # Move model to CPU first to free GPU memory
+        self.pipe.to("cpu")
+        
+        # Delete the pipeline
+        del self.pipe
+        self.pipe = None
+        
+        # Clear GPU cache and run garbage collection
+        clear_gpu_memory()
+        
+        print("Pipeline unloaded and memory freed")
+    
+    def get_pipeline(self):
+        """Get the current pipeline (load if necessary)"""
+        if self.pipe is None:
+            return self.load_pipeline()
+        return self.pipe
+
+# =============================
+# Main Application (UPDATED)
 # =============================
 
 class CryptoNewsImageGenerator:
     """Main application class"""
     
-    def __init__(self, config: Config, pipe):
+    def __init__(self, config: Config, pipeline_manager: PipelineManager):
         self.config = config
+        self.pipeline_manager = pipeline_manager
         self.news_client = NewsApiClient(config)
+        self.update_news_client = UpdateNewsApiClient(config)
         self.prompt_generator = PromptGenerator(config)
-        self.image_generator = ImageGenerator(pipe)
         self.history_manager = HistoryManager()
-    
-    def run(self, news_params: Optional[NewsApiRequest] = None):
-        """Run the image generation pipeline"""
-        # Use default parameters if none provided
-        if news_params is None:
-            news_params = NewsApiRequest()
         
-        print(f"\nFetching news...")
         
-        # Fetch news items
+       
+
+    # Add this method to the CryptoNewsImageGenerator class
+    def add_logo_to_image(self, image: Image.Image, title: str) -> Image.Image:
+         # IMPORTANT: Ensure image is on CPU and in PIL format
+        if hasattr(image, 'cpu'):
+            image = image.cpu()
+        
+        # If it's a tensor, convert to PIL
+        if torch.is_tensor(image):
+            image = transforms.ToPILImage()(image)
+        
+        # Ensure it's a PIL Image
+        if not isinstance(image, Image.Image):
+            print(f"Warning: Image is not PIL format, it's {type(image)}")
+            return image
+            
+        print(f"Adding logo to image for: {title[:50]}...")
+        
+        # Configuration
+        light_logo_path = "/home/anews/PS/gan/my_concept/DarkMode.png"
+        dark_logo_path = "/home/anews/PS/gan/my_concept/lightmode.png"
+        strip_width_percentage = 12
+        logo_opacity = 0.9
+        strip_opacity = 0.7
+        font_size_percentage = 50
+        brightness_threshold = 128
+        
+        # Check if logo files exist
+        if not os.path.exists(light_logo_path) or not os.path.exists(dark_logo_path):
+            print("Warning: Logo files not found, returning original image")
+            return image
+        
         try:
-            news_items = self.news_client.fetch_news(news_params)
-            print(f"Fetched {len(news_items)} news items")
-        except Exception as e:
-            print(f"Failed to fetch news: {e}")
-            return
-        
-        if not news_items:
-            print("No news items found")
-            return
-        
-        # Create output directory
-        os.makedirs(self.config.output_dir, exist_ok=True)
-        
-        images = []
-        fig_titles = []
-        skipped_count = 0
-        
-        for idx, news_item in enumerate(news_items):
-            # Check if already generated
-            if self.history_manager.is_generated(news_item.title):
-                print(f"\n--- Skipping {idx + 1}/{len(news_items)}: {news_item.title} (already generated) ---")
-                skipped_count += 1
-                continue
+            # Convert to RGBA if needed
+            if image.mode != 'RGBA':
+                image = image.convert('RGBA')
+            
+            main_width, main_height = image.size
+            
+            # Calculate strip width
+            strip_width = int(main_width * (strip_width_percentage / 100))
+            
+            # Analyze the brightness of the left edge
+            left_edge = image.crop((0, 0, strip_width, main_height))
+            gray_edge = left_edge.convert('L')
+            stat = ImageStat.Stat(gray_edge)
+            avg_brightness = stat.mean[0]
+            
+            # Determine if background is dark or light
+            is_dark_background = avg_brightness < brightness_threshold
+            
+            # Select appropriate logo and colors
+            if is_dark_background:
+                logo_path = light_logo_path
+                text_color = '#FFFFFF'
+            else:
+                logo_path = dark_logo_path
+                text_color = '#1F1E2E'
+            
+            # Create a copy of the image
+            output_image = image.copy()
+            
+            # Create transparent strip overlay
+            strip = Image.new('RGBA', (strip_width, main_height), (0, 0, 0, 0))
+            strip_draw = ImageDraw.Draw(strip)
+            
+            # Open and resize logo
+            logo = Image.open(logo_path).convert('RGBA')
+            logo_size = int(strip_width * 0.3)
+            logo_aspect = logo.height / logo.width
+            logo_height = int(logo_size * logo_aspect)
+            
+            if logo_height > logo_size:
+                logo_height = logo_size
+                logo_size = int(logo_height / logo_aspect)
+            
+            logo = logo.resize((logo_size, logo_height), Image.Resampling.LANCZOS)
+            
+            # Rotate logo 90 degrees
+            logo = logo.rotate(-90, expand=True)
+            logo_size, logo_height = logo_height, logo_size
+            
+            # Apply opacity to logo
+            if logo_opacity < 1.0:
+                logo_with_opacity = Image.new('RGBA', logo.size, (0, 0, 0, 0))
+                logo_with_opacity.paste(logo, (0, 0))
+                logo_array = logo_with_opacity.split()
+                if len(logo_array) == 4:
+                    alpha = logo_array[3]
+                    alpha = alpha.point(lambda p: p * logo_opacity)
+                    logo_with_opacity.putalpha(alpha)
+                    logo = logo_with_opacity
+            
+            # Position logo
+            top_padding = 50
+            logo_x = (strip_width - logo_size) // 2
+            logo_y = top_padding
+            strip.paste(logo, (logo_x, logo_y), logo)
+            
+            # Add text
+            text = "Aimoonhub"
+            font_size = int(strip_width * (font_size_percentage / 200))
             
             try:
-                print(f"\n--- Processing {idx + 1}/{len(news_items)}: {news_item.title} ---")
-                if news_item.tag:
-                    print(f"Tags: {', '.join(news_item.tag)}")
+                font_paths = [
+                    '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+                    '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                ]
+                font = None
+                for font_path in font_paths:
+                    if os.path.exists(font_path):
+                        font = ImageFont.truetype(font_path, font_size)
+                        break
+                if not font:
+                    font = ImageFont.load_default()
+            except:
+                font = ImageFont.load_default()
+            
+            # Create vertical text
+            text_img = Image.new('RGBA', (main_height, strip_width), (0, 0, 0, 0))
+            text_draw = ImageDraw.Draw(text_img)
+            
+            text_bbox = text_draw.textbbox((0, 0), text, font=font)
+            text_width = text_bbox[2] - text_bbox[0]
+            text_height = text_bbox[3] - text_bbox[1]
+            
+            text_start_y = logo_y + logo_height + 10
+            text_x = text_start_y
+            text_y = (strip_width - text_height) // 2
+            
+            # Parse text color
+            if text_color.startswith('#'):
+                tr = int(text_color[1:3], 16)
+                tg = int(text_color[3:5], 16)
+                tb = int(text_color[5:7], 16)
+            else:
+                tr, tg, tb = 255, 255, 255
+            
+            text_draw.text(
+                (text_x, text_y),
+                text,
+                fill=(tr, tg, tb, int(255 * logo_opacity)),
+                font=font
+            )
+            
+            # Rotate text
+            text_img = text_img.rotate(-90, expand=True)
+            strip.paste(text_img, (0, 0), text_img)
+            
+            # Paste strip onto image
+            output_image.paste(strip, (0, 0), strip)
+            
+            return output_image
+            
+        except Exception as e:
+            print(f"Error adding logo: {e}")
+            return image
+    
+    def run(self, news_params: Optional[NewsApiRequest] = None ):
+        """Run the image generation pipeline"""
+        # Load pipeline at the start of generation
+        pipe = self.pipeline_manager.load_pipeline()
+        image_generator = ImageGenerator(pipe)
+        
+        try:
+            # Use default parameters if none provided
+            if news_params is None:
+                news_params = NewsApiRequest()
+                
+          
+            
+            print(f"\nFetching news...")
+            
+            # Fetch news items
+            try:
+                news_items = self.news_client.fetch_news(news_params)
+                print(f"Fetched {len(news_items)} news items")
+            except Exception as e:
+                print(f"Failed to fetch news: {e}")
+                return
+            
+            if not news_items:
+                print("No news items found")
+                return
+            
+            # Create output directory
+            os.makedirs(self.config.output_dir, exist_ok=True)
+            
+            images = []
+            fig_titles = []
+            skipped_count = 0
+            
+            for idx, news_item in enumerate(news_items):
+                
+                # Check if already generated
+                if self.history_manager.is_generated(news_item.title):
+                    print(f"\n--- Skipping {idx + 1}/{len(news_items)}: {news_item.title} (already generated) ---")
+                    skipped_count += 1
+                    continue
+                
+                try:
+                    print(f"\n--- Processing {idx + 1}/{len(news_items)}: {news_item.title} ---")
+                    if news_item.tag:
+                        print(f"Tags: {', '.join(news_item.tag)}")
+                    
+                    # Get prompts
+                    prompt, negative_prompt = self.prompt_generator.get_prompts_from_qwen(
+                        news_item.title, 
+                        news_item.tag,
+                        news_item.cluster_info.cluster_category if news_item.cluster_info else None
+                    )
+                    
+                    print(f"Prompt: {prompt[:100]}...")
+                    print(f"Negative Prompt: {negative_prompt[:100]}...")
+                    
+                    # Create generation parameters
+                    params = ImageGenerationParams(
+                        prompt=prompt,
+                        negative_prompt=negative_prompt
+                    )
+                    
+                    # Generate image
+  
+                    image = image_generator.generate_image(params)
+                    
+                    
+                    # Add logo overlay
+                    
+                    image = self.add_logo_to_image(image, news_item.title)
 
+                    # Save image
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    safe_filename = ImageGenerator.sanitize_filename(news_item.title)
+                    filename = f"{timestamp}_{idx}_{safe_filename}.png"
+                    filepath = os.path.join(self.config.output_dir, filename)
+                    image.save(filepath)
+                    print(f"Saved: {filepath}")
 
                     
+                    try:
+                        # Try to find an ID field
+                        news_id = None
+                        for field in ['_id', 'id', 'ID', 'newsId', 'news_id']:
+                            if hasattr(news_item, field):
+                                news_id = getattr(news_item, field)
+                                if news_id:
+                                    break
+                        
+                        if news_id:
+                            # Construct the proper image URL
+                            base_url = "http://79.175.177.113:19800"
+                            image_url = f"{base_url}/crypto_news_images/{filename}"
+                            
+                            update_news_params = UpdateNewsApiRequest(
+                                _id=news_id,
+                                image_url=image_url
+                            )
+                            print('works till update')
+                            self.update_news_client.update_news(update_news_params)
+                            print(f"Updated news item {news_id} with image URL: {image_url}")
+                        else:
+                            print("Warning: No ID field found in news item, skipping update")
+                            print(f"Available fields: {news_item.dict().keys()}")
+                            
+                    except Exception as e:
+                        print(f"Failed to update news item: {e}")
+                        import traceback
+                        traceback.print_exc()
+                       
+
+                    # Save metadata to history
+                    self.history_manager.add_entry(
+                        title=news_item.title,
+                        summery=news_item.title,
+                        
+                        prompt=prompt,
+                        negative_prompt=negative_prompt,
+                        tags=news_item.tag,
+                        cluster=(news_item.cluster_info.cluster_category 
+                            if news_item.cluster_info and news_item.cluster_info.cluster_category 
+                            else "uncategorized"),
+                        filepath=filepath
+                    )
+                    
+                    # Collect for display
+                    images.append(image)
+                    fig_titles.append(news_item.title)
+                    
+                except Exception as e:
+                    print(f"Error processing '{news_item.title}': {e}")
+                    continue
+            
+            print(f"\nSummary: Generated {len(images)} new images, skipped {skipped_count} already generated")
+            
+            # Display results
+            if images:
+                self._display_images(images, fig_titles)
                 
-                # Get prompts
-                prompt, negative_prompt = self.prompt_generator.get_prompts_from_qwen(
-                    news_item.title, 
-                    news_item.tag,
-                    news_item.cluster_info.cluster_category if news_item.cluster_info else None
-                )
-                
-                print(f"Prompt: {prompt[:100]}...")
-                print(f"Negative Prompt: {negative_prompt[:100]}...")
-                
-                # Create generation parameters
-                params = ImageGenerationParams(
-                    prompt=prompt,
-                    negative_prompt=negative_prompt
-                )
-                
-                # Generate image
-                image = self.image_generator.generate_image(params)
-                
-                # Save image
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                safe_filename = ImageGenerator.sanitize_filename(news_item.title)
-                filepath = os.path.join(self.config.output_dir, f"{timestamp}_{idx}_{safe_filename}.png")
-                image.save(filepath)
-                print(f"Saved: {filepath}")
-                
-                # Save metadata to history
-                # Save metadata to history
-                self.history_manager.add_entry(
-                    title=news_item.title,
-                    prompt=prompt,
-                    negative_prompt=negative_prompt,
-                    tags=news_item.tag,
-                    cluster=(news_item.cluster_info.cluster_category 
-                         if news_item.cluster_info and news_item.cluster_info.cluster_category 
-                         else "uncategorized"),
-                    filepath=filepath
-                )
-                                
-                # Collect for display
-                images.append(image)
-                fig_titles.append(news_item.title)
-                
-            except Exception as e:
-                print(f"Error processing '{news_item.title}': {e}")
-                continue
-        
-        print(f"\nSummary: Generated {len(images)} new images, skipped {skipped_count} already generated")
-        
-        # Display results
-        if images:
-            self._display_images(images, fig_titles)
+        finally:
+            # Always unload pipeline after generation is complete
+            self.pipeline_manager.unload_pipeline()
             
     def export_history_report(self, report_file: str = "generation_report.json"):
         """Export a detailed report of all generated images"""
@@ -645,92 +972,94 @@ Examples:
     return args
 
 # =============================
-# Main Function
+# Main Function (UPDATED)
 # =============================
 
 def main():
     """Main function with command line argument support"""
-    args = parse_arguments()
-    
-    # Parse interval if provided
-    interval_seconds = 0
-    if args.interval:
-        try:
-            interval_seconds = parse_interval(args.interval)
-            print(f"Will repeat every {args.interval}")
-        except ValueError as e:
-            print(f"Error: {e}")
-            sys.exit(1)
-    
-   
-    from diffusers import SanaPipeline
-    print("Loading diffusion model...")
-
-    pipe = SanaPipeline.from_pretrained(
-        "./SANA1.5_4.8B_1024px_diffusers",
-        torch_dtype=torch.bfloat16,
-    )
-    pipe.to("cuda" if torch.cuda.is_available() else "cpu")
-    
-    pipe.text_encoder.to(torch.bfloat16)
-
-   
-    
-    # Create configuration
-    config = Config(
-        news_api_token="d4735e3a265e16ee2393953",
-        max_titles=args.count,
-        output_dir="crypto_news_images",
-        style=args.style
-    )
-    
-    if args.style:
-        print(f"Using style: {args.style}")
-    print(f"Will generate {args.count} images per run")
-    
-    # Create news parameters
-    news_params = NewsApiRequest(
-        symbols="all",
-        startDate=1716373411,
-        category="cryptocurrencies",
-        llmOnly=True,
-        language="en",
-        page=1,
-        pageLimit=args.count,
-        sortBy="pubDate",
-        sortValue="-1"
-    )
-    
-    # Initialize generator
-    app = CryptoNewsImageGenerator(config, pipe)
-    
-    # Run once or in a loop
-    if interval_seconds > 0:
-        print(f"\nStarting continuous generation with {args.interval} intervals...")
-        while True:
+    try:
+        args = parse_arguments()
+        
+        # Parse interval if provided
+        interval_seconds = 0
+        if args.interval:
             try:
-                print(f"\n{'='*60}")
-                print(f"Run started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                print(f"{'='*60}")
-                
-                app.run(news_params)
-                
-                print(f"\nWaiting {args.interval} until next run...")
-                print(f"Next run at: {(datetime.now() + timedelta(seconds=interval_seconds)).strftime('%Y-%m-%d %H:%M:%S')}")
-                print("Press Ctrl+C to stop")
-                
-                time.sleep(interval_seconds)
-                
-            except KeyboardInterrupt:
-                print("\n\nStopping continuous generation...")
-                break
-            except Exception as e:
-                print(f"\nError during run: {e}")
-                print(f"Waiting {args.interval} before retry...")
-                time.sleep(interval_seconds)
-    else:
-        # Run once
-        app.run(news_params)
+                interval_seconds = parse_interval(args.interval)
+                print(f"Will repeat every {args.interval}")
+            except ValueError as e:
+                print(f"Error: {e}")
+                sys.exit(1)
+        
+        # Create pipeline manager
+        pipeline_manager = PipelineManager()
+        
+        # Create configuration
+        config = Config(
+            news_api_token="d4735e3a265e16ee2393953",
+            max_titles=args.count,
+            output_dir="crypto_news_images",
+            style=args.style
+        )
+        
+        if args.style:
+            print(f"Using style: {args.style}")
+        print(f"Will generate {args.count} images per run")
+        
+        # Create news parameters
+        news_params = NewsApiRequest(
+            symbols="all",
+            startDate=1716373411,
+            category="cryptocurrencies",
+            llmOnly=True,
+            language="en",
+            page=1,
+            pageLimit=args.count,
+            sortBy="pubDate",
+            sortValue="-1"
+        )
+        
+        # Initialize generator with pipeline manager
+        app = CryptoNewsImageGenerator(config, pipeline_manager)
+        
+        # Run once or in a loop
+        if interval_seconds > 0:
+            print(f"\nStarting continuous generation with {args.interval} intervals...")
+            print("Note: Pipeline will be unloaded between runs to free memory")
+            
+            while True:
+                try:
+                    print(f"\n{'='*60}")
+                    print(f"Run started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    print(f"{'='*60}")
+                    
+                    app.run(news_params)
+                    
+                    print(f"\nPipeline unloaded. Memory is now free for other tasks.")
+                    print(f"Waiting {args.interval} until next run...")
+                    print(f"Next run at: {(datetime.now() + timedelta(seconds=interval_seconds)).strftime('%Y-%m-%d %H:%M:%S')}")
+                    print("Press Ctrl+C to stop")
+                    
+                    time.sleep(interval_seconds)
+                    
+                except KeyboardInterrupt:
+                    print("\n\nStopping continuous generation...")
+                    break
+                except Exception as e:
+                    print(f"\nError during run: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    print(f"Waiting {args.interval} before retry...")
+                    time.sleep(interval_seconds)
+        else:
+            # Run once
+            app.run(news_params)
+            print("\nGeneration complete. Pipeline unloaded and memory freed.")
+            
+    except Exception as e:
+        print(f"\nFATAL ERROR in main: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
