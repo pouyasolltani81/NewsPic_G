@@ -172,7 +172,7 @@ def translate_title(title, target_lang='en', auth_token=None):
             translate_url,
             json={
                 'text': title,
-                'target_lang': 'fa',
+                'target_lang': target_lang,
                 'source_lang': ''
             },
             headers=headers,
