@@ -263,7 +263,6 @@
     opacity: 0.5;
 }
 </style>
-
 <script>
 {% if needs_translation %}
 document.addEventListener('DOMContentLoaded', function() {
@@ -294,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Translating:', item.title, 'to', targetLang);
         
         try {
-            const response = await fetch('{% url "translate_text" %}', {
+            const response = await fetch('http://79.175.177.113:19800/Translate/translate/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -414,6 +413,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 
 {% endblock %}
