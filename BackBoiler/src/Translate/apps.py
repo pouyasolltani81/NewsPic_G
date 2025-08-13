@@ -1,39 +1,44 @@
 from django.apps import AppConfig
 import sys
-from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
-from threading import Lock
+from transformers import M2M100ForConditionalGeneration
 
 class TranslationConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'Translate'
     
-    _model = None
-    _tokenizer = None
-    _lock = Lock()
+    model = None
+    tokenizer = None
     
-    @classmethod
-    def get_model_and_tokenizer(cls):
-        """Get model and tokenizer, loading them if necessary"""
-        if cls._model is None:
-            with cls._lock:
-                # Double-check after acquiring lock
-                if cls._model is None:
-                    cls._load_translation_model()
-        return cls._model, cls._tokenizer
+    def ready(self):
+        # This runs when Django starts
+        if TranslationConfig.model is None:
+            self._load_translation_model()
     
-    @classmethod
-    def _load_translation_model(cls):
+    def _load_translation_model(self):
         try:
+            # Add your custom path for small100 tokenizer
+            # SMALL100_PATH = "/home/anews/PS/translate/small100"
             m2m100_418M_PATH = "/home/anews/PS/translate/m2m100_418M"
+            
+            # if SMALL100_PATH not in sys.path:
+            #     sys.path.append(SMALL100_PATH)
+                
+                
             
             if m2m100_418M_PATH not in sys.path:
                 sys.path.append(m2m100_418M_PATH)
             
+            # from tokenization_small100 import SMALL100Tokenizer
+            from transformers import M2M100Tokenizer
+            
             print("Loading translation model...")
-            cls._model = M2M100ForConditionalGeneration.from_pretrained(m2m100_418M_PATH)
-            cls._tokenizer = M2M100Tokenizer.from_pretrained(m2m100_418M_PATH)
+            # TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(SMALL100_PATH)
+            # TranslationConfig.tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
+            
+            TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(m2m100_418M_PATH)
+            TranslationConfig.tokenizer = M2M100Tokenizer.from_pretrained(m2m100_418M_PATH)
             print("Translation model loaded successfully!")
             
         except Exception as e:
             print(f"Failed to load translation model: {e}")
-            raise e
+            # You might want to handle this more gracefully
