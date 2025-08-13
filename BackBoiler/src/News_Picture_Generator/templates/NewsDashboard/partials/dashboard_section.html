@@ -29,32 +29,37 @@
     </div>
   </div>
 
-<!-- Gallery Grid -->
+  <!-- Gallery Grid -->
   <div id="imageGallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in page_obj %}
-    <div class="image-card news-item bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg" 
-         data-title="{{ item.original_title|default:item.title|lower }}" 
-         data-prompt="{{ item.prompt|lower }}"
-         data-item-id="{{ item.item_id }}">
+    {% comment %} <div class="image-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg" 
+         data-title="{{ item.title|lower }}" 
+         data-prompt="{{ item.prompt|lower }}">
       <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
         <img src="{{ item.filepath }}" alt="{{ item.title }}" class="w-full h-full object-cover" loading="lazy" />
       </div>
       <div class="p-4 flex flex-col flex-grow">
-        <h3 class="font-bold text-lg mb-2 truncate text-gray-900 dark:text-white news-title" 
-            title="{{ item.title }}"
-            data-original-title="{{ item.original_title|default:item.title }}">
-          {{ item.original_title|default:item.title }}
+        <h3 class="font-bold text-lg mb-2 truncate text-gray-900 dark:text-white" title="{{ item.title }}">
+          {{ item.title }}
         </h3>
         <div class="text-sm text-gray-700 dark:text-gray-300 flex-grow overflow-auto mb-2 max-h-20">
-          <strong>{% trans "Prompt:" %}</strong> <span class="prompt-text">{{ item.prompt }}</span>
+          <strong>Prompt:</strong> {{ item.prompt }}
         </div>
         <div class="text-sm text-red-600 dark:text-red-400 overflow-auto max-h-16">
-          <strong>{% trans "Negative Prompt:" %}</strong> <span class="negative-prompt-text">{{ item.negative_prompt }}</span>
+          <strong>Negative Prompt:</strong> {{ item.negative_prompt }}
         </div>
       </div>
     </div>
     {% empty %}
-    <p class="col-span-full text-center text-gray-600 dark:text-gray-400">{% trans "No news items found." %}</p>
+    <p class="col-span-full text-center text-gray-600 dark:text-gray-400">No news items found.</p> {% endcomment %}
+
+    <div class="news-item" data-item-id="{{ item.item_id }}">
+            <img src="{{ item.filepath }}" alt="{{ item.title }}">
+            <h3 class="news-title" data-original-title="{{ item.original_title }}">
+                {{ item.original_title }}
+            </h3>
+            <!-- Other item content -->
+        </div>
     {% endfor %}
   </div>
 
