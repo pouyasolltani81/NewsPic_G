@@ -350,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`[INFO] Batch translations:`, translations);
 
             translations.forEach(trans => {
+                console.log(trans)
                 const item = items.find(it => it.id === trans.id);
                 if (item) {
                     console.log(`[UPD] Replacing title for ID=${item.id} → "${trans.translated_title}"`);
