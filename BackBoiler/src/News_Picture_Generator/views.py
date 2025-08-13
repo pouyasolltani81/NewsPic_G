@@ -4,6 +4,8 @@ import os, json
 from datetime import datetime
 import requests
 from django.conf import settings
+from django.utils import translation
+
 
 def translate_title(title, target_lang='en', auth_token=None):
     """Helper function to translate a title using the translation API"""
@@ -41,6 +43,8 @@ def translate_title(title, target_lang='en', auth_token=None):
         print(f"Translation error: {e}")
         return title  # Return original if translation fails
 
+
+
 def NewsDashboard_view(request):
     # ===== USER CONTEXT =====
     context = {}
@@ -51,16 +55,24 @@ def NewsDashboard_view(request):
             'user_id': request.user.id,
             'username': request.user.username,
         })
-        # Get auth token if you're using token authentication
-        # auth_token = request.user.auth_token.key if hasattr(request.user, 'auth_token') else None
-
+    
     # ===== LANGUAGE SETTINGS =====
-    # Get target language from request or user preferences
-    target_lang = request.GET.get('lang', 'en')  # Default to English
-    # Or get from user preferences: target_lang = request.user.preferred_language if hasattr(request.user, 'preferred_language') else 'en'
+    # Get current language from Django's translation system
+    current_language = translation.get_language()
+    
+    # If no language is set, fall back to LANGUAGE_CODE from settings
+    if not current_language:
+        current_language = settings.LANGUAGE_CODE
+    
+    # Extract just the language code (e.g., 'en' from 'en-us')
+    target_lang = current_language.split('-')[0]
+    
+    # Alternative: You can also use request.LANGUAGE_CODE which Django sets automatically
+    # target_lang = request.LANGUAGE_CODE.split('-')[0]
     
     # ===== PATHS =====
     BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
+    
     json_path_gen = os.path.join(BASE_EXTERNAL_PATH, 'generated_history.json')
     json_path_custom = os.path.join(BASE_EXTERNAL_PATH, 'custom_pics.json')
 
