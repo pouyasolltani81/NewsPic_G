@@ -161,7 +161,8 @@ def translate_title(title, target_lang='en', auth_token=None):
     try:
         translate_url = getattr(settings, 'TRANSLATE_API_URL', 'http://79.175.177.113:19800/Translate/translate/')
         
-        console.log(translate_url , title , target_lang)
+        # Use print() instead of console.log()
+        print(f"Translate URL: {translate_url}, Title: {title}, Target Lang: {target_lang}")
         
         headers = {}
         if auth_token:
@@ -178,13 +179,16 @@ def translate_title(title, target_lang='en', auth_token=None):
             timeout=5
         )
         
-        console.log(response)
-        
+        # Log the response
+        print(f"Response Status: {response.status_code}")
+        print(f"Response Content: {response.text}")
         
         if response.status_code == 200:
             result = response.json()
             if result.get('success'):
-                return result.get('data', {}).get('translated_text', title)
+                translated_text = result.get('data', {}).get('translated_text', title)
+                print(f"Translation successful: {title} -> {translated_text}")
+                return translated_text
         
         return title
         
