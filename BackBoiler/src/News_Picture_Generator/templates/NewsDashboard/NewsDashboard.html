@@ -289,36 +289,71 @@ document.addEventListener('DOMContentLoaded', function() {
     
     progressTotal.textContent = items.length;
     
-    // Function to translate items in batches
-    async function translateBatch(batch) {
-        console.log('target lang : ' , targetLang)
+    // Function to translate a single item
+    async function translateSingle(item) {
+        console.log('Translating:', item.title, 'to', targetLang);
+        
         try {
-            const response = await fetch('{% url "translate_batch" %}', {
+            const response = await fetch('http://79.175.177.113:19800/Translate/translate/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify({
-                    items: batch.map(item => ({id: item.id, title: item.title})),
-                    target_lang: targetLang
+                    text: item.title,
+                    target_lang: targetLang,
+                    source_lang: ''  // auto-detect
                 })
             });
             
             if (response.ok) {
                 const data = await response.json();
-                return data.translations;
+                console.log('Translation response:', data);
+                
+                if (data.success && data.data && data.data.translated_text) {
+                    return {
+                        id: item.id,
+                        translated_title: data.data.translated_text
+                    };
+                } else if (data.success && data.translated_text) {
+                    // Handle flat response structure
+                    return {
+                        id: item.id,
+                        translated_title: data.translated_text
+                    };
+                }
             }
-            return [];
+            
+            console.error('Translation failed for:', item.title);
+            return {
+                id: item.id,
+                translated_title: item.title  // Return original on failure
+            };
+            
         } catch (error) {
             console.error('Translation error:', error);
-            return [];
+            return {
+                id: item.id,
+                translated_title: item.title  // Return original on error
+            };
         }
+    }
+    
+    // Function to translate items in batches (but calling single API)
+    async function translateBatch(batch) {
+        console.log('Processing batch of', batch.length, 'items');
+        
+        // Translate all items in the batch concurrently
+        const translationPromises = batch.map(item => translateSingle(item));
+        const translations = await Promise.all(translationPromises);
+        
+        return translations;
     }
     
     // Translate items progressively
     async function translateAll() {
-        const batchSize = 1; // Translate 2 items at a time
+        const batchSize = 3; // Process 3 items at a time
         let translated = 0;
         
         for (let i = 0; i < items.length; i += batchSize) {
@@ -328,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
             batch.forEach(item => item.element.classList.add('translating'));
             
             const translations = await translateBatch(batch);
-            console.log(translations)
+            console.log('Batch translations:', translations);
             
             // Apply translations
             translations.forEach(trans => {
@@ -346,8 +381,38 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Small delay between batches to avoid overwhelming the server
             if (i + batchSize < items.length) {
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
+        }
+        
+        // Hide overlay when done
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 500);
+    }
+    
+    // Alternative: Sequential translation (one at a time)
+    async function translateSequentially() {
+        let translated = 0;
+        
+        for (const item of items) {
+            // Add translating class
+            item.element.classList.add('translating');
+            
+            // Translate single item
+            const translation = await translateSingle(item);
+            
+            // Apply translation
+            item.element.textContent = translation.translated_title;
+            item.element.classList.remove('translating');
+            translated++;
+            
+            // Update progress
+            progressCurrent.textContent = translated;
+            progressBar.style.width = (translated / items.length * 100) + '%';
+            
+            // Small delay to avoid overwhelming the server
+            await new Promise(resolve => setTimeout(resolve, 50));
         }
         
         // Hide overlay when done
@@ -358,7 +423,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start translation
     if (items.length > 0) {
+        // Choose one of these methods:
+        
+        // Method 1: Batch processing (faster, processes multiple items concurrently)
         translateAll();
+        
+        // Method 2: Sequential processing (slower, but easier on the server)
+        // translateSequentially();
     } else {
         overlay.style.display = 'none';
     }
