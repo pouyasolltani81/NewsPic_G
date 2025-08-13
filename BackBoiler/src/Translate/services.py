@@ -51,7 +51,7 @@ from django.apps import apps
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def translate_text(request):
     """Translate text using small100 multilingual model"""
     
