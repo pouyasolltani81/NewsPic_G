@@ -2,6 +2,8 @@
 {% load i18n %}
 {% load static %}
 
+
+
 <div id="dashboard-content" class="tab-content p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
   <!-- Header with controls -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -30,7 +32,7 @@
   <!-- Gallery Grid -->
   <div id="imageGallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for item in page_obj %}
-    <div class="image-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg" 
+    {% comment %} <div class="image-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg" 
          data-title="{{ item.title|lower }}" 
          data-prompt="{{ item.prompt|lower }}">
       <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700">
@@ -49,7 +51,15 @@
       </div>
     </div>
     {% empty %}
-    <p class="col-span-full text-center text-gray-600 dark:text-gray-400">No news items found.</p>
+    <p class="col-span-full text-center text-gray-600 dark:text-gray-400">No news items found.</p> {% endcomment %}
+
+    <div class="news-item" data-item-id="{{ item.item_id }}">
+            <img src="{{ item.filepath }}" alt="{{ item.title }}">
+            <h3 class="news-title" data-original-title="{{ item.original_title }}">
+                {{ item.original_title }}
+            </h3>
+            <!-- Other item content -->
+        </div>
     {% endfor %}
   </div>
 

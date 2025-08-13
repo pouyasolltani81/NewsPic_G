@@ -54,4 +54,5 @@ urlpatterns = [
 
 urlpatterns += [
     path('NewsDashboard/', views.NewsDashboard_view, name='NewsDashboard'),
+    path('translate-batch/', views.translate_batch, name='translate_batch'),
 ]

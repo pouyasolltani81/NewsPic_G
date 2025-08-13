@@ -9,7 +9,27 @@
 {% endblock %}
 
 {% block content %}
+
+
+
   <div id="main-content" class='z-10'>
+
+    <!-- Loading overlay -->
+    {% if needs_translation %}
+    <div id="translation-overlay" class="translation-overlay">
+        <div class="translation-progress">
+            <h3>Translating content...</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p class="progress-text">
+                <span id="progress-current">0</span> / <span id="progress-total">0</span> items translated
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+
     {# ─────────────────────── DASHBOARD TAB ─────────────────────── #}
     {% include "./partials/dashboard_section.html" %}
 
@@ -189,5 +209,159 @@
       }
    
     </script>
+
+
+    
+<style>
+.translation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.translation-progress {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 300px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #4CAF50;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: #666;
+}
+
+.news-title {
+    transition: opacity 0.3s ease;
+}
+
+.news-title.translating {
+    opacity: 0.5;
+}
+</style>
+
+<script>
+{% if needs_translation %}
+document.addEventListener('DOMContentLoaded', function() {
+    const targetLang = '{{ current_lang }}';
+    const overlay = document.getElementById('translation-overlay');
+    const progressBar = document.getElementById('progress-bar');
+    const progressCurrent = document.getElementById('progress-current');
+    const progressTotal = document.getElementById('progress-total');
+    
+    // Collect all items that need translation
+    const items = [];
+    document.querySelectorAll('.news-item').forEach(item => {
+        const titleElement = item.querySelector('.news-title');
+        const originalTitle = titleElement.dataset.originalTitle;
+        if (originalTitle) {
+            items.push({
+                id: item.dataset.itemId,
+                title: originalTitle,
+                element: titleElement
+            });
+        }
+    });
+    
+    progressTotal.textContent = items.length;
+    
+    // Function to translate items in batches
+    async function translateBatch(batch) {
+        try {
+            const response = await fetch('{% url "translate_batch" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    items: batch.map(item => ({id: item.id, title: item.title})),
+                    target_lang: targetLang
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data.translations;
+            }
+            return [];
+        } catch (error) {
+            console.error('Translation error:', error);
+            return [];
+        }
+    }
+    
+    // Translate items progressively
+    async function translateAll() {
+        const batchSize = 5; // Translate 5 items at a time
+        let translated = 0;
+        
+        for (let i = 0; i < items.length; i += batchSize) {
+            const batch = items.slice(i, i + batchSize);
+            
+            // Add translating class
+            batch.forEach(item => item.element.classList.add('translating'));
+            
+            const translations = await translateBatch(batch);
+            
+            // Apply translations
+            translations.forEach(trans => {
+                const item = items.find(it => it.id === trans.id);
+                if (item) {
+                    item.element.textContent = trans.translated_title;
+                    item.element.classList.remove('translating');
+                    translated++;
+                    
+                    // Update progress
+                    progressCurrent.textContent = translated;
+                    progressBar.style.width = (translated / items.length * 100) + '%';
+                }
+            });
+            
+            // Small delay between batches to avoid overwhelming the server
+            if (i + batchSize < items.length) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+        
+        // Hide overlay when done
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 500);
+    }
+    
+    // Start translation
+    if (items.length > 0) {
+        translateAll();
+    } else {
+        overlay.style.display = 'none';
+    }
+});
+{% endif %}
+</script>
 
 {% endblock %}
