@@ -327,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
             batch.forEach(item => item.element.classList.add('translating'));
             
             const translations = await translateBatch(batch);
+            console.log(translations)
             
             // Apply translations
             translations.forEach(trans => {
