@@ -6,33 +6,6 @@ import sys
 import os
 from django.apps import apps
 
-
-# @permission_classes([IsAuthenticated])
-from django.shortcuts import render
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
-import os, json
-from datetime import datetime
-import requests
-from django.conf import settings
-from django.utils import translation
-from django.apps import apps
-import logging
-import traceback
-import torch
-
-logger = logging.getLogger(__name__)
-
-# Global variables for testing
-_test_model = None
-_test_tokenizer = None
-
-
 @extend_schema(
     description='Translate text to target language using small100 multilingual model',
     summary='Translate text between 100+ languages',
@@ -77,274 +50,103 @@ _test_tokenizer = None
         ),
     }
 )
-
 @api_view(['POST'])
-@permission_classes([AllowAny])  # Temporarily allow any for testing
+# @permission_classes([IsAuthenticated])
 def translate_text(request):
-    """Translate text using M2M100 multilingual model"""
+    """Translate text using small100 multilingual model"""
     
-    global _test_model, _test_tokenizer
+    # Get parameters
+    text = request.data.get('text', '').strip()
+    target_lang = request.data.get('target_lang', '').strip().lower()
+    source_lang = request.data.get('source_lang', '').strip().lower()
+    
+    # Validate parameters
+    if not text:
+        return Response({'error': "Missing 'text' parameter"}, status=400)
+    
+    if not target_lang:
+        return Response({'error': "Missing 'target_lang' parameter"}, status=400)
+    
+    # List of supported language codes
+    supported_langs = [
+        'af', 'am', 'ar', 'ast', 'az', 'ba', 'be', 'bg', 'bn', 'br', 'bs', 'ca', 'ceb', 'cs', 'cy', 'da', 
+        'de', 'el', 'en', 'es', 'et', 'fa', 'ff', 'fi', 'fr', 'fy', 'ga', 'gd', 'gl', 'gu', 'ha', 'he', 
+        'hi', 'hr', 'ht', 'hu', 'hy', 'id', 'ig', 'ilo', 'is', 'it', 'ja', 'jv', 'ka', 'kk', 'km', 'kn', 
+        'ko', 'lb', 'lg', 'ln', 'lo', 'lt', 'lv', 'mg', 'mk', 'ml', 'mn', 'mr', 'ms', 'my', 'ne', 'nl', 
+        'no', 'ns', 'oc', 'or', 'pa', 'pl', 'ps', 'pt', 'ro', 'ru', 'sd', 'si', 'sk', 'sl', 'so', 'sq', 
+        'sr', 'ss', 'su', 'sv', 'sw', 'ta', 'th', 'tl', 'tn', 'tr', 'uk', 'ur', 'uz', 'vi', 'wo', 'xh', 
+        'yi', 'yo', 'zh', 'zu'
+    ]
+    
+    if target_lang not in supported_langs:
+        return Response({
+            'return': False,
+            'error': f"Unsupported target language: {target_lang}",
+            'supported_languages': supported_langs
+        }, status=400)
+    
+    if source_lang and source_lang not in supported_langs:
+        return Response({
+            'return': False,
+            'error': f"Unsupported source language: {source_lang}",
+            'supported_languages': supported_langs
+        }, status=400)
     
     try:
-        # Log incoming request
-        logger.info(f"Translation request received: {request.data}")
+        # Get the pre-loaded model and tokenizer
+        app_config = apps.get_app_config('Translate')  # Replace with your app name
+        model = app_config.model
+        tokenizer = app_config.tokenizer
         
-        # Get parameters
-        text = request.data.get('text', '').strip()
-        target_lang = request.data.get('target_lang', '').strip().lower()
-        source_lang = request.data.get('source_lang', '').strip().lower()
-        
-        logger.info(f"Parameters: text='{text}', target_lang='{target_lang}', source_lang='{source_lang}'")
-        
-        # Validate parameters
-        if not text:
+        if model is None or tokenizer is None:
             return Response({
-                'success': False,
-                'error': "Missing 'text' parameter"
-            }, status=400)
+                'return': False,
+                'error': "Translation model not loaded. Please restart the server."
+            }, status=500)
         
-        if not target_lang:
-            return Response({
-                'success': False,
-                'error': "Missing 'target_lang' parameter"
-            }, status=400)
+        # Create a copy of the tokenizer to avoid thread safety issues
+        tokenizer_copy = tokenizer.__class__.from_pretrained(tokenizer.name_or_path)
         
-        # List of supported language codes for M2M100
-        supported_langs = [
-            'af', 'am', 'ar', 'ast', 'az', 'ba', 'be', 'bg', 'bn', 'br', 'bs', 'ca', 'ceb', 'cs', 'cy', 'da', 
-            'de', 'el', 'en', 'es', 'et', 'fa', 'ff', 'fi', 'fr', 'fy', 'ga', 'gd', 'gl', 'gu', 'ha', 'he', 
-            'hi', 'hr', 'ht', 'hu', 'hy', 'id', 'ig', 'ilo', 'is', 'it', 'ja', 'jv', 'ka', 'kk', 'km', 'kn', 
-            'ko', 'lb', 'lg', 'ln', 'lo', 'lt', 'lv', 'mg', 'mk', 'ml', 'mn', 'mr', 'ms', 'my', 'ne', 'nl', 
-            'no', 'ns', 'oc', 'or', 'pa', 'pl', 'ps', 'pt', 'ro', 'ru', 'sd', 'si', 'sk', 'sl', 'so', 'sq', 
-            'sr', 'ss', 'su', 'sv', 'sw', 'ta', 'th', 'tl', 'tn', 'tr', 'uk', 'ur', 'uz', 'vi', 'wo', 'xh', 
-            'yi', 'yo', 'zh', 'zu'
-        ]
+        # Set target language
+        tokenizer_copy.tgt_lang = target_lang
         
-        if target_lang not in supported_langs:
-            return Response({
-                'success': False,
-                'error': f"Unsupported target language: {target_lang}",
-                'supported_languages': supported_langs
-            }, status=400)
-        
-        if source_lang and source_lang not in supported_langs:
-            return Response({
-                'success': False,
-                'error': f"Unsupported source language: {source_lang}",
-                'supported_languages': supported_langs
-            }, status=400)
-        
-        # TESTING: Load model directly in view if not already loaded
-        if _test_model is None or _test_tokenizer is None:
-            logger.info("Loading model directly in view for testing...")
-            
-            try:
-                from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
-                
-                model_path = "/home/anews/PS/translate/m2m100_418M"
-                
-                # Check if path exists
-                if not os.path.exists(model_path):
-                    return Response({
-                        'success': False,
-                        'error': f"Model path does not exist: {model_path}"
-                    }, status=500)
-                
-                # Check if it's a directory with model files
-                model_files = os.listdir(model_path)
-                logger.info(f"Files in model directory: {model_files}")
-                
-                # Load model and tokenizer
-                logger.info("Loading M2M100 model...")
-                _test_model = M2M100ForConditionalGeneration.from_pretrained(model_path)
-                
-                logger.info("Loading M2M100 tokenizer...")
-                _test_tokenizer = M2M100Tokenizer.from_pretrained(model_path)
-                
-                logger.info("Model and tokenizer loaded successfully!")
-                
-                # Log model info
-                logger.info(f"Model type: {type(_test_model)}")
-                logger.info(f"Tokenizer type: {type(_test_tokenizer)}")
-                logger.info(f"Model device: {next(_test_model.parameters()).device}")
-                
-            except Exception as load_error:
-                logger.error(f"Failed to load model: {load_error}")
-                logger.error(traceback.format_exc())
-                return Response({
-                    'success': False,
-                    'error': f"Failed to load model: {str(load_error)}",
-                    'traceback': traceback.format_exc()
-                }, status=500)
-        
-        model = _test_model
-        tokenizer = _test_tokenizer
-        
-        logger.info("Creating tokenizer instance...")
-        
-        # Set source language
+        # If source language is provided, set it
         if source_lang:
-            tokenizer.src_lang = source_lang
-        else:
-            tokenizer.src_lang = 'en'
+            tokenizer_copy.src_lang = source_lang
         
-        logger.info(f"Tokenizing with src_lang={tokenizer.src_lang}")
-        
-        # Tokenize
-        encoded_text = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-        logger.info(f"Encoded text shape: {encoded_text['input_ids'].shape}")
-        
-        # Get target language ID
-        target_lang_id = tokenizer.get_lang_id(target_lang)
-        logger.info(f"Target language ID: {target_lang_id}")
-        
-        # Move to same device as model if using GPU
-        device = next(model.parameters()).device
-        encoded_text = {k: v.to(device) for k, v in encoded_text.items()}
+        # Tokenize and translate
+        encoded_text = tokenizer_copy(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
         
         # Generate translation
-        logger.info("Generating translation...")
-        with torch.no_grad():  # Disable gradient computation for inference
-            generated_tokens = model.generate(
-                **encoded_text,
-                forced_bos_token_id=target_lang_id,
-                max_length=512,
-                num_beams=5,
-                length_penalty=1.0,
-                early_stopping=True,
-                no_repeat_ngram_size=3,
-                temperature=1.0,
-            )
+        generated_tokens = model.generate(
+            **encoded_text,
+            max_length=512,
+            num_beams=5,
+            length_penalty=1.0,
+            early_stopping=True
+        )
         
-        logger.info(f"Generated tokens shape: {generated_tokens.shape}")
-        
-        # Decode
-        logger.info("Decoding translation...")
-        translated_text = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
-        
-        logger.info(f"Translation successful: '{text}' -> '{translated_text}'")
+        # Decode the translation
+        translated_text = tokenizer_copy.batch_decode(generated_tokens, skip_special_tokens=True)[0]
         
         return Response({
-            'success': True,
+            'return': True,
             'data': {
                 'original_text': text,
                 'translated_text': translated_text,
-                'source_lang': source_lang if source_lang else tokenizer.src_lang,
+                'source_lang': source_lang if source_lang else 'auto-detected',
                 'target_lang': target_lang,
-                'model_used': 'm2m100_418M',
-                'loaded_in_view': True  # Indicator that model was loaded in view
+                'model_used': 'small100'
             }
         }, status=200)
         
     except Exception as e:
-        logger.error(f"Translation error: {type(e).__name__}: {str(e)}")
-        logger.error(traceback.format_exc())
-        
         return Response({
-            'success': False,
-            'error': f"Translation failed: {type(e).__name__}: {str(e)}",
-            'traceback': traceback.format_exc()  # Remove this in production
+            'return': False,
+            'error': f"Translation failed: {str(e)}"
         }, status=500)
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def check_model_status(request):
-    """Check if the translation model is loaded"""
-    global _test_model, _test_tokenizer
-    
-    try:
-        # Check both AppConfig and view-loaded models
-        app_config = apps.get_app_config('Translate')
-        
-        app_model = None
-        app_tokenizer = None
-        
-        if hasattr(app_config, 'get_model_and_tokenizer'):
-            try:
-                app_model, app_tokenizer = app_config.get_model_and_tokenizer()
-            except:
-                pass
-        else:
-            app_model = getattr(app_config, 'model', None)
-            app_tokenizer = getattr(app_config, 'tokenizer', None)
-        
-        # Check model path
-        model_path = "/home/anews/PS/translate/m2m100_418M"
-        path_exists = os.path.exists(model_path)
-        model_files = []
-        if path_exists:
-            model_files = os.listdir(model_path)
-        
-        return Response({
-            'success': True,
-            'app_config': {
-                'model_loaded': app_model is not None,
-                'tokenizer_loaded': app_tokenizer is not None,
-                'model_type': str(type(app_model)) if app_model else None,
-                'tokenizer_type': str(type(app_tokenizer)) if app_tokenizer else None,
-            },
-            'view_loaded': {
-                'model_loaded': _test_model is not None,
-                'tokenizer_loaded': _test_tokenizer is not None,
-                'model_type': str(type(_test_model)) if _test_model else None,
-                'tokenizer_type': str(type(_test_tokenizer)) if _test_tokenizer else None,
-            },
-            'model_path': {
-                'path': model_path,
-                'exists': path_exists,
-                'files': model_files[:10] if model_files else []  # Show first 10 files
-            },
-            'cuda_available': torch.cuda.is_available(),
-            'device': str(next(_test_model.parameters()).device) if _test_model else None
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e),
-            'traceback': traceback.format_exc()
-        }, status=500)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def test_simple_translation(request):
-    """Simple test endpoint to verify basic functionality"""
-    try:
-        # Just echo back the input with a simple transformation
-        text = request.data.get('text', '')
-        target_lang = request.data.get('target_lang', 'en')
-        
-        # Simple mock translation for testing
-        mock_translations = {
-            'fr': {'hello': 'bonjour', 'world': 'monde'},
-            'es': {'hello': 'hola', 'world': 'mundo'},
-            'de': {'hello': 'hallo', 'world': 'welt'},
-        }
-        
-        words = text.lower().split()
-        translated_words = []
-        
-        for word in words:
-            if target_lang in mock_translations and word in mock_translations[target_lang]:
-                translated_words.append(mock_translations[target_lang][word])
-            else:
-                translated_words.append(word)
-        
-        return Response({
-            'success': True,
-            'data': {
-                'original_text': text,
-                'translated_text': ' '.join(translated_words),
-                'target_lang': target_lang,
-                'note': 'This is a mock translation for testing'
-            }
-        })
-    except Exception as e:
-        return Response({
-            'success': False,
-            'error': str(e)
-        }, status=500)
 # Optional: Add a service to list supported languages
 @extend_schema(
     description='Get list of supported languages for translation',
