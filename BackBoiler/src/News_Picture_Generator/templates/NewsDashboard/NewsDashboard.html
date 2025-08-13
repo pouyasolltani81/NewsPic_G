@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to translate items in batches
     async function translateBatch(batch) {
+        console.log('target lang : ' , targetLang)
         try {
             const response = await fetch('{% url "translate_batch" %}', {
                 method: 'POST',
