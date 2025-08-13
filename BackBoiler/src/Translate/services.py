@@ -94,7 +94,7 @@ def translate_text(request):
     
     try:
         # Get the pre-loaded model and tokenizer
-        app_config = apps.get_app_config('your_app_name')  # Replace with your app name
+        app_config = apps.get_app_config('Translate')  # Replace with your app name
         model = app_config.model
         tokenizer = app_config.tokenizer
         
