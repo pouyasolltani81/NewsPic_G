@@ -2,20 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-<!-- Loading overlay for translations -->
-{% if needs_translation %}
-<div id="translation-overlay" class="translation-overlay">
-    <div class="translation-progress">
-        <h3>{% trans "Translating content..." %}</h3>
-        <div class="progress-bar-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
-        <p class="progress-text">
-            <span id="progress-current">0</span> / <span id="progress-total">0</span> {% trans "items translated" %}
-        </p>
-    </div>
-</div>
-{% endif %}
+
 
 <div id="dashboard-content" class="tab-content p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
   <!-- Header with controls -->
