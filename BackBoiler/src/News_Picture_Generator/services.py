@@ -11,7 +11,7 @@ import threading
 from datetime import datetime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from .whisper_model import model  
+# from .whisper_model import model  
 import whisper
 import torch
 
