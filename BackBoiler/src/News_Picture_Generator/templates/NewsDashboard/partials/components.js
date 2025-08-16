@@ -247,7 +247,7 @@ function closeResultModal() {
     if (resultModal) {
         resultModal.remove();
         // Optionally reload the page to show the new image in the gallery
-        window.location.reload();
+        // window.location.reload();
     }
 }
 
