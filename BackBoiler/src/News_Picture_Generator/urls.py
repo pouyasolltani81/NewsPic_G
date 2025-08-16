@@ -23,7 +23,8 @@ from .services import (
     news_image_stats,
     download_image_with_logo,
     preview_logo_placement,
-    analyze_image_brightness
+    analyze_image_brightness,
+    transcribe_audio
 )
 
 urlpatterns = [
@@ -46,9 +47,13 @@ urlpatterns = [
     
     # LOGO 
   
-    path('api/news-images/download-with-logo/', download_image_with_logo, name='download-news-image-with-logo'),
-    path('api/news-images/analyze-brightness/', analyze_image_brightness, name='analyze-image-brightness'),
+    path('news-images/download-with-logo/', download_image_with_logo, name='download-news-image-with-logo'),
+    path('news-images/analyze-brightness/', analyze_image_brightness, name='analyze-image-brightness'),
     # path('news-images/preview-logo/', preview_logo_placement, name='preview-logo-placement'),
+
+
+    #whisper 
+    path('transcribe/', transcribe_audio, name='transcribe_audio'),
 ]
 
 

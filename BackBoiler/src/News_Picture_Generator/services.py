@@ -9,6 +9,9 @@ import json
 import subprocess
 import threading
 from datetime import datetime
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from .whisper_model import model  
 
 
 
@@ -1636,3 +1639,75 @@ def preview_logo_placement(request):
         }, status=500)
 
 
+
+
+# whisper 
+
+
+
+@extend_schema(
+    description='Transcribe Persian audio using Whisper Large-v3',
+    summary='Whisper Persian transcription',
+    methods=['POST'],
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'audio_file': {
+                    'type': 'string',
+                    'format': 'binary',
+                    'description': 'Audio file to transcribe',
+                },
+                'language': {
+                    'type': 'string',
+                    'description': 'Language code, default is "fa" for Persian',
+                    'example': 'fa',
+                    'default': 'fa',
+                }
+            },
+            'required': ['audio_file'],
+        }
+    },
+    responses={
+        200: OpenApiResponse(
+            description='Transcription result',
+            response={
+                'type': 'object',
+                'properties': {
+                    'text': {'type': 'string', 'description': 'Transcribed text'},
+                    'language': {'type': 'string', 'description': 'Detected or forced language code'},
+                }
+            }
+        ),
+        400: OpenApiResponse(description='Bad request'),
+        500: OpenApiResponse(description='Internal server error'),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def transcribe_audio(request):
+    """Transcribe Persian audio using Whisper Large-v3"""
+    audio_file = request.FILES.get('audio_file')
+    if not audio_file:
+        return Response({'error': "Missing 'audio_file' parameter"}, status=400)
+
+    language = request.data.get('language', 'fa')
+
+    try:
+        # Save uploaded file temporarily
+        temp_path = default_storage.save('temp_audio', ContentFile(audio_file.read()))
+        temp_full_path = default_storage.path(temp_path)
+
+        # Transcribe using Whisper, force language if given
+        result = model.transcribe(temp_full_path, language=language)
+
+        # Clean up temp file
+        default_storage.delete(temp_path)
+
+        return Response({
+            'text': result['text'],
+            'language': result.get('language', language)
+        })
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
