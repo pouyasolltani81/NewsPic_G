@@ -1644,7 +1644,6 @@ def preview_logo_placement(request):
 # whisper 
 
 
-
 @extend_schema(
     description='Transcribe Persian audio using Whisper Large-v3',
     summary='Whisper Persian transcription',
@@ -1686,24 +1685,32 @@ def preview_logo_placement(request):
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def transcribe_audio(request):
-    """Transcribe Persian audio using Whisper Large-v3"""
+    """Transcribe Persian audio using Whisper Large-v3 on demand, then free GPU memory."""
     audio_file = request.FILES.get('audio_file')
     if not audio_file:
         return Response({'error': "Missing 'audio_file' parameter"}, status=400)
 
     language = request.data.get('language', 'fa')
 
+    temp_path = None
+    model = None
     try:
         # Save uploaded file temporarily
         temp_path = default_storage.save('temp_audio', ContentFile(audio_file.read()))
         temp_full_path = default_storage.path(temp_path)
 
-        # Transcribe using Whisper, force language if given
+        # Load model on demand
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model = whisper.load_model("large-v3").to(device)
+
+        # Transcribe forcing language if given
         result = model.transcribe(temp_full_path, language=language)
 
         # Clean up temp file
         default_storage.delete(temp_path)
+        temp_path = None
 
+        # Return transcription
         return Response({
             'text': result['text'],
             'language': result.get('language', language)
@@ -1711,3 +1718,16 @@ def transcribe_audio(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+    finally:
+        # Delete model and free GPU memory
+        if model is not None:
+            del model
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        # Remove temp file if still exists
+        if temp_path is not None:
+            try:
+                default_storage.delete(temp_path)
+            except Exception:
+                pass
