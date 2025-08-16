@@ -1,0 +1,61 @@
+{% block whisper_section_tab %}
+{% load i18n %}
+{% load static %}
+
+<div id="whisper-content" class="hidden tab-content p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200 max-w-md mx-auto">
+
+  <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Whisper Persian Transcription</h2>
+
+  <!-- Audio input options -->
+  <div class="space-y-4">
+
+    <!-- Upload MP3 -->
+    <div>
+      <label class="block mb-1 text-gray-700 dark:text-gray-300 font-medium" for="audio-upload">Upload MP3 file:</label>
+      <input
+        id="audio-upload"
+        type="file"
+        accept="audio/mpeg, audio/mp3"
+        class="block w-full text-sm text-gray-600 dark:text-gray-400
+               file:mr-4 file:py-2 file:px-4
+               file:rounded file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-100 file:text-blue-700
+               hover:file:bg-blue-200
+               cursor-pointer"
+      />
+    </div>
+
+    <div class="text-center text-gray-600 dark:text-gray-400 font-semibold">OR</div>
+
+    <!-- Record audio -->
+    <div>
+      <button id="record-btn" class="w-full py-2 px-4 rounded bg-green-600 hover:bg-green-700 text-white font-semibold transition duration-150">
+        Start Recording
+      </button>
+      <p id="recording-status" class="mt-2 text-sm text-red-600 dark:text-red-400 hidden">Recording...</p>
+    </div>
+
+  </div>
+
+  <!-- Transcription result -->
+  <div class="mt-6">
+    <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Transcription Result:</h3>
+    <pre id="transcription-result" class="whitespace-pre-wrap bg-white dark:bg-gray-800 p-4 rounded border border-gray-300 dark:border-gray-700 min-h-[100px] text-gray-900 dark:text-gray-100"></pre>
+  </div>
+
+  <!-- Submit button -->
+  <button id="submit-btn" disabled
+    class="mt-6 w-full py-2 px-4 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+    Transcribe
+  </button>
+
+  <!-- Error message -->
+  <p id="error-msg" class="mt-4 text-red-600 dark:text-red-400 hidden"></p>
+
+</div>
+
+
+
+
+{% endblock %}

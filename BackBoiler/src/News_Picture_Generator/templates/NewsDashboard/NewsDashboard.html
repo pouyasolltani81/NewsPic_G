@@ -45,6 +45,13 @@
     {# ─────────────────────── QWEN TAB ─────────────────────── #}
     {% include "./partials/qwen_section.html" %}
 
+
+
+    {# ─────────────────────── WHISPER TAB ─────────────────────── #}
+    {% include "./partials/whisper_section.html" %}
+
+  
+
   
     
      {# ─────────────────────── MESSAGES TAB ─────────────────────── #}
@@ -61,7 +68,8 @@
   const navItems = [
   { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
   { key: '2', section: "qwen", label: "{{ _('qwen') }}", icon: "brain-circuit" },
-  { key: '3', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
+  { key: '3', section: "whisper", label: "{{ _('whisper') }}", icon: "audio-lines" },
+  { key: '4', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
 
 
 ];
@@ -71,6 +79,8 @@
       dashboard: document.getElementById('dashboard-content'),
       messages: document.getElementById('messages-content'),
       qwen: document.getElementById('qwen-content'),
+      whisper: document.getElementById('whisper-content'),
+
 
 
     };
@@ -90,6 +100,8 @@
   {% include "./partials/messages.js" %}
   {% include "./partials/components.js" %}
   {% include "./partials/qwen.js" %}
+  {% include "./partials/whisper.js" %}
+
 
 
 
