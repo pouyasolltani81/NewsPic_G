@@ -60,10 +60,19 @@
     setTimeout(() => successMsg.classList.add('hidden'), 3000);
   }
 
-    function updateSubmitState() {
-    const hasAudio = uploadInput.files.length > 0 || recordedBlob !== null;
-    submitBtn.disabled = !hasAudio;
+   function updateSubmitState() {
+  const hasUploadedFile = uploadInput.files && uploadInput.files.length > 0;
+  const hasRecordedAudio = recordedBlob !== null;
+  const hasAudio = hasUploadedFile || hasRecordedAudio;
+  submitBtn.disabled = !hasAudio;
+  
+  // Optional: Add visual feedback
+  if (hasAudio) {
+    submitBtn.classList.remove('opacity-50');
+  } else {
+    submitBtn.classList.add('opacity-50');
   }
+}
 
   function updateRecordingTimer() {
     if (recordingStartTime) {
@@ -85,17 +94,20 @@
 
   // Event listeners
   uploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      const file = e.target.files[0];
-      fileName.textContent = file.name;
-      fileInfo.classList.remove('hidden');
-      recordedBlob = null; // Reset recorded audio
+  if (e.target.files.length > 0) {
+    const file = e.target.files[0];
+    fileName.textContent = file.name;
+    fileInfo.classList.remove('hidden');
+    recordedBlob = null; // Reset recorded audio
+    // Use setTimeout to ensure the file input state is updated
+    setTimeout(() => {
       updateSubmitState();
-    } else {
-      fileInfo.classList.add('hidden');
-      updateSubmitState();
-    }
-  });
+    }, 0);
+  } else {
+    fileInfo.classList.add('hidden');
+    updateSubmitState();
+  }
+});
 
   // Recording functionality
   recordBtn.addEventListener('click', async () => {
