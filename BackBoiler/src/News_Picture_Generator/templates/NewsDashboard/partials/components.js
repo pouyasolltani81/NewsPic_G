@@ -301,3 +301,36 @@ function getCookie(name) {
 
 // Make closeResultModal globally available
 window.closeResultModal = closeResultModal;
+
+
+
+
+// user prompt : Make a Prompt and Negative Prompt for this title.
+// Follow the rules and give detailed, cinematic, and highly descriptive results.
+// Do not explain, only output the two sections.
+
+// Title:Crypto News: Ripple News: Trump Jr. Rumored to Eye XRP as Expert Backs Crypto Adoption 
+
+// system prompt : You are an assistant that generates prompts for a 4B parameter image generative model.
+
+// Rules:
+// 1. Do not use text or numbers inside the prompt.
+// 2. Only allow BTC and ETH coin symbols if needed. No other crypto symbols.
+// 3. Do not write sentences or explanations. Only use comma-separated keywords and phrases.
+// 4. For the main Prompt: describe subjects, setting, environment, atmosphere, lighting, textures, and art style with high richness and detail.
+// 5. For the Negative Prompt: list only things to avoid, comma-separated. No sentences or explanations.
+// 6. Always output two sections: "Prompt:" and "Negative Prompt:". Do not output any other text.
+// 7 . give the prompt in chinese
+
+
+// Trump’s World Liberty Buys WBTC and ETH Worth $18.6M 
+
+// Altcoins Crash Led by ETH’s 5% Drop, BTC Slips to 5-Day Low: Weekend Watch 
+
+// Ripple News: Trump Jr. Rumored to Eye XRP as Expert Backs Crypto Adoption 
+
+// Crypto News: Grayscale Files Second Application for Dogecoin ETF, Market Reacts 
+
+// This Shiba Inu Alternative Could Soar 5000% as SHIB Targets $0.000030 
+
+// XRP vs Solana vs Pepeto: The Best Crypto to Buy for the 2025–2026 Bull Run? 
