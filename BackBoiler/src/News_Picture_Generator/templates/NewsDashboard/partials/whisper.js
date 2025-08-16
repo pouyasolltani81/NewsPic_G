@@ -6,7 +6,7 @@
   const recordIcon = document.getElementById('record-icon');
   const recordingStatus = document.getElementById('recording-status');
   const recordingTimer = document.getElementById('recording-timer');
-  const submitBtn = document.getElementById('submit-btn');
+  const submitBtn = document.getElementById('submit-btn-W');
   const clearBtn = document.getElementById('clear-btn');
   const transcriptionResult = document.getElementById('transcription-result');
   const copyBtn = document.getElementById('copy-btn');
@@ -61,37 +61,34 @@
   }
 
     function updateSubmitState() {
-  // More explicit checking
-  const hasUploadedFile = uploadInput && uploadInput.files && uploadInput.files.length > 0;
+  const hasUploadedFile = uploadInput.files && uploadInput.files.length > 0;
   const hasRecordedAudio = recordedBlob !== null;
   const hasAudio = hasUploadedFile || hasRecordedAudio;
-  
-  // Debug logging
-  console.log('Update submit state:', {
-    hasUploadedFile,
-    hasRecordedAudio,
-    hasAudio,
-    filesLength: uploadInput.files.length
-  });
-  
   submitBtn.disabled = !hasAudio;
+  
+  // Optional: Add visual feedback
+  if (hasAudio) {
+    submitBtn.classList.remove('opacity-50');
+  } else {
+    submitBtn.classList.add('opacity-50');
+  }
 }
 
 // Replace the uploadInput event listener
 uploadInput.addEventListener('change', (e) => {
-  console.log('File input changed:', e.target.files); // Debug log
-  
-  if (e.target.files && e.target.files.length > 0) {
+  if (e.target.files.length > 0) {
     const file = e.target.files[0];
     fileName.textContent = file.name;
     fileInfo.classList.remove('hidden');
     recordedBlob = null; // Reset recorded audio
+    // Use setTimeout to ensure the file input state is updated
+    setTimeout(() => {
+      updateSubmitState();
+    }, 0);
   } else {
     fileInfo.classList.add('hidden');
+    updateSubmitState();
   }
-  
-  // Call updateSubmitState directly
-  updateSubmitState();
 });
 
   function updateRecordingTimer() {
