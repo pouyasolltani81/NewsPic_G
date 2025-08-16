@@ -52,7 +52,7 @@
 
   const navItems = [
   { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
-  { key: '2', section: "qwen", label: "{{ _('qwen') }}", icon: "brain-circuit", active: true },
+  { key: '2', section: "qwen", label: "{{ _('qwen') }}", icon: "brain-circuit" },
   { key: '3', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
 
 
@@ -80,6 +80,8 @@
 <script>
 
   {% include "./partials/messages.js" %}
+  {% include "./partials/qwen.js" %}
+
 
 
 </script>
