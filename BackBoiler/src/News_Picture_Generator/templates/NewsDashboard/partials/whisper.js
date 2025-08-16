@@ -61,9 +61,38 @@
   }
 
     function updateSubmitState() {
-    const hasAudio = uploadInput.files.length > 0 || recordedBlob !== null;
-    submitBtn.disabled = !hasAudio;
+  // More explicit checking
+  const hasUploadedFile = uploadInput && uploadInput.files && uploadInput.files.length > 0;
+  const hasRecordedAudio = recordedBlob !== null;
+  const hasAudio = hasUploadedFile || hasRecordedAudio;
+  
+  // Debug logging
+  console.log('Update submit state:', {
+    hasUploadedFile,
+    hasRecordedAudio,
+    hasAudio,
+    filesLength: uploadInput.files.length
+  });
+  
+  submitBtn.disabled = !hasAudio;
+}
+
+// Replace the uploadInput event listener
+uploadInput.addEventListener('change', (e) => {
+  console.log('File input changed:', e.target.files); // Debug log
+  
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
+    fileName.textContent = file.name;
+    fileInfo.classList.remove('hidden');
+    recordedBlob = null; // Reset recorded audio
+  } else {
+    fileInfo.classList.add('hidden');
   }
+  
+  // Call updateSubmitState directly
+  updateSubmitState();
+});
 
   function updateRecordingTimer() {
     if (recordingStartTime) {
