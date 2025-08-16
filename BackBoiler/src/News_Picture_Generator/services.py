@@ -12,7 +12,8 @@ from datetime import datetime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .whisper_model import model  
-
+import whisper
+import torch
 
 
 BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
