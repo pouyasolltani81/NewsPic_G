@@ -61,6 +61,14 @@
         </div>
         {% endif %}
 
+
+        {% if item.selected_scope %}
+        <div class="text-sm text-blue-600 dark:text-blue-400 overflow-auto max-h-16">
+          <strong>Selected Scope :</strong>
+          <span  data-original-summary="{{ item.selected_scope }}">{{ item.selected_scope }}</span>
+        </div>
+        {% endif %}
+
       </div>
     </div>
     {% empty %}

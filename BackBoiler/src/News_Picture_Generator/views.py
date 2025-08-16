@@ -45,6 +45,8 @@ def NewsDashboard_view(request):
         # Store original title
         item['original_title'] = item.get('title', '')
         item['summaryEn'] = item.get('summaryEn', '')
+        item['selected_scope'] = item.get('selected_scope', '')
+        
         
         
         
