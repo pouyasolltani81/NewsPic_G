@@ -1,14 +1,14 @@
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const generateForm = document.getElementById('generateForm');
     const generateBtn_txt2image = document.getElementById('generateBtn_txt2image');
     const generateText = document.getElementById('generateText');
     const generateSpinner = document.getElementById('generateSpinner');
-    
+
     const emptyImageState = document.getElementById('emptyImageState');
     const loadingState = document.getElementById('loadingState');
     const generatedImageDisplay = document.getElementById('generatedImageDisplay');
-    
+
     let pollInterval = null;
     let currentGenerationId = null;
 
@@ -16,16 +16,16 @@ document.addEventListener('DOMContentLoaded', function() {
     generateForm.addEventListener('submit', async (e) => {
         e.preventDefault(); // This prevents page reload
         e.stopPropagation(); // Extra safety to stop event bubbling
-        
+
         // Show loading state
         emptyImageState.classList.add('hidden');
         generatedImageDisplay.classList.add('hidden');
         loadingState.classList.remove('hidden');
-        
+
         generateText.textContent = 'Generating...';
         generateSpinner.classList.remove('hidden');
         generateBtn_txt2image.disabled = true;
-        
+
         const formData = new FormData(generateForm);
         const data = {
             prompt: formData.get('prompt'),
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             steps: parseInt(formData.get('steps')),
             guidance_scale: parseFloat(formData.get('guidance_scale'))
         };
-        
+
         try {
             const response = await fetch('/News_Picture_Generator/custom-images/generate/', {
                 method: 'POST',
@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(data)
             });
-            
+
             if (response.ok) {
                 const result = await response.json();
-                
+
                 if (result.generation_id) {
                     currentGenerationId = result.generation_id;
                     startPolling(currentGenerationId);
@@ -70,7 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Also handle button click separately to ensure no reload
     generateBtn_txt2image.addEventListener('click', (e) => {
         e.preventDefault();
-        // The form submit event will handle the actual submission
+        // Manually trigger the form submission
+        generateForm.dispatchEvent(new Event('submit', { cancelable: true }));
     });
 
     // Start polling for generation result
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 generation_id: generationId,
                 include_negative: false
             };
-            
+
             const response = await fetch('/News_Picture_Generator/custom-images/search/', {
                 method: 'POST',
                 headers: {
@@ -107,10 +108,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify(searchData)
             });
-            
+
             if (response.ok) {
                 const result = await response.json();
-                
+
                 if (result.count > 0 && result.results && result.results.length > 0) {
                     stopPolling();
                     displayGeneratedImage(result.results[0]);
@@ -128,28 +129,28 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayGeneratedImage(imageData) {
         // Hide loading state
         loadingState.classList.add('hidden');
-        
+
         // Update image
         const generatedImage = document.getElementById('generatedImage');
         generatedImage.src = imageData.url;
-        
+
         // Update details
         document.getElementById('displayPrompt').textContent = imageData.prompt;
-        
+
         if (imageData.negative_prompt) {
             document.getElementById('displayNegativePromptContainer').classList.remove('hidden');
             document.getElementById('displayNegativePrompt').textContent = imageData.negative_prompt;
         } else {
             document.getElementById('displayNegativePromptContainer').classList.add('hidden');
         }
-        
+
         document.getElementById('displayDimensions').textContent = `${imageData.width} × ${imageData.height}`;
         document.getElementById('displaySeed').textContent = imageData.seed;
         document.getElementById('displayTime').textContent = new Date(imageData.generated_at).toLocaleString();
-        
+
         // Show generated image display
         generatedImageDisplay.classList.remove('hidden');
-        
+
         // Setup download button
         const downloadBtn = document.getElementById('downloadBtn');
         downloadBtn.onclick = () => {
@@ -160,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
             a.click();
             document.body.removeChild(a);
         };
-        
+
         // Setup fullscreen button
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         fullscreenBtn.onclick = () => {
