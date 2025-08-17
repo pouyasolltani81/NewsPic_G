@@ -1,7 +1,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const generateForm = document.getElementById('generateForm');
-    const generateBtn = document.getElementById('generateBtn');
+    const generateBtn_txt2image = document.getElementById('generateBtn_txt2image');
     const generateText = document.getElementById('generateText');
     const generateSpinner = document.getElementById('generateSpinner');
     
@@ -12,9 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let pollInterval = null;
     let currentGenerationId = null;
 
-    // Handle form submission
+    // Handle form submission - PREVENT DEFAULT HERE
     generateForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // This prevents page reload
+        e.stopPropagation(); // Extra safety to stop event bubbling
         
         // Show loading state
         emptyImageState.classList.add('hidden');
@@ -23,11 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         generateText.textContent = 'Generating...';
         generateSpinner.classList.remove('hidden');
-        generateBtn.disabled = true;
+        generateBtn_txt2image.disabled = true;
         
         const formData = new FormData(generateForm);
         const data = {
-                        prompt: formData.get('prompt'),
+            prompt: formData.get('prompt'),
             width: parseInt(formData.get('width')),
             height: parseInt(formData.get('height')),
             negative_prompt: formData.get('negative_prompt'),
@@ -64,6 +65,12 @@ document.addEventListener('DOMContentLoaded', function() {
             resetGenerateButton();
             showEmptyState();
         }
+    });
+
+    // Also handle button click separately to ensure no reload
+    generateBtn_txt2image.addEventListener('click', (e) => {
+        e.preventDefault();
+        // The form submit event will handle the actual submission
     });
 
     // Start polling for generation result
@@ -171,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetGenerateButton() {
         generateText.textContent = 'Generate Image';
         generateSpinner.classList.add('hidden');
-        generateBtn.disabled = false;
+        generateBtn_txt2image.disabled = false;
     }
 
     // Show empty state
