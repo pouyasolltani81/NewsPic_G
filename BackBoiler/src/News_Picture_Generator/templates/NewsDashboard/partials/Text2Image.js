@@ -56,7 +56,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     throw new Error('No generation ID received');
                 }
+
+
+
+                
             } else {
+                console.log(response);
+
                 throw new Error('Generation failed');
             }
         } catch (error) {
