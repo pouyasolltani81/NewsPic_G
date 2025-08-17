@@ -1,6 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', function () {
-    const generateForm = document.getElementById('generateForm');
+    const generateForm_txt2image = document.getElementById('generateForm_txt2image');
     const generateBtn_txt2image = document.getElementById('generateBtn_txt2image');
     const generateText = document.getElementById('generateText');
     const generateSpinner = document.getElementById('generateSpinner');
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentGenerationId = null;
 
     // Handle form submission - PREVENT DEFAULT HERE
-    generateForm.addEventListener('submit', async (e) => {
+    generateForm_txt2image.addEventListener('submit', async (e) => {
         e.preventDefault(); // This prevents page reload
         e.stopPropagation(); // Extra safety to stop event bubbling
 
@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function () {
         generateSpinner.classList.remove('hidden');
         generateBtn_txt2image.disabled = true;
 
-        const formData = new FormData(generateForm);
+        const formData = new FormData(generateForm_txt2image);
         const data = {
-            prompt: formData.get('prompt_txt2image'),
+            prompt: formData.get('prompt'),
             width: parseInt(formData.get('width')),
             height: parseInt(formData.get('height')),
             negative_prompt: formData.get('negative_prompt'),
@@ -47,10 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify(data)
             });
 
-            console.log(JSON.stringify(data));
-            
-            
-
             if (response.ok) {
                 const result = await response.json();
 
@@ -60,13 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     throw new Error('No generation ID received');
                 }
-
-
-
                 
             } else {
-                console.log(response);
-
                 throw new Error('Generation failed');
             }
         } catch (error) {
@@ -81,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
     generateBtn_txt2image.addEventListener('click', (e) => {
         e.preventDefault();
         // Manually trigger the form submission
-        generateForm.dispatchEvent(new Event('submit', { cancelable: true }));
+        generateForm_txt2image.dispatchEvent(new Event('submit', { cancelable: true }));
     });
 
     // Start polling for generation result
