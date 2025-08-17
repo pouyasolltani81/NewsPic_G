@@ -6,6 +6,72 @@
 
 {% block extra_css %}
   {{ block.super }}
+
+
+<style>
+/* Custom styles for range inputs */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+    background: #e5e7eb;
+    height: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.dark input[type="range"]::-webkit-slider-track {
+    background: #374151;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #3b82f6;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 50%;
+    margin-top: -0.375rem;
+}
+
+input[type="range"]::-moz-range-track {
+    background: #e5e7eb;
+    height: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.dark input[type="range"]::-moz-range-track {
+    background: #374151;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background: #3b82f6;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 50%;
+    border: none;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+    background: #2563eb;
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+    background: #2563eb;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -14,14 +80,7 @@
 
   <div id="main-content" class='z-10'>
 
-    <!-- Generate new picture button -->
-      <button id="generateBtn" class="mt-10 ml-10 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
-        Generate New Picture
-      </button>
-
+    
     <!-- Loading overlay -->
     {% if needs_translation %}
     <div id="translation-overlay" class="translation-overlay">
@@ -43,12 +102,19 @@
 
 
     {# ─────────────────────── QWEN TAB ─────────────────────── #}
-    {% include "./partials/qwen_section.html" %}
+    {% include "./partials/Prompt_engineeing_section.html" %}
 
 
 
     {# ─────────────────────── WHISPER TAB ─────────────────────── #}
-    {% include "./partials/whisper_section.html" %}
+    {% include "./partials/Speech2text_section.html" %}
+
+
+
+    {# ─────────────────────── Text2Image TAB ─────────────────────── #}
+    {% include "./partials/Text2Image_section.html" %}
+
+  
 
   
 
@@ -67,9 +133,10 @@
 
   const navItems = [
   { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
-  { key: '2', section: "qwen", label: "{{ _('Prompt engineeing') }}", icon: "brain-circuit" },
-  { key: '3', section: "whisper", label: "{{ _('Speech2text') }}", icon: "audio-lines" },
-  { key: '4', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
+  { key: '2', section: "Prompt_engineeing", label: "{{ _('Prompt engineeing') }}", icon: "brain-circuit" },
+  { key: '3', section: "Speech2text", label: "{{ _('Speech2text') }}", icon: "audio-lines" },
+  { key: '4', section: "Text2Image", label: "{{ _('Text2Image') }}", icon: "image-plus" },
+  { key: '5', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
 
 
 ];
@@ -78,8 +145,10 @@
     const contentSections = {
       dashboard: document.getElementById('dashboard-content'),
       messages: document.getElementById('messages-content'),
-      qwen: document.getElementById('qwen-content'),
-      whisper: document.getElementById('whisper-content'),
+      Prompt_engineeing: document.getElementById('Prompt_engineeing-content'),
+      Speech2text: document.getElementById('Speech2text-content'),
+      Text2Image: document.getElementById('Text2Image'),
+
 
 
 
@@ -101,6 +170,8 @@
   {% include "./partials/components.js" %}
   {% include "./partials/qwen.js" %}
   {% include "./partials/whisper.js" %}
+  {% include "./partials/Text2Image.js" %}
+
 
 
 

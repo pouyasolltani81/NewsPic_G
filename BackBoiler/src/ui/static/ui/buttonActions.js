@@ -89,7 +89,7 @@ function getCSRFToken() {
 //   notifications 
 // ─────────────── Constants & State ───────────────
 const NOTIF_API = "https://message.imoonex.ir/msgCore/GetUserMessages";
-const READ_API = "https://message.imoonex.ir/msgCore/ReadUserMessages"; // adjust if different
+const READ_API = "https://message.imoonex.ir/msgCore/ReadUserMessages"; 
 const AUTH_TOKEN = "7688b6ef5255596256325511";
 let notifications = [];
 let currentNotificationIndex = null;

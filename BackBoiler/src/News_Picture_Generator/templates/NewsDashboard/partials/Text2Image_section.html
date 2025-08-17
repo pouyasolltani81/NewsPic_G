@@ -1,0 +1,183 @@
+{% block Text2Image_section_tab %}
+{% load i18n %}
+{% load static %}
+
+<div id="Text2Image_section-content" class="hidden tab-content p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Text to Image Generator</h1>
+            <p class="text-gray-600 dark:text-gray-400">Create AI-generated images from text descriptions</p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Left Column: Generation Form -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Generation Settings</h2>
+                
+                <form id="generateForm" class="space-y-6">
+                    <!-- Prompt -->
+                    <div>
+                        <label for="prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Prompt <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="prompt" name="prompt" rows="4" required
+                                  placeholder="Describe the image you want to generate..."
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                    </div>
+
+                    <!-- Negative Prompt -->
+                    <div>
+                        <label for="negative_prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Negative Prompt
+                        </label>
+                        <textarea id="negative_prompt" name="negative_prompt" rows="3"
+                                  placeholder="What to avoid in the image..."
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                    </div>
+
+                    <!-- Dimensions -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Dimensions</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="width" class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Width</label>
+                                <select id="width" name="width" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                                    <option value="512">512px</option>
+                                    <option value="768">768px</option>
+                                    <option value="1024" selected>1024px</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="height" class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Height</label>
+                                <select id="height" name="height" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                                    <option value="512">512px</option>
+                                    <option value="768">768px</option>
+                                    <option value="1024" selected>1024px</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Advanced Settings</h3>
+                        
+                        <!-- Seed -->
+                        <div class="mb-4">
+                            <label for="seed" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Seed <span class="text-xs text-gray-500">(Use -1 for random)</span>
+                            </label>
+                            <input type="number" id="seed" name="seed" value="-1" min="-1"
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Steps -->
+                        <div class="mb-4">
+                            <label for="steps" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Sampling Steps: <span id="stepsValue" class="text-blue-600 dark:text-blue-400 font-semibold">20</span>
+                            </label>
+                            <input type="range" id="steps" name="steps" min="1" max="50" value="20"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                   oninput="document.getElementById('stepsValue').textContent = this.value">
+                        </div>
+
+                        <!-- Guidance Scale -->
+                        <div class="mb-4">
+                            <label for="guidance_scale" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Guidance Scale: <span id="guidanceValue" class="text-blue-600 dark:text-blue-400 font-semibold">7.5</span>
+                            </label>
+                            <input type="range" id="guidance_scale" name="guidance_scale" min="1" max="20" step="0.5" value="7.5"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                   oninput="document.getElementById('guidanceValue').textContent = this.value">
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="submit" id="generateBtn" 
+                            class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="generateText">Generate Image</span>
+                        <svg id="generateSpinner" class="hidden animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Column: Generated Image Display -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Generated Image</h2>
+                
+                <!-- Image Container -->
+                <div id="imageContainer" class="relative">
+                    <!-- Empty State -->
+                    <div id="emptyImageState" class="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                        <svg class="w-24 h-24 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-gray-500 dark:text-gray-400 text-center">Your generated image will appear here</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden flex flex-col items-center justify-center py-16 px-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+                        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+                        <p class="text-gray-600 dark:text-gray-400 font-medium">Generating your image...</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">This may take a few moments</p>
+                    </div>
+
+                    <!-- Generated Image Display -->
+                    <div id="generatedImageDisplay" class="hidden">
+                        <div class="relative group">
+                            <img id="generatedImage" src="" alt="Generated image" class="w-full rounded-lg shadow-md">
+                            
+                            <!-- Image Overlay Actions -->
+                            <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button id="downloadBtn" class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </button>
+                                <button id="fullscreenBtn" class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Image Details -->
+                        <div id="imageDetails" class="mt-6 space-y-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Prompt</h3>
+                                <p id="displayPrompt" class="text-sm text-gray-600 dark:text-gray-400 mt-1"></p>
+                            </div>
+                            <div id="displayNegativePromptContainer" class="hidden">
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Negative Prompt</h3>
+                                <p id="displayNegativePrompt" class="text-sm text-gray-600 dark:text-gray-400 mt-1"></p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Dimensions:</span>
+                                    <span id="displayDimensions" class="text-gray-700 dark:text-gray-300 ml-1"></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Seed:</span>
+                                    <span id="displaySeed" class="text-gray-700 dark:text-gray-300 ml-1"></span>
+                                </div>
+                            </div>
+                            <div class="text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">Generated:</span>
+                                <span id="displayTime" class="text-gray-700 dark:text-gray-300 ml-1"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
