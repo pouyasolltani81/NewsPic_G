@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             console.log(JSON.stringify(data));
             
+            
 
             if (response.ok) {
                 const result = await response.json();
