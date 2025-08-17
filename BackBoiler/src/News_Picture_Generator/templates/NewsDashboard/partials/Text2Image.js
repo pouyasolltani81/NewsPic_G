@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const formData = new FormData(generateForm);
         const data = {
-            prompt: formData.get('prompt'),
+            prompt: formData.get('prompt_txt2image'),
             width: parseInt(formData.get('width')),
             height: parseInt(formData.get('height')),
             negative_prompt: formData.get('negative_prompt'),
