@@ -44,35 +44,7 @@ class NavigationMain {
     setTimeout(() => toast.remove(), 3000);
   }
 
-  loadWorkflowsTable() {
-    const workflowsTable = document.getElementById('workflows-table');
-    if (workflowsTable) {
-      workflowsTable.innerHTML = `
-        <table class="w-full text-left border border-gray-200 dark:border-gray-600">
-          <thead>
-            <tr class="bg-gray-50 dark:bg-gray-700">
-              <th class="p-2">Workflow</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Last Modified</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
-              <td class="p-2">Customer Onboarding</td>
-              <td class="p-2">Active</td>
-              <td class="p-2">2 hours ago</td>
-            </tr>
-            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
-              <td class="p-2">Data Processing</td>
-              <td class="p-2">Paused</td>
-              <td class="p-2">1 day ago</td>
-            </tr>
-          </tbody>
-        </table>
-      `;
-      this.showToast('Workflows table loaded', 'info');
-    }
-  }
+  
 
   switchToSection(section) {
     console.log('switchToSection firing')
@@ -100,10 +72,7 @@ class NavigationMain {
 
     if (this.contentSections[section]) {
       this.contentSections[section].classList.remove('hidden');
-      this.showToast(`Navigated to ${section}`, 'info');
-      if (section === 'workflows') {
-        this.loadWorkflowsTable();
-      }
+      // this.showToast(`Navigated to ${section}`, 'info');
     }
   }
 
