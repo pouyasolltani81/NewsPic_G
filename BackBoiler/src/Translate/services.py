@@ -78,19 +78,19 @@ def translate_text(request):
         'yi', 'yo', 'zh', 'zu'
     ]
     
-    if target_lang not in supported_langs:
-        return Response({
-            'return': False,
-            'error': f"Unsupported target language: {target_lang}",
-            'supported_languages': supported_langs
-        }, status=400)
+    # if target_lang not in supported_langs:
+    #     return Response({
+    #         'return': False,
+    #         'error': f"Unsupported target language: {target_lang}",
+    #         'supported_languages': supported_langs
+    #     }, status=400)
     
-    if source_lang and source_lang not in supported_langs:
-        return Response({
-            'return': False,
-            'error': f"Unsupported source language: {source_lang}",
-            'supported_languages': supported_langs
-        }, status=400)
+    # if source_lang and source_lang not in supported_langs:
+    #     return Response({
+    #         'return': False,
+    #         'error': f"Unsupported source language: {source_lang}",
+    #         'supported_languages': supported_langs
+    #     }, status=400)
     
     try:
         # Get the pre-loaded model and tokenizer
