@@ -25,12 +25,12 @@ class TranslationConfig(AppConfig):
             from tokenization_small100 import SMALL100Tokenizer
             
             print("Loading translation model...")
-            # TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(SMALL100_PATH)
-            # TranslationConfig.tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
+            TranslationConfig.model = M2M100ForConditionalGeneration.from_pretrained(SMALL100_PATH)
+            TranslationConfig.tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
             
             
-            TranslationConfig.model = MBartForConditionalGeneration.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
-            TranslationConfig.tokenizer = MBart50TokenizerFast.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
+            # TranslationConfig.model = MBartForConditionalGeneration.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
+            # TranslationConfig.tokenizer = MBart50TokenizerFast.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
             
         
             print("Translation model loaded successfully!")
