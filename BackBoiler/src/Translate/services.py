@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 import sys
 import os
 from django.apps import apps
