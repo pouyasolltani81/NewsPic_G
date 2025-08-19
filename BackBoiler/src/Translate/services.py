@@ -95,8 +95,13 @@ def translate_text(request):
     try:
         # Get the pre-loaded model and tokenizer
         app_config = apps.get_app_config('Translate')  # Replace with your app name
-        model = app_config.model
-        tokenizer = app_config.tokenizer
+        # model = app_config.model
+        # tokenizer = app_config.tokenizer
+        
+            
+        model = MBartForConditionalGeneration.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
+        tokenizer = MBart50TokenizerFast.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
+            
         
         if model is None or tokenizer is None:
             return Response({
