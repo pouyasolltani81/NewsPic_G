@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     text,
-                    target_lang: targetLang,
-                    source_lang: ''
+                    target_lang: "fa_IR",
+                    source_lang: 'en_XX'
                 })
             });
 
