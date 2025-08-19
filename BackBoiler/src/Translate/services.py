@@ -108,7 +108,7 @@ def translate_text(request):
         tokenizer_copy = tokenizer.__class__.from_pretrained(tokenizer.name_or_path)
         
         # Set target language
-        tokenizer_copy.tgt_lang = target_lang
+        # tokenizer_copy.tgt_lang = target_lang
         
         # If source language is provided, set it
         if source_lang:
@@ -118,12 +118,17 @@ def translate_text(request):
         encoded_text = tokenizer_copy(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
         
         # Generate translation
+        # generated_tokens = model.generate(
+        #     **encoded_text,
+        #     max_length=512,
+        #     num_beams=5,
+        #     length_penalty=1.0,
+        #     early_stopping=True
+        # )
+        
         generated_tokens = model.generate(
             **encoded_text,
-            max_length=512,
-            num_beams=5,
-            length_penalty=1.0,
-            early_stopping=True
+            forced_bos_token_id=tokenizer.lang_code_to_id[target_lang]
         )
         
         # Decode the translation
