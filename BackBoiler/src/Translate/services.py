@@ -7,6 +7,9 @@ import sys
 import os
 from django.apps import apps
 
+base_path = "/home/anews/PS/translate"
+
+
 @extend_schema(
     description='Translate text to target language using small100 multilingual model',
     summary='Translate text between 100+ languages',
