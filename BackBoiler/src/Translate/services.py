@@ -101,7 +101,7 @@ def translate_text(request):
             
         model = MBartForConditionalGeneration.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
         tokenizer = MBart50TokenizerFast.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
-            
+        
         
         if model is None or tokenizer is None:
             return Response({
@@ -109,30 +109,41 @@ def translate_text(request):
                 'error': "Translation model not loaded. Please restart the server."
             }, status=500)
         
-        # Create a copy of the tokenizer to avoid thread safety issues
-        tokenizer_copy = tokenizer.__class__.from_pretrained(tokenizer.name_or_path)
         
-        # Set target language
-        tokenizer_copy.tgt_lang = target_lang
         
-        # If source language is provided, set it
-        if source_lang:
-            tokenizer_copy.src_lang = source_lang
-        
-        # Tokenize and translate
-        encoded_text = tokenizer_copy(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-        
-        # Generate translation
+        tokenizer.src_lang = source_lang
+        encoded_hi = tokenizer(text, return_tensors="pt")
         generated_tokens = model.generate(
-            **encoded_text,
-            max_length=512,
-            num_beams=5,
-            length_penalty=1.0,
-            early_stopping=True
+            **encoded_hi,
+            forced_bos_token_id=tokenizer.lang_code_to_id[target_lang]
         )
+        translated_text = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+            
         
-        # Decode the translation
-        translated_text = tokenizer_copy.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+        # # Create a copy of the tokenizer to avoid thread safety issues
+        # tokenizer_copy = tokenizer.__class__.from_pretrained(tokenizer.name_or_path)
+        
+        # # Set target language
+        # tokenizer_copy.tgt_lang = target_lang
+        
+        # # If source language is provided, set it
+        # if source_lang:
+        #     tokenizer_copy.src_lang = source_lang
+        
+        # # Tokenize and translate
+        # encoded_text = tokenizer_copy(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        
+        # # Generate translation
+        # generated_tokens = model.generate(
+        #     **encoded_text,
+        #     max_length=512,
+        #     num_beams=5,
+        #     length_penalty=1.0,
+        #     early_stopping=True
+        # )
+        
+        # # Decode the translation
+        # translated_text = tokenizer_copy.batch_decode(generated_tokens, skip_special_tokens=True)[0]
         
         return Response({
             'return': True,
