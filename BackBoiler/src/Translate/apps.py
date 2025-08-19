@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 import sys
 from transformers import M2M100ForConditionalGeneration
+from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 
 class TranslationConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -30,8 +31,8 @@ class TranslationConfig(AppConfig):
             # TranslationConfig.tokenizer = SMALL100Tokenizer.from_pretrained(SMALL100_PATH)
             
             
-            # TranslationConfig.model = MBartForConditionalGeneration.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
-            # TranslationConfig.tokenizer = MBart50TokenizerFast.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
+            TranslationConfig.model = MBartForConditionalGeneration.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
+            TranslationConfig.tokenizer = MBart50TokenizerFast.from_pretrained(f"{base_path}/mbart-large-50-many-to-many-mmt")
             
         
             print("Translation model loaded successfully!")
