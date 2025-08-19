@@ -61,9 +61,9 @@ def translate_text(request):
     
     # Get parameters
     text = request.data.get('text', '').strip()
-    target_lang = request.data.get('target_lang', '').strip().lower()
-    source_lang = request.data.get('source_lang', '').strip().lower()
-    
+    target_lang = request.data.get('target_lang', '').strip()
+    source_lang = request.data.get('source_lang', '').strip()
+        
     # Validate parameters
     if not text:
         return Response({'error': "Missing 'text' parameter"}, status=400)
