@@ -1,11 +1,11 @@
 (function () {
   const API_BASE = "/News_Picture_Generator"; // base path
   // DOM refs
-  const systemInput = document.getElementById("system-prompt-input");
-  const userInput = document.getElementById("user-prompt-input");
-  const styleInput = document.getElementById("style-input");
-  const scopesList = document.getElementById("scopes-list");
-  const newScopeInput = document.getElementById("new-scope-input");
+  const systemInput = document.getElementById("config-system-prompt-input");
+  const userInput = document.getElementById("config-user-prompt-input");
+  const styleInput = document.getElementById("config-style-input");
+  const scopesList = document.getElementById("config-scopes-list");
+  const newScopeInput = document.getElementById("config-new-scope-input");
 
   const status = id => document.getElementById(id);
 
@@ -104,25 +104,25 @@
   }
 
   // Attach UI actions
-  document.getElementById("refresh-configs").addEventListener("click", loadAll);
+  document.getElementById("config-refresh-configs").addEventListener("click", loadAll);
 
-  document.getElementById("save-system").addEventListener("click", () => {
+  document.getElementById("config-save-system").addEventListener("click", () => {
     saveField("SYSTEM_PROMPT", systemInput.value, "system-status");
   });
-  document.getElementById("revert-system").addEventListener("click", loadAll);
+  document.getElementById("config-revert-system").addEventListener("click", loadAll);
 
-  document.getElementById("save-user").addEventListener("click", () => {
+  document.getElementById("config-save-user").addEventListener("click", () => {
     saveField("USER_PROMPT", userInput.value, "user-status");
   });
-  document.getElementById("revert-user").addEventListener("click", loadAll);
+  document.getElementById("config-revert-user").addEventListener("click", loadAll);
 
-  document.getElementById("save-style").addEventListener("click", () => {
+  document.getElementById("config-save-style").addEventListener("click", () => {
     saveField("STYLE", styleInput.value, "style-status");
   });
-  document.getElementById("revert-style").addEventListener("click", loadAll);
+  document.getElementById("config-revert-style").addEventListener("click", loadAll);
 
   // Scopes actions
-  document.getElementById("add-scope").addEventListener("click", () => {
+  document.getElementById("config-add-scope").addEventListener("click", () => {
     const v = newScopeInput.value.trim();
     if (!v) return;
     // append visually
@@ -141,7 +141,7 @@
     newScopeInput.value = "";
   });
 
-  document.getElementById("save-scopes").addEventListener("click", async () => {
+  document.getElementById("config-save-scopes").addEventListener("click", async () => {
     const arr = collectScopes();
     try {
       const res = await fetchJson(API_BASE + "/scopes/update/", {

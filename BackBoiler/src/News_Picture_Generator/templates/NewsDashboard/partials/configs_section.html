@@ -4,12 +4,11 @@
 
 <div id="configs-content" class="tab-content hidden">
 
-    <!-- configs UI (paste inside your #configs-content) -->
-<div class="p-4 max-w-6xl mx-auto space-y-6">
+<div class="p-4  mx-auto space-y-6">
   <div class="flex items-center justify-between">
     <h2 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Configs</h2>
     <div class="flex gap-2 items-center">
-      <button id="refresh-configs" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 flex items-center gap-2">
+      <button id="config-refresh-configs" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 flex items-center gap-2">
         <i data-lucide="refresh-cw" class="w-4 h-4"></i><span class="text-sm">Refresh</span>
       </button>
     </div>
@@ -26,16 +25,16 @@
             <div class="text-sm text-slate-500 dark:text-slate-400">server: <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">/News_Picture_Generator/system_prompt/</code></div>
           </div>
 
-          <textarea id="system-prompt-input" rows="6" class="mt-3 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-3 text-sm resize-y" placeholder="Loading..."></textarea>
+          <textarea id="config-system-prompt-input" rows="6" class="mt-3 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-3 text-sm resize-y" placeholder="Loading..."></textarea>
 
           <div class="mt-3 flex items-center gap-2">
-            <button id="save-system" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white">
+            <button id="config-save-system" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white">
               <i data-lucide="save" class="w-4 h-4"></i> Save
             </button>
-            <button id="revert-system" class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200">
+            <button id="config-revert-system" class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200">
               <i data-lucide="corner-down-left" class="w-4 h-4"></i> Revert
             </button>
-            <div id="system-status" class="ml-auto text-sm"></div>
+            <div id="config-system-status" class="ml-auto text-sm"></div>
           </div>
         </div>
       </div>
@@ -51,16 +50,16 @@
             <div class="text-sm text-slate-500 dark:text-slate-400">server: <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">/News_Picture_Generator/user_prompt/</code></div>
           </div>
 
-          <textarea id="user-prompt-input" rows="6" class="mt-3 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-3 text-sm resize-y" placeholder="Loading..."></textarea>
+          <textarea id="config-user-prompt-input" rows="6" class="mt-3 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-3 text-sm resize-y" placeholder="Loading..."></textarea>
 
           <div class="mt-3 flex items-center gap-2">
-            <button id="save-user" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white">
+            <button id="config-save-user" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white">
               <i data-lucide="save" class="w-4 h-4"></i> Save
             </button>
-            <button id="revert-user" class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200">
+            <button id="config-revert-user" class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200">
               <i data-lucide="corner-down-left" class="w-4 h-4"></i> Revert
             </button>
-            <div id="user-status" class="ml-auto text-sm"></div>
+            <div id="config-user-status" class="ml-auto text-sm"></div>
           </div>
         </div>
       </div>
@@ -76,16 +75,16 @@
             <div class="text-sm text-slate-500 dark:text-slate-400">server: <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">/News_Picture_Generator/style/</code></div>
           </div>
 
-          <input id="style-input" class="mt-3 block w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-3 text-sm" placeholder="e.g. Digital Art" />
+          <input id="config-style-input" class="mt-3 block w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-3 text-sm" placeholder="e.g. Digital Art" />
 
           <div class="mt-3 flex items-center gap-2">
-            <button id="save-style" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white">
+            <button id="config-save-style" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white">
               <i data-lucide="save" class="w-4 h-4"></i> Save
             </button>
-            <button id="revert-style" class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200">
+            <button id="config-revert-style" class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200">
               <i data-lucide="corner-down-left" class="w-4 h-4"></i> Revert
             </button>
-            <div id="style-status" class="ml-auto text-sm"></div>
+            <div id="config-style-status" class="ml-auto text-sm"></div>
           </div>
         </div>
       </div>
@@ -101,22 +100,22 @@
             <div class="text-sm text-slate-500 dark:text-slate-400">server: <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">/News_Picture_Generator/scopes/</code></div>
           </div>
 
-          <div id="scopes-list" class="mt-3 space-y-2">
+          <div id="config-scopes-list" class="mt-3 space-y-2">
             <!-- dynamically populated -->
             <div class="text-sm text-slate-500 dark:text-slate-400">Loading scopes…</div>
           </div>
 
           <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
-            <input id="new-scope-input" class="flex-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-2 text-sm" placeholder="Add new scope (e.g. 'crypto analytics')" />
+            <input id="config-new-scope-input" class="flex-1 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-2 text-sm" placeholder="Add new scope (e.g. 'crypto analytics')" />
             <button id="add-scope" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white">
               <i data-lucide="plus" class="w-4 h-4"></i> Add
             </button>
 
-            <button id="save-scopes" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white ml-auto">
+            <button id="config-save-scopes" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white ml-auto">
               <i data-lucide="save" class="w-4 h-4"></i> Save All
             </button>
 
-            <div id="scopes-status" class="ml-auto text-sm"></div>
+            <div id="config-scopes-status" class="ml-auto text-sm"></div>
           </div>
         </div>
       </div>
