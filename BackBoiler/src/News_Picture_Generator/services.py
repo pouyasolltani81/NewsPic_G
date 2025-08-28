@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiResponse , OpenApiExample
 from django.utils import timezone
 from django.http import FileResponse, Http404
 import os
@@ -14,6 +14,11 @@ from django.core.files.base import ContentFile
 # from .whisper_model import model  
 import whisper
 import torch
+
+# config 
+from .utils import read_config, write_config
+from rest_framework import status
+
 
 
 BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
@@ -1732,3 +1737,124 @@ def transcribe_audio(request):
                 default_storage.delete(temp_path)
             except Exception:
                 pass
+            
+            
+            
+# config 
+
+# Generic function for get/set
+def handle_config_field(field, new_value=None):
+    config = read_config()
+    if new_value is None:   # show
+        return {field: config.get(field)}
+    else:                   # update
+        config[field] = new_value
+        write_config(config)
+        return {"return": True, field: new_value}
+
+
+# ================= SYSTEM_PROMPT =================
+@extend_schema(
+    summary="Get System Prompt",
+    description="Retrieve the current SYSTEM_PROMPT value from config.json.",
+    responses={200: {"type": "object", "properties": {"SYSTEM_PROMPT": {"type": "string"}}}},
+    examples=[
+        OpenApiExample("Example Response", value={"SYSTEM_PROMPT": "You are a helpful assistant"})
+    ],
+)
+@api_view(["GET"])
+def get_system_prompt(request):
+    return Response(handle_config_field("SYSTEM_PROMPT"))
+
+
+@extend_schema(
+    summary="Set System Prompt",
+    description="Update the SYSTEM_PROMPT value in config.json.",
+    request={"type": "object", "properties": {"SYSTEM_PROMPT": {"type": "string"}}, "required": ["SYSTEM_PROMPT"]},
+    responses={200: {"type": "object", "properties": {"return": {"type": "boolean"}, "SYSTEM_PROMPT": {"type": "string"}}}},
+    examples=[
+        OpenApiExample("Example Request", value={"SYSTEM_PROMPT": "You are a financial advisor"}),
+        OpenApiExample("Example Response", value={"return": True, "SYSTEM_PROMPT": "You are a financial advisor"})
+    ],
+)
+@api_view(["POST"])
+def set_system_prompt(request):
+    new_value = request.data.get("SYSTEM_PROMPT")
+    if not new_value:
+        return Response({"error": "SYSTEM_PROMPT required"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(handle_config_field("SYSTEM_PROMPT", new_value))
+
+
+# ================= USER_PROMPT =================
+@extend_schema(
+    summary="Get User Prompt",
+    description="Retrieve the current USER_PROMPT value from config.json.",
+    responses={200: {"type": "object", "properties": {"USER_PROMPT": {"type": "string"}}}},
+)
+@api_view(["GET"])
+def get_user_prompt(request):
+    return Response(handle_config_field("USER_PROMPT"))
+
+
+@extend_schema(
+    summary="Set User Prompt",
+    description="Update the USER_PROMPT value in config.json.",
+    request={"type": "object", "properties": {"USER_PROMPT": {"type": "string"}}, "required": ["USER_PROMPT"]},
+    responses={200: {"type": "object", "properties": {"return": {"type": "boolean"}, "USER_PROMPT": {"type": "string"}}}},
+)
+@api_view(["POST"])
+def set_user_prompt(request):
+    new_value = request.data.get("USER_PROMPT")
+    if not new_value:
+        return Response({"error": "USER_PROMPT required"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(handle_config_field("USER_PROMPT", new_value))
+
+
+# ================= STYLE =================
+@extend_schema(
+    summary="Get Style",
+    description="Retrieve the current STYLE value from config.json.",
+    responses={200: {"type": "object", "properties": {"STYLE": {"type": "string"}}}},
+)
+@api_view(["GET"])
+def get_style(request):
+    return Response(handle_config_field("STYLE"))
+
+
+@extend_schema(
+    summary="Set Style",
+    description="Update the STYLE value in config.json.",
+    request={"type": "object", "properties": {"STYLE": {"type": "string"}}, "required": ["STYLE"]},
+    responses={200: {"type": "object", "properties": {"return": {"type": "boolean"}, "STYLE": {"type": "string"}}}},
+)
+@api_view(["POST"])
+def set_style(request):
+    new_value = request.data.get("STYLE")
+    if not new_value:
+        return Response({"error": "STYLE required"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(handle_config_field("STYLE", new_value))
+
+
+# ================= SCOPES =================
+@extend_schema(
+    summary="Get Scopes",
+    description="Retrieve the current SCOPES value from config.json.",
+    responses={200: {"type": "object", "properties": {"SCOPES": {"type": "array", "items": {"type": "string"}}}}},
+)
+@api_view(["GET"])
+def get_scopes(request):
+    return Response(handle_config_field("SCOPES"))
+
+
+@extend_schema(
+    summary="Set Scopes",
+    description="Update the SCOPES value in config.json.",
+    request={"type": "object", "properties": {"SCOPES": {"type": "array", "items": {"type": "string"}}}, "required": ["SCOPES"]},
+    responses={200: {"type": "object", "properties": {"return": {"type": "boolean"}, "SCOPES": {"type": "array", "items": {"type": "string"}}}}},
+)
+@api_view(["POST"])
+def set_scopes(request):
+    new_value = request.data.get("SCOPES")
+    if not new_value:
+        return Response({"error": "SCOPES required"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(handle_config_field("SCOPES", new_value))

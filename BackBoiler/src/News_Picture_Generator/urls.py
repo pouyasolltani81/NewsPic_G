@@ -24,7 +24,15 @@ from .services import (
     download_image_with_logo,
     preview_logo_placement,
     analyze_image_brightness,
-    transcribe_audio
+    transcribe_audio,
+    get_system_prompt,
+    set_system_prompt,
+    get_user_prompt,
+    set_user_prompt,
+    get_style,
+    set_style,
+    get_scopes,
+    set_scopes
 )
 
 urlpatterns = [
@@ -54,6 +62,24 @@ urlpatterns = [
 
     #whisper 
     path('transcribe/', transcribe_audio, name='transcribe_audio'),
+    
+    
+    # configs 
+
+
+    path("system_prompt/", get_system_prompt),
+    path("system_prompt/update/", set_system_prompt),
+
+    path("user_prompt/", get_user_prompt),
+    path("user_prompt/update/", set_user_prompt),
+
+    path("style/", get_style),
+    path("style/update/", set_style),
+
+    path("scopes/", get_scopes),
+    path("scopes/update/", set_scopes),
+
+
 ]
 
 
