@@ -43,7 +43,7 @@
       renderScopes(scopes);
     } catch (err) {
       console.error("load error", err);
-      showStatus("system-status", "Failed to load configs", false);
+      showStatus("config-system-status", "Failed to load configs", false);
     } finally {
       document.querySelectorAll("#configs-content textarea, #configs-content input").forEach(i => i.disabled = false);
     }
@@ -107,17 +107,17 @@
   document.getElementById("config-refresh-configs").addEventListener("click", loadAll);
 
   document.getElementById("config-save-system").addEventListener("click", () => {
-    saveField("SYSTEM_PROMPT", systemInput.value, "system-status");
+    saveField("SYSTEM_PROMPT", systemInput.value, "config-system-status");
   });
   document.getElementById("config-revert-system").addEventListener("click", loadAll);
 
   document.getElementById("config-save-user").addEventListener("click", () => {
-    saveField("USER_PROMPT", userInput.value, "user-status");
+    saveField("USER_PROMPT", userInput.value, "config-user-status");
   });
   document.getElementById("config-revert-user").addEventListener("click", loadAll);
 
   document.getElementById("config-save-style").addEventListener("click", () => {
-    saveField("STYLE", styleInput.value, "style-status");
+    saveField("STYLE", styleInput.value, "config-style-status");
   });
   document.getElementById("config-revert-style").addEventListener("click", loadAll);
 
@@ -150,13 +150,13 @@
         body: JSON.stringify({ SCOPES: arr }),
       });
       if (res.return === true) {
-        showStatus("scopes-status", "Saved ✓", true);
+        showStatus("config-scopes-status", "Saved ✓", true);
       } else {
-        showStatus("scopes-status", "Save failed", false);
+        showStatus("config-scopes-status", "Save failed", false);
       }
     } catch (err) {
       console.error(err);
-      showStatus("scopes-status", "Save error", false);
+      showStatus("config-scopes-status", "Save error", false);
     }
   });
 
