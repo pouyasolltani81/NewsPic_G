@@ -126,6 +126,12 @@ input[type="range"]:hover::-moz-range-thumb {
      {# ─────────────────────── MESSAGES TAB ─────────────────────── #}
     {% include "./partials/messages_section.html" %}
 
+
+
+    
+     {# ─────────────────────── CONFIGS TAB ─────────────────────── #}
+    {% include "./partials/configs_section.html" %}
+
    
   </div>
 {% endblock %}
@@ -137,11 +143,15 @@ input[type="range"]:hover::-moz-range-thumb {
   const navItems = [
   { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
   { key: '2', section: "Prompt_engineeing", label: "{{ _('Prompt engineeing') }}", icon: "brain-circuit" },
+  
   { key: '3', section: "Speech2text", label: "{{ _('Speech2text') }}", icon: "audio-lines" },
   { key: '4', section: "Text2Image", label: "{{ _('Text2Image') }}", icon: "image-plus" },
   { key: '5', section: "Translation", label: "{{ _('Translation') }}", icon: "languages" },
 
   { key: '6', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
+
+  { key: '7', section: "configs", label: "{{ _('configs') }}", icon: "bolt" },
+
 
 
 ];
@@ -154,6 +164,8 @@ input[type="range"]:hover::-moz-range-thumb {
       Speech2text: document.getElementById('Speech2text-content'),
       Text2Image: document.getElementById('Text2Image-content'),
       Translation: document.getElementById('Translation-content'),
+      configs: document.getElementById('configs-content'),
+
 
 
 
@@ -179,16 +191,11 @@ input[type="range"]:hover::-moz-range-thumb {
   {% include "./partials/whisper.js" %}
   {% include "./partials/Text2Image.js" %}
   {% include "./partials/Translate_section.js" %}
-
-
-
-
-
-
+  {% include "./partials/configs.js" %}
+  
 </script>
 
 
-    
 <style>
 .translation-overlay {
     position: fixed;
