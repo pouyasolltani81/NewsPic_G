@@ -110,7 +110,7 @@ class UserAuth(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = api_get_hash(f'{self.user.id}/{timezone.now().second}/token', len=32)
-            self.expired_at = timezone.now() + timedelta(days=720)
+            self.expired_at = timezone.now() + timedelta(hours=720)
 
         super().save(*args, **kwargs)
     
