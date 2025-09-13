@@ -79,13 +79,18 @@ urlpatterns = [
     path('crypto_news_images/<path:path>/', serve, {'document_root': images_dir}),
     path('custom_images/<path:path>/', serve, {'document_root': custom_images_dir}),
     
+    
+    
+    re_path(r'^static/(?P<path>.*)$', serve, {
+        'document_root': '/home/anews/NewsPic_G/BackBoiler/src/static',
+    }),  
   
 
     # re_path(r'^static/(?P<path>.*)$', serve, {
     #     'document_root': '',
     # }),  
 
-]
+] + static('/static/', document_root='/home/anews/NewsPic_G/BackBoiler/src/static')
 
 
 if settings.DEBUG:
