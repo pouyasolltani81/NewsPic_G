@@ -39,4 +39,4 @@ class TranslationConfig(AppConfig):
             
         except Exception as e:
             print(f"Failed to load translation model: {e}")
-            # You might want to handle this more gracefully
+           
