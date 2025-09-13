@@ -1,5 +1,4 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser , IsAuthenticated
 from AuthModel.models import user_credential
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse , OpenApiExample
@@ -58,7 +57,7 @@ with open(json_path, 'r', encoding='utf-8') as f:
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def download_image_by_title(request):
     title = request.data.get('title', '').strip()
     if not title:
@@ -122,7 +121,7 @@ def download_image_by_title(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def check_image_exists(request):
     """Check if image exists for given title"""
     title = request.data.get('title', '').strip()
@@ -187,7 +186,7 @@ def check_image_exists(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def list_generated_images(request):
     """List all generated images"""
     # Reload the JSON file to get latest data
@@ -237,7 +236,7 @@ def list_generated_images(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def news_image_stats(request):
     """Get statistics about news image generation"""
     
@@ -565,7 +564,7 @@ def generate_custom_image(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def list_custom_images(request):
     """List all custom generated images"""
     limit = request.GET.get('limit')
@@ -642,7 +641,7 @@ def list_custom_images(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def download_custom_image(request):
     """Download a custom generated image"""
     filename = request.data.get('filename', '').strip()
@@ -715,7 +714,7 @@ def download_custom_image(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def search_custom_images(request):
     """Search custom images by prompt text or generation ID"""
     search_text = request.data.get('search_text', '').strip().lower()
@@ -842,7 +841,7 @@ def search_custom_images(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def custom_image_stats(request):
     """Get statistics about custom image generation"""
     
@@ -933,7 +932,7 @@ def custom_image_stats(request):
     }
 )
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def delete_custom_image(request):
     """Delete a custom generated image"""
     filename = request.data.get('filename', '').strip()
@@ -1066,7 +1065,7 @@ import numpy as np
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def download_image_with_logo(request):
     """Download news image with adaptive vertical logo overlay"""
     title = request.data.get('title', '').strip()
@@ -1433,7 +1432,7 @@ def download_image_with_logo(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def analyze_image_brightness(request):
     """Analyze image brightness for adaptive logo placement"""
     title = request.data.get('title', '').strip()
@@ -1587,7 +1586,7 @@ def analyze_image_brightness(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def preview_logo_placement(request):
     """Preview logo placement on image"""
     title = request.data.get('title', '').strip()
@@ -1708,7 +1707,7 @@ def preview_logo_placement(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@user_credential
 def transcribe_audio(request):
     """Transcribe Persian audio using Whisper Large-v3 on demand, then free GPU memory."""
     audio_file = request.FILES.get('audio_file')
