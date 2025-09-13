@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from AnalyticsModel.models import APIRequest, APIEndpoint, UserSession, SystemMetrics, ErrorLog
+from AnalyticsModel.models import APIRequest, APIEndpoint, UserSession, SystemMetrics
 
 class Command(BaseCommand):
     help = 'Clean all analytics data'
