@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Documentation</title>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #redoc-container { height: 100vh; }
+  </style>
+</head>
+<body>
+<div id="redoc-container"></div>
+<script>
+  const redocContainer = document.getElementById("redoc-container");
+  const specUrl = "{% url 'swagger-yaml' %}";
+
+  console.log("Initializing Redoc with spec URL:", specUrl);
+
+  try {
+    Redoc.init(specUrl, {}, redocContainer)
+      .then(() => {
+        console.log("Redoc loaded successfully!");
+      })
+      .catch(err => {
+        console.error("Error loading Redoc:", err);
+        redocContainer.innerHTML = "<p style='color:red;'>Failed to load API docs. Check console for details.</p>";
+      });
+  } catch (err) {
+    console.error("Unexpected error initializing Redoc:", err);
+    redocContainer.innerHTML = "<p style='color:red;'>Unexpected error initializing API docs.</p>";
+  }
+
+  // Optional: check if container exists
+  if (!redocContainer) {
+    console.error("Redoc container not found!");
+  }
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: BackBoiler Model API
-  version: 1.1.0
+  version: 1.2.0
   description: BackBoiler framework for every Django Project needs.
 paths:
   /Auth/CheckUserAuth/:
@@ -248,7 +248,7 @@ paths:
                 timestamp:
                   type: string
                   format: date-time
-                  default: '2025-08-01 07:04:15'
+                  default: '2025-09-07 06:05:09'
                   description: Start timestamp for log retrieval
       security:
       - cookieAuth: []
@@ -709,6 +709,96 @@ paths:
                 return: boolean
                 asps: dict
           description: ASP user details retrieved successfully
+  /User/ChangePassword/:
+    post:
+      operationId: User_ChangePassword_create
+      description: Change user password
+      summary: Update password for authenticated user<br><br> <b> User Authentication
+        Required </b>
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_password:
+                  type: string
+                  description: Current password
+                new_password:
+                  type: string
+                  description: New password
+                confirm_password:
+                  type: string
+                  description: Confirm new password
+              required:
+              - old_password
+              - new_password
+              - confirm_password
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                message: str
+          description: Password changed successfully
+  /User/CheckAuthStatus/:
+    get:
+      operationId: User_CheckAuthStatus_retrieve
+      description: Check if user is authenticated
+      summary: Verify current authentication status<br><br> <b> No Authentication
+        Required </b>
+      tags:
+      - User
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                authenticated: boolean
+                user: dict
+          description: Authentication status
+  /User/GetTelegramInfo/:
+    post:
+      operationId: User_GetTelegramInfo_create
+      description: Get Telegram profile by user phone number
+      summary: Fetch Telegram info (telegram_id/chat_id) for a given phone number
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: string
+                  description: Phone number like 98912... without +
+              required:
+              - phone_number
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                user: object
+          description: Telegram info
   /User/GetUserToken/:
     post:
       operationId: User_GetUserToken_create
@@ -774,34 +864,304 @@ paths:
               schema:
                 return: boolean
           description: ''
+  /User/LoginUser/:
+    post:
+      operationId: User_LoginUser_create
+      description: User login with email or phone number
+      summary: Authenticate user and get access token
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email address
+                phone_number:
+                  type: string
+                  default: ''
+                  description: Phone number can be in format 09123211212, +9834567890
+                    or 9834567890
+                password:
+                  type: string
+                  default: ''
+                  description: User password
+              required:
+              - password
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                user: dict
+                user_token: str
+          description: Successful login
+  /User/LogoutUser/:
+    post:
+      operationId: User_LogoutUser_create
+      description: User logout
+      summary: Logout user from Django session<br><br> <b> User Authentication Required
+        </b>
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                message: str
+          description: Successful logout
+  /User/RegisterUser/:
+    post:
+      operationId: User_RegisterUser_create
+      description: Register new user account
+      summary: Create new user with email or phone number<br><br> <b> app Credential
+        </b>
+      tags:
+      - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                phone_number:
+                  type: string
+                  default: ''
+                  description: Phone number can be in format 09123211212, +9834567890
+                    or 9834567890
+                password:
+                  type: string
+                  default: ''
+                  description: Password can be at any size
+                first_name:
+                  type: string
+                  default: ''
+                  description: First name of user
+                last_name:
+                  type: string
+                  default: ''
+                  description: Last name of user
+              required:
+              - password
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                return: boolean
+                user: dict
+                user_token: str
+          description: Successful creation
+  /analytics/SystemCheckAPIView/:
+    get:
+      operationId: analytics_SystemCheckAPIView_retrieve
+      description: Returns comprehensive system metrics and optionally checks resource
+        availability.
+      parameters:
+      - in: query
+        name: max_cpu
+        schema:
+          type: string
+        description: Maximum CPU usage allowed (e.g., "80" for 80%)
+      - in: query
+        name: min_gpu_memory
+        schema:
+          type: string
+        description: Minimum GPU memory required (e.g., "2.0" for 2 GB or "30%" for
+          30% free)
+      - in: query
+        name: min_memory
+        schema:
+          type: string
+        description: Minimum memory required (e.g., "4.0" for 4 GB or "30%" for 30%
+          free)
+      tags:
+      - System
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /analytics/api/{metric_type}/:
+    get:
+      operationId: analytics_api_retrieve
+      description: Retrieve analytics data for different metric types (overview, users,
+        endpoints, realtime, errors, performance, geographic, devices).
+      summary: Get analytics metrics
+      parameters:
+      - in: path
+        name: metric_type
+        schema:
+          type: string
+          enum:
+          - devices
+          - endpoints
+          - errors
+          - geographic
+          - overview
+          - performance
+          - realtime
+          - users
+        description: The type of metric to retrieve
+        required: true
+      - in: query
+        name: range
+        schema:
+          type: string
+          enum:
+          - 1h
+          - 24h
+          - 30d
+          - 7d
+        description: Time range for metrics
+      tags:
+      - analytics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsOverview'
+          description: ''
+        '400':
+          description: Invalid metric type
+        '403':
+          description: Unauthorized
+        '503':
+          description: Feature disabled
 components:
   schemas:
-    LevelEnum:
+    AnalyticsOverview:
+      type: object
+      properties:
+        total_requests:
+          type: integer
+        avg_response_time:
+          type: number
+          format: double
+        error_rate:
+          type: number
+          format: double
+        active_users:
+          type: integer
+        total_users:
+          type: integer
+        online_users:
+          type: integer
+      required:
+      - active_users
+      - avg_response_time
+      - error_rate
+      - online_users
+      - total_requests
+      - total_users
+    ErrorCategoryEnum:
       enum:
-      - error
-      - warning
-      - urgent error
-      - return
-      - info
+      - none
+      - validation
+      - authentication
+      - permission
+      - not_found
+      - server
+      - database
+      - external_api
+      - business_logic
+      - unknown
       type: string
       description: |-
-        * `error` - Error
-        * `warning` - Warning
-        * `urgent error` - Urgent Error
-        * `return` - Return
+        * `none` - None
+        * `validation` - Validation Error
+        * `authentication` - Authentication Error
+        * `permission` - Permission Error
+        * `not_found` - Not Found
+        * `server` - Server Error
+        * `database` - Database Error
+        * `external_api` - External API Error
+        * `business_logic` - Business Logic Error
+        * `unknown` - Unknown Error
+    LevelEnum:
+      enum:
+      - info
+      - warning
+      - error
+      - critical
+      - debug
+      type: string
+      description: |-
         * `info` - Info
+        * `warning` - Warning
+        * `error` - Error
+        * `critical` - Critical
+        * `debug` - Debug
     Log:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        timestamp:
-          type: string
-          format: date-time
         user:
           type: integer
           nullable: true
+        user_display:
+          type: string
+          readOnly: true
+        timestamp:
+          type: string
+          format: date-time
         level:
           $ref: '#/components/schemas/LevelEnum'
         message:
@@ -809,9 +1169,14 @@ components:
         exception_type:
           type: string
           maxLength: 255
+        stack_trace:
+          type: string
         file_path:
           type: string
           maxLength: 255
+        full_file_path:
+          type: string
+          maxLength: 500
         line_number:
           type: integer
           maximum: 9223372036854775807
@@ -821,8 +1186,31 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        api_endpoint:
+          type: string
+          maxLength: 255
+        http_method:
+          type: string
+          maxLength: 10
+        is_error:
+          type: boolean
+        error_category:
+          $ref: '#/components/schemas/ErrorCategoryEnum'
+        error_category_display:
+          type: string
+          readOnly: true
+        request_path:
+          type: string
+          maxLength: 500
+        user_ip:
+          type: string
+          nullable: true
+        user_agent:
+          type: string
       required:
+      - error_category_display
       - id
+      - user_display
   securitySchemes:
     basicAuth:
       type: http

@@ -1,0 +1,169 @@
+{% extends "ui/dashboard.html" %}
+{% load i18n %}
+
+{% block title %}Dashboard – {{ config.project.display_name }}{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+
+
+{% block extra_css %}
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  <div id="main-content" class='z-10'>
+
+    {# ─────────────────────── DASHBOARD TAB ─────────────────────── #}
+    {% include "Dashboard/partials/dashboard_section.html" %}
+
+    {# ─────────────────────── WORKFLOWS TAB ─────────────────────── #}
+    {% include "Dashboard/partials/workflows_section.html" %}
+
+    {# ─────────────────────── ANALYTICS TAB ─────────────────────── #}
+    {% include "Dashboard/partials/analytics_section.html" %}
+
+    {# ─────────────────────── LOGS TAB ─────────────────────── #}
+    {% include "Dashboard/partials/logs_section.html" %}
+
+
+    {# ─────────────────────── METRICS TAB ─────────────────────── #}
+    {% include "Dashboard/partials/metrics_section.html" %}
+    
+     {# ─────────────────────── MESSAGES TAB ─────────────────────── #}
+    {% include "Dashboard/partials/messages_section.html" %}
+
+    {# ─────────────────────── SETTINGS TAB ─────────────────────── #}
+    {% include "Dashboard/partials/setting_section.html" %}
+
+
+    {# ─────────────────────── ADDITIONAL TABS ─────────────────────── #}
+    {# ─────────────────────── DAEMON TAB ─────────────────────── #}
+    {% include "Dashboard/partials/daemon_section.html" %}
+   
+    
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+
+  const navItems = [
+    { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true, access: false },
+    { key: '2', section: "workflows", label: "{{ _('Workflows') }}", icon: "workflow", access: 'superuser' },
+    { key: '3', section: "analytics", label: "{{ _('Analytics') }}", icon: "bar-chart-3", access: 'superuser' },
+    { key: '4', section: "logs", label: "{{ _('Logs') }}", icon: "scroll-text", access: 'superuser' },
+
+  { key: '9', section: "daemon", label: "{{ _('Daemon') }}", icon: "server-cog", access: 'superuser' },
+    { key: '5', section: "metrics", label: "{{ _('Metrics') }}", icon: "microchip", access: 'superuser' },
+
+
+    { key: '7', section: "messages", label: "{{ _('Messages') }}", icon: "mails", access: 'superuser' },
+    { key: '8', section: "settings", label: "{{ _('Settings') }}", icon: "settings", access: 'superuser' },];
+
+
+    const contentSections = {
+      dashboard: document.getElementById('dashboard-content'),
+      workflows: document.getElementById('workflows-content'),
+      analytics: document.getElementById('apiAnalysis-content'),
+      logs: document.getElementById('logs-content'),
+
+      metrics: document.getElementById('metrics-content'),
+
+      messages: document.getElementById('messages-content'),
+      settings: document.getElementById('settings-content'),
+      daemon: document.getElementById('daemon-content'),};
+
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      const nav = new NavigationMain('navigationMain', navItems, contentSections);
+      window.nav = nav;
+    });
+</script>
+
+
+<script>
+  {% comment %} {% include "dashboardcli/partials/quickactions.js" %} {% endcomment %}
+  {% include "Dashboard/partials/messages.js" %}
+  {% include "Dashboard/partials/settings.js" %}
+    
+</script>
+
+
+<script>
+function toggleApp(appId) {
+    const content = document.getElementById(appId + '-content');
+    const icon = document.getElementById(appId + '-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function toggleService(serviceId) {
+    const content = document.getElementById(serviceId + '-content');
+    const icon = document.getElementById(serviceId + '-icon');
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function filterWorkflows() {
+    const searchTerm = document.getElementById('workflow-search').value.toLowerCase();
+    const apps = document.querySelectorAll('.app-item');
+    
+    apps.forEach(app => {
+        const appName = app.getAttribute('data-app-name');
+        const services = app.querySelectorAll('.service-item');
+        const templates = app.querySelectorAll('[data-template-name]');
+        
+        let appVisible = false;
+        
+        // Check if app name matches
+        if (appName.includes(searchTerm)) {
+            appVisible = true;
+            app.style.display = 'block';
+            // Show all services and templates if app matches
+            services.forEach(s => s.style.display = 'block');
+            templates.forEach(t => t.style.display = 'flex');
+        } else {
+            // Check services and templates
+            services.forEach(service => {
+                const serviceName = service.getAttribute('data-service-name');
+                if (serviceName && serviceName.includes(searchTerm)) {
+                    appVisible = true;
+                    service.style.display = 'block';
+                } else {
+                    service.style.display = 'none';
+                }
+            });
+            
+            templates.forEach(template => {
+                const templateName = template.getAttribute('data-template-name');
+                if (templateName && templateName.includes(searchTerm)) {
+                    appVisible = true;
+                    template.style.display = 'flex';
+                } else {
+                    template.style.display = 'none';
+                }
+            });
+        }
+        
+        app.style.display = appVisible ? 'block' : 'none';
+    });
+}
+</script>
+
+
+
+
+
+{% endblock %}

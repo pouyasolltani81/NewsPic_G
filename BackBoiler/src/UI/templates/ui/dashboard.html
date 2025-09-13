@@ -1,0 +1,412 @@
+{# templates/ui/base.html #}
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html id='main' lang="{{ LANGUAGE_CODE }}" dir='ltr' class='overflow-y-hidden'>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="timezone" content="Asia/Tehran">
+  <title>{% block title %}Workflow UI{% endblock %}</title>
+  {% comment %} <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" /> {% endcomment %}
+
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.10.0/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      corePlugins: {
+        preflight: true,
+      },
+      variants: {
+        extend: {
+          margin: ['rtl'],
+          padding: ['rtl'],
+          space: ['rtl'],
+        }
+      }
+    }
+  </script>
+
+  {% block extra_css %}
+  {% if block.super %}{{ block.super }}{% endif %}
+  {% endblock %}
+  <style>
+  {% include 'ui/partials/calender.css'%}
+</style>
+    
+
+</head>
+
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-sm space-y-2 z-50"></div>
+
+<!-- Modal Overlay -->
+<div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+<!-- Modal Container -->
+<div id="modal-container" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-screen-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4">
+    <div class="flex justify-between items-center">
+      <div id="modal-title" class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white"></div>
+      <button onclick="hideModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div>
+      <div id="modal-content" class="text-gray-700 dark:text-gray-300 rtl:right-to-left ltr:left-to-right"></div>
+      <div class="pt-2" id='close_modal'>
+        <button onclick="hideModal()" class="w-full text-sm font-medium py-2.5 px-4 rounded-md border border-blue-700 dark:border-blue-300 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors">
+          {% trans 'close' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% comment %} notifications  {% endcomment %}
+
+
+        <!-- Notification Dropdown Box -->
+        <div id="notif-box"
+        class="fixed z-50 top-[5rem] right-4 sm:right-8 md:right-16 lg:right-32 w-[calc(100vw-2rem)] sm:w-80 max-h-96 overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 hidden"
+        >
+        </div>
+
+
+<body class="bg-gray-50 dark:bg-gray-900 h-screen overflow-y-hidden transition-colors duration-300" dir-test="{% if get_current_language_bidi %}rtl{% else %}ltr{% endif %}" data-user-id="{{ request.user.id }}">
+  <div class="flex h-full">
+
+    <!-- Sidebar -->
+    <nav id="navigationMain"
+  class="fixed hidden md:block md:relative inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-all duration-300 transform -translate-x-full md:translate-x-0">
+</nav>
+
+    <!-- Main area -->
+    <div class="flex-1 flex flex-col">
+
+      <!-- Header -->
+      <header
+        class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-4 flex items-center justify-between transition-colors duration-300">
+        <div class="flex items-center space-x-2 sm:space-x-4 rtl:space-x-reverse">
+          
+          <h2 id="page-title" class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 dark:text-white truncate">
+            {% block page_heading %}Page Title{% endblock %}
+          </h2>
+        </div>
+
+        <!-- Buttons  -->
+        {% include "ui/partials/header_buttons.html" %}
+
+        <!-- QA toggle (mobile) -->
+         <button id="qa-toggle"
+          class="hidden md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ml-2 sm:ml-4 rtl:ml-0 rtl:mr-2 sm:rtl:mr-4">
+          <i data-lucide="more-vertical" class="w-6 h-6 text-gray-600 dark:text-gray-400"></i>
+        </button> 
+      </header>
+
+      <!-- Main content -->
+      <div class="flex-1 flex overflow-hidden relative">
+        <main id='main_content' class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Includes -->
+  <script src="{% static 'ui/script.js' %}"></script>
+  <script src="{% static 'ui/navigationMain.js' %}"></script>
+
+  
+  <script>
+    lucide.createIcons();
+
+    // Mobile navigation toggle with overlay
+    const navToggle = document.getElementById('nav-toggle');
+    const navigationMain = document.getElementById('navigationMain');
+ 
+  
+    
+    // Create overlay for mobile navigation
+    const mobileOverlay = document.createElement('div');
+    mobileOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden';
+    document.body.appendChild(mobileOverlay);
+
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      // document.getElementById('navigationMain').classList.toggle('-translate-x-full');
+      document.getElementById('navigationMain').classList.toggle('hidden');
+
+    });
+
+    // Close mobile menu when clicking overlay
+    mobileOverlay.addEventListener('click', () => {
+      navigationMain.classList.add('-translate-x-full');
+      mobileOverlay.classList.add('hidden');
+    });
+
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (window.innerWidth >= 768) {
+          mobileOverlay.classList.add('hidden');
+          navigationMain.classList.remove('-translate-x-full');
+        }
+      }, 250);
+    });
+  </script>
+  <script>
+    window.translations = {
+      noMessages: "{{ _('no_new_messages') }}",
+      newNotification: "{{ _('new_notification') }}",
+      noContent: "{{ _('no_content_available') }}",
+      showAll: "{{ _('navigation.messages.show_all_messages') }}"
+      
+    };
+    window.loginTranslations = {
+      account: "{{ _('account') }}",
+      login: "{{ _('login') }}",
+      register: "{{ _('register') }}",
+      emailOrPhone: "{{ _('email_or_phone') }}",
+      password: "{{ _('password') }}",
+      firstName: "{{ _('first_name') }}",
+      lastName: "{{ _('last_name') }}",
+      phone: "{{ _('phone_number') }}",
+      telegramId: "{{ _('telegram_id') }}",
+      createAccount: "{{ _('create_account') }}",
+      changePassword: "{{ _('change_password') }}",
+      currentPassword: "{{ _('current_password') }}",
+      newPassword: "{{ _('new_password') }}",
+      confirmNewPassword: "{{ _('confirm_new_password') }}",
+      successLogin: "{{ _('login_success') }}",
+      successRegister: "{{ _('register_success') }}",
+      successPasswordChange: "{{ _('password_change_success') }}",
+      logoutSuccess: "{{ _('logout_success') }}",
+      adminPanel: "{{ _('admin_panel') }}",
+      settings: "{{ _('settings') }}",
+      signOut: "{{ _('sign_out') }}",
+      userId: "{{ _('user_id') }}",
+      email: "{{ _('email') }}",
+      name: "{{ _('name') }}",
+      status: "{{ _('status') }}",
+      active: "{{ _('active') }}",
+      inactive: "{{ _('inactive') }}",
+      joined: "{{ _('joined') }}",
+      lastLogin: "{{ _('last_login') }}",
+      never: "{{ _('never') }}",
+      guest: "{{ _('guest') }}",
+      guestUser: "{{ _('guest_user') }}"
+    };
+  </script>
+  <script src="{% static 'ui/buttonActions.js' %}" defer></script>
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script> {% endcomment %}
+  
+
+
+  {% block extra_js %}
+  {% if block.super %}{{ block.super }}{% endif %}
+  {% endblock %}
+
+
+<script>
+
+const API_BASE_URL = '/User'; // Adjust this to your API base URL
+const API_ENDPOINTS = {
+    checkAuth: '/CheckAuthStatus/',
+    getUserByUUID: '/GetUserbyUUID/',
+    logout: '/LogoutUser/',
+    changePassword: '/ChangePassword/'
+};
+
+
+
+// Utility Functions
+const apiRequest = async (endpoint, method = 'POST', data = null) => {
+    const options = {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    };
+    
+    if (data && method !== 'GET') {
+        options.body = JSON.stringify(data);
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.message || 'API request failed');
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('API Request Error:', error);
+        throw error;
+    }
+};
+
+const getCsrfToken = () => {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.querySelector('meta[name="csrf-token"]')?.content || 
+           '{{ csrf_token }}';
+};
+
+
+
+// Translation strings
+const translations = {
+    userId: "{% trans 'user_id' %}",
+    email: "{% trans 'email' %}",
+    name: "{% trans 'name' %}",
+    status: "{% trans 'status' %}",
+    active: "{% trans 'active' %}",
+    inactive: "{% trans 'inactive' %}",
+    joined: "{% trans 'joined' %}",
+    lastLogin: "{% trans 'last_login' %}",
+    never: "{% trans 'never' %}",
+    staff: "{% trans 'staff' %}",
+    superuser: "{% trans 'superuser' %}",
+    settings: "{% trans 'settings' %}",
+    adminPanel: "{% trans 'admin_panel' %}",
+    signOut: "{% trans 'sign_out' %}",
+    userMenu: "{% trans 'user_menu' %}",
+    guest: "{% trans 'guest' %}",
+    guestUser: "{% trans 'guest_user' %}",
+    signIn: "{% trans 'sign_in' %}"
+};
+
+// --- Add Change Password Modal ---
+const changePasswordModal = `
+  <form id="change-password-form" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+      <input type="password" name="old_password" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="Current password">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+      <input type="password" name="new_password" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="New password">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+      <input type="password" name="confirm_password" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="Confirm new password">
+    </div>
+    <div id="change-password-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm"></div>
+    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Change Password</button>
+  </form>
+`;
+
+// --- User Menu Button Logic ---
+document.getElementById("user-menu-btn").addEventListener("click", () => {
+  {% if user.is_authenticated %}
+  const userId = "{{ user.id|default:'' }}";
+  const username = "{{ user.username|default:''|escapejs }}";
+  const userFullName = "{{ user.get_full_name|default:''|escapejs }}";
+  const firstName = "{{ user.first_name|default:''|escapejs }}";
+  const lastName = "{{ user.last_name|default:''|escapejs }}";
+  const userEmail = "{{ user.email|default:''|escapejs }}";
+  const phoneNumber = "{{ user.phone_number|default:''|escapejs }}";
+  const isActive = {{ user.is_active|yesno:"true,false" }};
+  const isStaff = {{ user.is_staff|yesno:"true,false" }};
+  const isSuperuser = {{ user.is_superuser|yesno:"true,false" }};
+  const dateJoined = "{{ user.date_joined|date:'M d, Y H:i' }}";
+  const lastLogin = "{{ user.last_login|date:'M d, Y H:i'|default:'' }}";
+  const adminUrl = "{% url 'admin:index' %}";
+
+  const csrfToken = "{{ csrf_token }}";
+
+  const content = `
+        <div class="space-y-2">
+            <div class="p-3 border-b border-gray-200 dark:border-gray-600">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-800 dark:text-white">${userFullName || username}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@${username}</p>
+                    </div>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">${loginTranslations.userId}:</span><span class="text-gray-800 dark:text-white font-mono">#${userId}</span></div>
+                    ${userEmail ? `<div class=\"flex justify-between\"><span class=\"text-gray-600 dark:text-gray-400\">${loginTranslations.email}:</span><span class=\"text-gray-800 dark:text-white\">${userEmail}</span></div>` : ''}
+                    ${(firstName || lastName) ? `<div class=\"flex justify-between\"><span class=\"text-gray-600 dark:text-gray-400\">${loginTranslations.name}:</span><span class=\"text-gray-800 dark:text-white\">${firstName} ${lastName}</span></div>` : ''}
+                    ${phoneNumber ? `<div class=\"flex justify-between\"><span class=\"text-gray-600 dark:text-gray-400\">${loginTranslations.phone}:</span><span class=\"text-gray-800 dark:text-white\">${phoneNumber}</span></div>` : ''}
+                    <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">${loginTranslations.telegramId}:</span><span id="user-telegram-id" class="text-gray-800 dark:text-white">-</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">${loginTranslations.status}:</span><span class="${isActive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${isActive ? loginTranslations.active : loginTranslations.inactive}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">${loginTranslations.joined}:</span><span class="text-gray-800 dark:text-white">${dateJoined}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-600 dark:text-gray-400">${loginTranslations.lastLogin}:</span><span class="text-gray-800 dark:text-white">${lastLogin || loginTranslations.never}</span></div>
+                </div>
+            </div>
+            <button class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="document.querySelector('[data-section=settings]').click(); hideModal();">
+                <div class="flex items-center space-x-3"><i data-lucide="settings" class="w-4 h-4 text-gray-600 dark:text-gray-400"></i><span class="text-gray-800 dark:text-white">${loginTranslations.settings}</span></div>
+            </button>
+            ${isStaff ? `<a href="${adminUrl}" class="block w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"><div class="flex items-center space-x-3"><i data-lucide="shield" class="w-4 h-4 text-gray-600 dark:text-gray-400"></i><span class="text-gray-800 dark:text-white">${loginTranslations.adminPanel}</span></div></a>` : ''}
+            <button id="change-password-btn" class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-yellow-600 dark:text-yellow-400"><div class="flex items-center space-x-3"><i data-lucide="key" class="w-4 h-4"></i><span>${loginTranslations.changePassword}</span></div></button>
+            <button id="logout-btn" class="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-red-600 dark:text-red-400"><div class="flex items-center space-x-3"><i data-lucide="log-out" class="w-4 h-4"></i><span>${loginTranslations.signOut}</span></div></button>
+        </div>
+    `;
+  showModal(loginTranslations.account, content);
+  if (window.lucide && typeof window.lucide.createIcons === 'function') { window.lucide.createIcons(); }
+  setTimeout(() => {
+    document.getElementById('logout-btn').onclick = async () => {
+      try {
+        await apiRequest(API_ENDPOINTS.logout, 'POST');
+        showToast('Logged out successfully', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+      } catch (e) {
+        showToast('Logout failed', 'error');
+      }
+    };
+    document.getElementById('change-password-btn').onclick = () => {
+      showModal('Change Password', changePasswordModal);
+      document.getElementById('change-password-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+          old_password: form.old_password.value,
+          new_password: form.new_password.value,
+          confirm_password: form.confirm_password.value
+        };
+        const errorDiv = document.getElementById('change-password-error');
+        errorDiv.classList.add('hidden');
+        try {
+          const res = await apiRequest(API_ENDPOINTS.changePassword, 'POST', data);
+          if (res.return) {
+            showToast('Password changed successfully', 'success');
+            hideModal();
+          } else {
+            errorDiv.textContent = res.error || 'Failed to change password';
+            errorDiv.classList.remove('hidden');
+          }
+        } catch (err) {
+          errorDiv.textContent = err.message || 'Failed to change password';
+          errorDiv.classList.remove('hidden');
+        }
+      };
+    };
+  }, 100);
+  {% else %}
+  if (window.nav && typeof window.nav.showLoginModal === 'function') { window.nav.showLoginModal(); } else { alert('Login modal unavailable'); }
+  {% endif %}
+});
+</script>
+
+
+</body>
+
+</html>

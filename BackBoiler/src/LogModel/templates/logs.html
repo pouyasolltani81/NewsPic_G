@@ -4,90 +4,331 @@
 
 {% block content %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
-<div class="container p-6 px-6 bg-gray-100 max-w-full">
-    <h1 class="text-2xl font-bold mb-6 text-indigo-700">Log Dashboard</h1>
-    
-    <div class="p-6 rounded-lg shadow-lg mb-6 border border-blue-500 bg-blue-100">
-        <div class="flex flex-wrap -mx-3">
-            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                <h2 class="text-lg font-bold mb-3 text-indigo-700">
-                    <i class="fas fa-calendar-alt mr-2"></i>Filter by Date
-                </h2>
-                <div class="flex items-center space-x-4">
-                    <label for="user-date" class="text-sm font-bold text-gray-700"> List From:</label>
-                    <div class="relative">
-                        <input datepicker type="text" id="user-date" class="text-center p-3 border border-blue-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent" placeholder="YYYY/MM/DD">
+<div class="min-h-screen bg-gray-50 transition-colors duration-200">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Log Dashboard</h1>
+            <p class="text-gray-600 mt-2">Monitor system logs and API activities</p>
+        </div>
+       
+        <!-- Filters Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Date Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                        Date Range
+                    </label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="user-date" 
+                            class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Select date"
+                        >
+                        <input 
+                            type="time" 
+                            id="user-time" 
+                            class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value="00:00"
+                        >
                     </div>
-                    <div class="relative">
-                        <input type="time" id="user-time" class="text-center p-3 border border-blue-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent" value="00:00">
+                </div>
+                
+                <!-- Search -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="search" class="w-4 h-4 inline mr-1"></i>
+                        Search
+                    </label>
+                    <input 
+                        type="text" 
+                        id="log-search" 
+                        placeholder="Search logs..." 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+
+                <!-- Level Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="filter" class="w-4 h-4 inline mr-1"></i>
+                        Log Level
+                    </label>
+                    <select 
+                        id="level-filter" 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">All Levels</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                        <option value="critical">Critical</option>
+                        <option value="debug">Debug</option>
+                    </select>
+                </div>
+
+                <!-- Error Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4 inline mr-1"></i>
+                        Error Type
+                    </label>
+                    <select 
+                        id="error-filter" 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">All Types</option>
+                        <option value="true">Errors Only</option>
+                        <option value="false">Non-Errors</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <!-- API Endpoint Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="globe" class="w-4 h-4 inline mr-1"></i>
+                        API Endpoint
+                    </label>
+                    <input 
+                        type="text" 
+                        id="endpoint-filter" 
+                        placeholder="Filter by endpoint..." 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+
+                <!-- Items per page -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="list" class="w-4 h-4 inline mr-1"></i>
+                        Items per page
+                    </label>
+                    <select 
+                        id="items-per-page" 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+
+                <!-- User Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
+                        User
+                    </label>
+                    <input 
+                        type="text" 
+                        id="user-filter" 
+                        placeholder="Filter by user..." 
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <button id="refresh-logs" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                    Refresh
+                </button>
+                
+                <button id="delete-all-logs" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                    Delete All
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                <span id="last-updated">Never updated</span>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Total Logs</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-logs">0</p>
+                    </div>
+                    <div class="p-3 bg-blue-100 rounded-lg">
+                        <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
                     </div>
                 </div>
             </div>
-            <div class="w-full md:w-1/2 px-3">
-                <h2 class="text-lg font-bold mb-3 text-blue-700">
-                    <i class="fas fa-search mr-2"></i>Search Logs
-                </h2>
-                <input type="text" id="log-search" placeholder="Enter keywords..." 
-                    class="w-full p-3 border border-blue-300 rounded-lg shadow-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent">
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Errors</p>
+                        <p class="text-2xl font-bold text-red-600" id="error-count">0</p>
+                    </div>
+                    <div class="p-3 bg-red-100 rounded-lg">
+                        <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Warnings</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="warning-count">0</p>
+                    </div>
+                    <div class="p-3 bg-yellow-100 rounded-lg">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Info</p>
+                        <p class="text-2xl font-bold text-blue-600" id="info-count">0</p>
+                    </div>
+                    <div class="p-3 bg-blue-100 rounded-lg">
+                        <i data-lucide="info" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Critical</p>
+                        <p class="text-2xl font-bold text-purple-600" id="critical-count">0</p>
+                    </div>
+                    <div class="p-3 bg-purple-100 rounded-lg">
+                        <i data-lucide="zap" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                </div>
             </div>
         </div>
         
-    </div>
-
-    <div class="flex items-center mb-4 space-x-6">
-        <button id="refresh-logs" class="bg-green-500 hover:bg-green-600 text-black font-bold p-3 rounded">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-        <span id="last-updated" class="text-gray-600 border-b-2 border-dotted border-blue-500"></span>
-        <button id="delete-all-logs" class="bg-red-500 hover:bg-red-600 text-white font-bold p-3 rounded">
-            <i class="fas fa-trash-alt"></i>
-        </button>
-    </div>
-    
-    
-    <div class="p-6 px-6 bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="w-full overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="bg-blue-200 text-blue-800 text-center text-sm">
-                    <tr>
-                        <th class="py-2 px-3 ">ID</th>
-                        <th class="py-3 px-4 ">Time Stamp</th>
-                        <th class="py-3 px-4 ">User</th>
-                        <th class="py-3 px-4 ">Level</th>
-                        <th class="py-3 px-4 ">Message</th>
-                        <th class="py-3 px-4 ">Exception Type</th>
-                        <th class="py-3 px-4 ">File Path</th>
-                        <th class="py-3 px-4 ">Line Number</th>
-                        <th class="py-2 px-3 ">View Name</th>
-                    </tr>
-                </thead>
-                <tbody id="log-table-body">
-                    <!-- Log entries will be inserted here -->
-                </tbody>
-            </table>
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">API Endpoint</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Log entries will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-sm text-gray-700">
+                        Showing <span id="showing-start" class="font-medium">0</span> to <span id="showing-end" class="font-medium">0</span> of <span id="showing-total" class="font-medium">0</span> results
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <button id="prev-page" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <div id="page-numbers" class="flex items-center gap-1">
+                            <!-- Page numbers will be inserted here -->
+                        </div>
+                        
+                        <button id="next-page" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    
 </div>
+
+<!-- Log Details Modal -->
+<div id="log-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Log Details</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div id="modal-content" class="mt-2">
+            <!-- Log details will be inserted here -->
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // State management
+    let allLogs = [];
+    let filteredLogs = [];
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    
+    // DOM elements
     const dateInput = document.getElementById('user-date');
     const timeInput = document.getElementById('user-time');
     const logSearch = document.getElementById('log-search');
+    const levelFilter = document.getElementById('level-filter');
+    const errorFilter = document.getElementById('error-filter');
+    const endpointFilter = document.getElementById('endpoint-filter');
+    const userFilter = document.getElementById('user-filter');
     const refreshButton = document.getElementById('refresh-logs');
     const deleteAllButton = document.getElementById('delete-all-logs');
     const lastUpdated = document.getElementById('last-updated');
     const logTableBody = document.getElementById('log-table-body');
+    const itemsPerPageSelect = document.getElementById('items-per-page');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageNumbers = document.getElementById('page-numbers');
+    
+    // Stats elements
+    const totalLogsEl = document.getElementById('total-logs');
+    const errorCountEl = document.getElementById('error-count');
+    const warningCountEl = document.getElementById('warning-count');
+    const infoCountEl = document.getElementById('info-count');
+    const criticalCountEl = document.getElementById('critical-count');
 
-    flatpickr(dateInput, { dateFormat: "Y/m/d" });
-    flatpickr(timeInput, { enableTime: true, noCalendar: true, dateFormat: "H:i" });
+    // Initialize Flatpickr
+    flatpickr(dateInput, { 
+        dateFormat: "Y/m/d",
+        defaultDate: new Date(Date.now() - 86400000)
+    });
 
+    // Set default date to yesterday
     const yesterday = new Date(Date.now() - 86400000);
-    document.getElementById('user-date').value = yesterday.toISOString().split('T')[0].replace(/-/g, '/');
+    dateInput.value = yesterday.toISOString().split('T')[0].replace(/-/g, '/');
 
     const getFormattedDateTime = () => {
         if (!dateInput.value || !timeInput.value) {
@@ -101,79 +342,299 @@
         const classes = {
             'error': 'bg-red-100 text-red-800',
             'warning': 'bg-yellow-100 text-yellow-800',
-            'urgent error': 'bg-red-300 text-yellow-800',
-            'info': 'bg-blue-100 text-blue-800'
+            'critical': 'bg-purple-100 text-purple-800',
+            'info': 'bg-blue-100 text-blue-800',
+            'debug': 'bg-gray-100 text-gray-800'
         };
         return classes[level.toLowerCase()] ?? 'bg-gray-100 text-gray-800';
     };
 
-    const updateLogsTable = logs => {
-        const fragment = document.createDocumentFragment();
-        logs.forEach(log => {
-            const row = document.createElement('tr');
-            row.className = 'border-b hover:bg-gray-50 text-sm';
-            row.innerHTML = `
-                <td class="py-2 px-4 font-bold">${log.id}</td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                    <div>${new Date(log.timestamp).toLocaleDateString()}</div>
-                    <div class="flex flex-col mt-1 border-t-2 border-blue-500 border-dotted"></div>
-                    <div>${new Date(log.timestamp).toLocaleTimeString()}</div>
-                </td>
-                <td class="py-2 px-4">${log.user ?? ''}</td>
-                <td class="py-2 px-4 text-center"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getLevelClass(log.level)}">${log.level}</span></td>
-                <td class="py-2 px-4">${log.message}</td>
-                <td class="py-2 px-4">${log.exception_type}</td>
-                <td class="py-2 px-4">${log.file_path}</td>
-                <td class="py-2 px-4">${log.line_number}</td>
-                <td class="py-2 px-4">${log.view_name}</td>
+    const getErrorCategoryBadge = (category) => {
+        const badges = {
+            'validation': 'bg-orange-100 text-orange-800',
+            'authentication': 'bg-indigo-100 text-indigo-800',
+            'permission': 'bg-pink-100 text-pink-800',
+            'not_found': 'bg-gray-100 text-gray-800',
+            'server': 'bg-red-100 text-red-800',
+            'database': 'bg-purple-100 text-purple-800',
+            'external_api': 'bg-teal-100 text-teal-800',
+            'business_logic': 'bg-yellow-100 text-yellow-800',
+            'unknown': 'bg-gray-100 text-gray-800',
+            'none': 'bg-green-100 text-green-800'
+        };
+        return badges[category] ?? 'bg-gray-100 text-gray-800';
+    };
+
+    const updateStats = () => {
+        const stats = filteredLogs.reduce((acc, log) => {
+            const level = log.level.toLowerCase();
+            if (level === 'error') acc.errors++;
+            else if (level === 'warning') acc.warnings++;
+            else if (level === 'info') acc.info++;
+            else if (level === 'critical') acc.critical++;
+            return acc;
+        }, { errors: 0, warnings: 0, info: 0, critical: 0 });
+
+        totalLogsEl.textContent = filteredLogs.length;
+        errorCountEl.textContent = stats.errors;
+        warningCountEl.textContent = stats.warnings;
+        infoCountEl.textContent = stats.info;
+        criticalCountEl.textContent = stats.critical;
+    };
+
+    const renderPagination = () => {
+        const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+        
+        // Update showing info
+        const start = filteredLogs.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredLogs.length);
+        document.getElementById('showing-start').textContent = start;
+        document.getElementById('showing-end').textContent = end;
+        document.getElementById('showing-total').textContent = filteredLogs.length;
+        
+        // Enable/disable prev/next buttons
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        
+        // Generate page numbers
+        pageNumbers.innerHTML = '';
+        
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.appendChild(createPageButton(i, i === currentPage));
+            }
+        } else {
+            if (currentPage <= 3) {
+                for (let i = 1; i <= 5; i++) {
+                    pageNumbers.appendChild(createPageButton(i, i === currentPage));
+                }
+                pageNumbers.appendChild(createEllipsis());
+                pageNumbers.appendChild(createPageButton(totalPages, false));
+            } else if (currentPage >= totalPages - 2) {
+                pageNumbers.appendChild(createPageButton(1, false));
+                pageNumbers.appendChild(createEllipsis());
+                for (let i = totalPages - 4; i <= totalPages; i++) {
+                    pageNumbers.appendChild(createPageButton(i, i === currentPage));
+                }
+            } else {
+                pageNumbers.appendChild(createPageButton(1, false));
+                pageNumbers.appendChild(createEllipsis());
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pageNumbers.appendChild(createPageButton(i, i === currentPage));
+                }
+                pageNumbers.appendChild(createEllipsis());
+                pageNumbers.appendChild(createPageButton(totalPages, false));
+            }
+        }
+        
+        lucide.createIcons();
+    };
+
+    const createPageButton = (page, isActive) => {
+        const button = document.createElement('button');
+        button.className = `px-3 py-1 text-sm rounded-lg transition-colors ${
+            isActive 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700'
+        }`;
+        button.textContent = page;
+        button.onclick = () => {
+            currentPage = page;
+            renderLogs();
+        };
+        return button;
+    };
+
+    const createEllipsis = () => {
+        const span = document.createElement('span');
+        span.className = 'px-2 text-gray-500';
+        span.textContent = '...';
+        return span;
+    };
+
+    const renderLogs = () => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const logsToShow = filteredLogs.slice(start, end);
+        
+        if (logsToShow.length === 0) {
+            logTableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center">
+                            <i data-lucide="inbox" class="w-12 h-12 text-gray-400 mb-3"></i>
+                            <p class="text-gray-600 font-medium">No logs found</p>
+                            <p class="text-sm text-gray-500 mt-1">Try adjusting your filters or date range</p>
+                        </div>
+                    </td>
+                </tr>
             `;
-            fragment.appendChild(row);
+        } else {
+            logTableBody.innerHTML = logsToShow.map(log => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${log.id}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex flex-col">
+                            <span class="font-medium">${new Date(log.timestamp).toLocaleDateString()}</span>
+                            <span class="text-xs text-gray-500">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        ${log.user_display || log.user || 'Anonymous'}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getLevelClass(log.level)}">
+                            ${log.level}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        ${log.is_error ? `
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getErrorCategoryBadge(log.error_category)}">
+                                ${log.error_category_display || log.error_category}
+                            </span>
+                        ` : '<span class="text-gray-400">-</span>'}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                        ${log.api_endpoint ? `
+                            <div class="flex flex-col">
+                                <span class="font-medium truncate max-w-xs" title="${log.api_endpoint}">${log.api_endpoint}</span>
+                                <span class="text-xs text-gray-500">${log.http_method || ''}</span>
+                            </div>
+                        ` : '<span class="text-gray-400">-</span>'}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                        <div class="max-w-xs truncate" title="${log.message}">${log.message}</div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                        ${log.file_path ? `
+                            <div class="flex flex-col">
+                                <span class="truncate max-w-xs" title="${log.full_file_path || log.file_path}">${log.file_path}</span>
+                                <span class="text-xs text-gray-500">Line ${log.line_number || '-'}</span>
+                            </div>
+                        ` : '<span class="text-gray-400">-</span>'}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm">
+                        <button onclick="viewLogDetails(${log.id})" class="text-blue-600 hover:text-blue-800">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        renderPagination();
+        lucide.createIcons();
+    };
+
+    const filterLogs = () => {
+        const searchTerm = logSearch.value.toLowerCase();
+        const level = levelFilter.value;
+        const isError = errorFilter.value;
+        const endpoint = endpointFilter.value.toLowerCase();
+        const user = userFilter.value.toLowerCase();
+        
+        filteredLogs = allLogs.filter(log => {
+            // Search filter
+            if (searchTerm && !Object.values(log).some(value => 
+                value && value.toString().toLowerCase().includes(searchTerm)
+            )) return false;
+            
+            // Level filter
+            if (level && log.level !== level) return false;
+            
+            // Error filter
+            if (isError === 'true' && !log.is_error) return false;
+            if (isError === 'false' && log.is_error) return false;
+            
+            // Endpoint filter
+            if (endpoint && (!log.api_endpoint || !log.api_endpoint.toLowerCase().includes(endpoint))) return false;
+            
+            // User filter
+            if (user && (!log.user_display || !log.user_display.toLowerCase().includes(user))) return false;
+            
+            return true;
         });
-        logTableBody.innerHTML = '';
-        logTableBody.appendChild(fragment);
+        
+        currentPage = 1;
+        updateStats();
+        renderLogs();
     };
 
     const fetchLogs = async () => {
         try {
-            const formData = new FormData();
-            formData.append('timestamp', getFormattedDateTime());
+            // Show loading state
+            logTableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="px-6 py-12 text-center">
+                        <div class="flex justify-center items-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <span class="ml-3 text-gray-600">Loading logs...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
             const response = await fetch('/Log/GetLogs/', {
                 method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') 
+                },
+                body: JSON.stringify({
+                    timestamp: getFormattedDateTime(),
+                    level: levelFilter.value || null,
+                    is_error: errorFilter.value === '' ? null : errorFilter.value === 'true',
+                    api_endpoint: endpointFilter.value || null
+                }),
                 credentials: 'same-origin'
             });
+            
             const data = await response.json();
+            
             if (data.return) {
-                updateLogsTable(data.logs);
-                lastUpdated.textContent = `Last updated: ${new Date().toLocaleString()}`;
+                allLogs = data.logs;
+                filterLogs();
+                lastUpdated.textContent = new Date().toLocaleString();
+                showNotification('Logs refreshed successfully', 'success');
             } else {
                 console.error('Failed to fetch logs:', data.error);
+                showNotification('Failed to fetch logs', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
+            showNotification('An error occurred while fetching logs', 'error');
         }
     };
 
-    const debounce = (func, delay) => {
-        let timeoutId;
-        return (...args) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func(...args), delay);
-        };
-    };
-
-    const filterLogs = debounce(e => {
-        const searchTerm = e.target.value.toLowerCase();
-        Array.from(logTableBody.children).forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
-        });
-    }, 300);
-
+    // Event listeners
     refreshButton.addEventListener('click', fetchLogs);
-    logSearch.addEventListener('input', filterLogs);
+    logSearch.addEventListener('input', debounce(filterLogs, 300));
+    levelFilter.addEventListener('change', filterLogs);
+    errorFilter.addEventListener('change', filterLogs);
+    endpointFilter.addEventListener('input', debounce(filterLogs, 300));
+    userFilter.addEventListener('input', debounce(filterLogs, 300));
     dateInput.addEventListener('change', fetchLogs);
     timeInput.addEventListener('change', fetchLogs);
+    itemsPerPageSelect.addEventListener('change', (e) => {
+        itemsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        renderLogs();
+    });
+    
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderLogs();
+        }
+    });
+    
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderLogs();
+        }
+    });
 
     deleteAllButton.addEventListener('click', async () => {
         if (confirm('Are you sure you want to delete all logs? This action cannot be undone.')) {
@@ -186,18 +647,179 @@
                 const data = await response.json();
                 if (data.return) {
                     fetchLogs();
+                    showNotification('All logs deleted successfully', 'success');
                 } else {
-                    alert('Failed to delete logs: ' + data.error);
+                    showNotification('Failed to delete logs: ' + data.error, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
+                showNotification('An error occurred while deleting logs', 'error');
             }
         }
     });
 
-    fetchLogs();
-    setInterval(fetchLogs, 20000);
-});
+    // Helper functions
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
+    function debounce(func, delay) {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func(...args), delay);
+        };
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+        notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full z-50`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" class="w-5 h-5 mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // View log details function
+    window.viewLogDetails = (logId) => {
+        const log = allLogs.find(l => l.id === logId);
+        if (log) {
+            const modal = document.getElementById('log-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Log ID</h4>
+                            <p class="mt-1 text-sm text-gray-900">#${log.id}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Timestamp</h4>
+                            <p class="mt-1 text-sm text-gray-900">${new Date(log.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">User</h4>
+                            <p class="mt-1 text-sm text-gray-900">${log.user_display || log.user || 'Anonymous'}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Level</h4>
+                            <span class="mt-1 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getLevelClass(log.level)}">
+                                ${log.level}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Is Error</h4>
+                            <p class="mt-1 text-sm text-gray-900">${log.is_error ? 'Yes' : 'No'}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Error Category</h4>
+                            <span class="mt-1 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getErrorCategoryBadge(log.error_category)}">
+                                ${log.error_category_display || log.error_category}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">API Endpoint</h4>
+                            <p class="mt-1 text-sm text-gray-900">${log.api_endpoint || '-'}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">HTTP Method</h4>
+                            <p class="mt-1 text-sm text-gray-900">${log.http_method || '-'}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Request Path</h4>
+                            <p class="mt-1 text-sm text-gray-900 break-all">${log.request_path || '-'}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">User IP</h4>
+                            <p class="mt-1 text-sm text-gray-900">${log.user_ip || '-'}</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">Message</h4>
+                        <p class="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded">${log.message}</p>
+                    </div>
+                    
+                    ${log.exception_type ? `
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Exception Type</h4>
+                            <p class="mt-1 text-sm text-gray-900 font-mono bg-red-50 p-3 rounded">${log.exception_type}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${log.stack_trace ? `
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Stack Trace</h4>
+                            <pre class="mt-1 text-xs text-gray-900 bg-gray-50 p-3 rounded overflow-x-auto">${log.stack_trace}</pre>
+                        </div>
+                    ` : ''}
+                    
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500">File Location</h4>
+                        <div class="mt-1 space-y-1">
+                            <p class="text-sm text-gray-900"><strong>File:</strong> ${log.file_path || '-'}</p>
+                            <p class="text-sm text-gray-900"><strong>Full Path:</strong> ${log.full_file_path || '-'}</p>
+                            <p class="text-sm text-gray-900"><strong>Line Number:</strong> ${log.line_number || '-'}</p>
+                            <p class="text-sm text-gray-900"><strong>View Name:</strong> ${log.view_name || '-'}</p>
+                        </div>
+                    </div>
+                    
+                    ${log.user_agent ? `
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">User Agent</h4>
+                            <p class="mt-1 text-sm text-gray-900 break-all">${log.user_agent}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+    };
+
+    window.closeModal = () => {
+        document.getElementById('log-modal').classList.add('hidden');
+    };
+
+    // Close modal when clicking outside
+    document.getElementById('log-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'log-modal') {
+            closeModal();
+        }
+    });
+
+    // Initial fetch
+    fetchLogs();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(fetchLogs, 30000);
+});
 </script>
 {% endblock %}

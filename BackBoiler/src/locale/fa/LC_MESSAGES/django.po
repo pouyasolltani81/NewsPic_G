@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-16 11:56+0330\n"
+"POT-Creation-Date: 2025-09-07 15:48+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,181 +18,564 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: LogModel/templates/dashboard/partials/dashboard_section.html:8
-msgid "Total Users"
-msgstr "تعداد کاربران"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:13
-msgid "Active Workflows"
-msgstr "گردش‌کارهای فعال"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:18
-msgid "Pending Tasks"
-msgstr "وظایف در انتظار"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:23
-msgid "System Uptime"
-msgstr "زمان روشن بودن سیستم"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:29
-msgid "Recent Activity"
-msgstr "فعالیت اخیر"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:31
-msgid "Workflow “Import Data” completed 5 minutes ago."
-msgstr "گردش‌کار «وارد کردن داده» پنج دقیقه پیش کامل شد."
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:32
-msgid "New user registered: alice@example.com."
-msgstr "کاربر جدید ثبت‌نام کرد: alice@example.com."
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:33
-msgid "Task “Generate Report” is pending review."
-msgstr "وظیفه «تولید گزارش» در انتظار بررسی است."
-
 # navigation 
-#: ui/templates/ui/user_base.html:125
+#: UI/templates/Dashboard/Dashboard.html:44
 msgid "Dashboard"
 msgstr "داشبورد"
 
-#: ui/templates/ui/user_base.html:126
+#: UI/templates/Dashboard/Dashboard.html:45
 msgid "Workflows"
 msgstr "گردش‌کارها"
 
-#: ui/templates/ui/user_base.html:127
+#: UI/templates/Dashboard/Dashboard.html:46
 msgid "Analytics"
 msgstr "تحلیل‌ها"
 
-#: ui/templates/ui/user_base.html:128
-msgid "Inputs"
-msgstr "ورودی‌ها"
+#: UI/templates/Dashboard/Dashboard.html:47
+msgid "logs"
+msgstr ""
 
-#: ui/templates/ui/user_base.html:129
+# messages 
+#: UI/templates/Dashboard/Dashboard.html:48
+msgid "Messages"
+msgstr "پیام‌ها"
+
+#: UI/templates/Dashboard/Dashboard.html:49
 msgid "Settings"
 msgstr "تنظیمات"
 
+#: UI/templates/Dashboard/partials/dashboard_section.html:34
+msgid "API Requests (24h)"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:38
+#, fuzzy
+#| msgid "Active Workflows"
+msgid "Active Users"
+msgstr "گردش‌کارهای فعال"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:42
+msgid "Error Rate"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:46
+msgid "Avg. Response Time"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:55
+msgid "Requests Trend"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:61
+#, fuzzy
+#| msgid "System Uptime"
+msgid "System Health"
+msgstr "زمان روشن بودن سیستم"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:87
+msgid "Top Endpoints"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:93
+msgid "Endpoint"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:94
+msgid "Method"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:95
+#, fuzzy
+#| msgid "guest"
+msgid "Requests"
+msgstr "مهمان"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:96
+msgid "Avg. Time (ms)"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:100
+msgid "Loading..."
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:119
+msgid "No data"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:12
+msgid "Search messages..."
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:35
+#, fuzzy
+#| msgid "Device"
+msgid "Device/ID"
+msgstr "دستگاه"
+
+#: UI/templates/Dashboard/partials/messages_section.html:37
+msgid "Sender"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:38
+msgid "Title"
+msgstr "عنوان"
+
+#: UI/templates/Dashboard/partials/messages_section.html:39
+msgid "Status"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:40
+msgid "sent Time"
+msgstr ""
+
+# messages 
+#: UI/templates/Dashboard/partials/messages_section.html:41
+#, fuzzy
+#| msgid "Messages"
+msgid "Message Type"
+msgstr "پیام‌ها"
+
+# messages 
+#: UI/templates/Dashboard/partials/messages_section.html:42
+#, fuzzy
+#| msgid "Messages"
+msgid "Message Class"
+msgstr "پیام‌ها"
+
+#: UI/templates/Dashboard/partials/messages_section.html:43
+msgid "View"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:9
+msgid "Dark Mode"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:20
+msgid "RTL Direction"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:31
+msgid "Show Profile"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:42
+#, fuzzy
+#| msgid "new_notification"
+msgid "Show Notifications"
+msgstr "اعلان جدید"
+
+#: UI/templates/Dashboard/partials/setting_section.html:53
+msgid "Show Language Selector"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:12
+msgid "Search apps, services, or templates..."
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:33
+msgid "services"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:49
+msgid "endpoints"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:59
+msgid "Endpoints"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:73
+msgid "Templates"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:92
+msgid "Other Templates"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:106
+msgid "No services or templates found"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:113
+msgid "No applications found"
+msgstr ""
+
+#: UI/templates/ui/dashboard.html:68
+msgid "close"
+msgstr ""
+
 # messages
-#: ui/templates/ui/user_base.html:163
+#: UI/templates/ui/dashboard.html:173
 msgid "no_new_messages"
 msgstr "پیامی وجود ندارد"
 
-#: ui/templates/ui/user_base.html:164
+#: UI/templates/ui/dashboard.html:174
 msgid "new_notification"
 msgstr "اعلان جدید"
 
-#: ui/templates/ui/user_base.html:165
+#: UI/templates/ui/dashboard.html:175
 msgid "no_content_available"
 msgstr "محتوایی در دسترس نیست"
 
-#: ui/templates/ui/user_base.html:166
+#: UI/templates/ui/dashboard.html:176
 msgid "navigation.messages.show_all_messages"
 msgstr "نمایش تمام پیام‌ها"
+
+# افزوده‌های احراز هویت/منو
+#: UI/templates/ui/dashboard.html:180
+msgid "account"
+msgstr "حساب کاربری"
+
+#: UI/templates/ui/dashboard.html:181
+msgid "login"
+msgstr "ورود"
+
+#: UI/templates/ui/dashboard.html:182
+msgid "register"
+msgstr "ثبت‌نام"
+
+#: UI/templates/ui/dashboard.html:183
+msgid "email_or_phone"
+msgstr "ایمیل یا شماره تلفن"
+
+#: UI/templates/ui/dashboard.html:184
+msgid "password"
+msgstr "رمز عبور"
+
+#: UI/templates/ui/dashboard.html:185
+msgid "first_name"
+msgstr "نام"
+
+#: UI/templates/ui/dashboard.html:186
+msgid "last_name"
+msgstr "نام خانوادگی"
+
+#: UI/templates/ui/dashboard.html:187
+msgid "phone_number"
+msgstr "شماره تلفن"
+
+#: UI/templates/ui/dashboard.html:188
+msgid "create_account"
+msgstr "ایجاد حساب"
+
+#: UI/templates/ui/dashboard.html:189
+msgid "change_password"
+msgstr "تغییر رمز عبور"
+
+#: UI/templates/ui/dashboard.html:190
+msgid "current_password"
+msgstr "رمز عبور فعلی"
+
+#: UI/templates/ui/dashboard.html:191
+msgid "new_password"
+msgstr "رمز عبور جدید"
+
+#: UI/templates/ui/dashboard.html:192
+msgid "confirm_new_password"
+msgstr "تایید رمز عبور جدید"
+
+#: UI/templates/ui/dashboard.html:193
+msgid "login_success"
+msgstr "ورود با موفقیت انجام شد"
+
+#: UI/templates/ui/dashboard.html:194
+msgid "register_success"
+msgstr "حساب با موفقیت ایجاد شد"
+
+#: UI/templates/ui/dashboard.html:195
+msgid "password_change_success"
+msgstr "رمز عبور با موفقیت تغییر کرد"
+
+#: UI/templates/ui/dashboard.html:196
+msgid "logout_success"
+msgstr "خروج با موفقیت انجام شد"
+
+#: UI/templates/ui/dashboard.html:197 UI/templates/ui/dashboard.html:287
+msgid "admin_panel"
+msgstr "پنل مدیریت"
+
+#: UI/templates/ui/dashboard.html:198 UI/templates/ui/dashboard.html:286
+msgid "settings"
+msgstr "تنظیمات"
+
+#: UI/templates/ui/dashboard.html:199 UI/templates/ui/dashboard.html:288
+msgid "sign_out"
+msgstr "خروج"
+
+#: UI/templates/ui/dashboard.html:200 UI/templates/ui/dashboard.html:275
+msgid "user_id"
+msgstr "شناسه کاربر"
+
+#: UI/templates/ui/dashboard.html:201 UI/templates/ui/dashboard.html:276
+msgid "email"
+msgstr "ایمیل"
+
+#: UI/templates/ui/dashboard.html:202 UI/templates/ui/dashboard.html:277
+msgid "name"
+msgstr "نام"
+
+#: UI/templates/ui/dashboard.html:203 UI/templates/ui/dashboard.html:278
+msgid "status"
+msgstr "وضعیت"
+
+#: UI/templates/ui/dashboard.html:204 UI/templates/ui/dashboard.html:279
+msgid "active"
+msgstr "فعال"
+
+#: UI/templates/ui/dashboard.html:205 UI/templates/ui/dashboard.html:280
+msgid "inactive"
+msgstr "غیرفعال"
+
+#: UI/templates/ui/dashboard.html:206 UI/templates/ui/dashboard.html:281
+msgid "joined"
+msgstr "تاریخ عضویت"
+
+#: UI/templates/ui/dashboard.html:207 UI/templates/ui/dashboard.html:282
+msgid "last_login"
+msgstr "آخرین ورود"
+
+#: UI/templates/ui/dashboard.html:208 UI/templates/ui/dashboard.html:283
+msgid "never"
+msgstr "هرگز"
+
+#: UI/templates/ui/dashboard.html:209 UI/templates/ui/dashboard.html:290
+msgid "guest"
+msgstr "مهمان"
+
+#: UI/templates/ui/dashboard.html:210 UI/templates/ui/dashboard.html:291
+msgid "guest_user"
+msgstr "کاربر مهمان"
+
+#: UI/templates/ui/dashboard.html:284
+msgid "staff"
+msgstr "کارمند"
+
+#: UI/templates/ui/dashboard.html:285
+msgid "superuser"
+msgstr "مدیر کل"
+
+#: UI/templates/ui/dashboard.html:289
+msgid "user_menu"
+msgstr "منوی کاربر"
+
+#: UI/templates/ui/dashboard.html:292
+msgid "sign_in"
+msgstr "ورود"
+
+#: UI/templates/ui/index.html:7
+msgid "BackBoiler | Welcome"
+msgstr "بک‌بویلر | خوش آمدید"
+
+#: UI/templates/ui/index.html:13
+#, python-format
+msgid "Welcome to <span class=\"text-blue-600\">%(project_name)s</span>"
+msgstr "<span class=\"text-blue-600\">%(project_name)s</span> خوش آمدید به"
+
+#: UI/templates/ui/index.html:17
+msgid "Your backend is up and running 🚀"
+msgstr "بک‌اند شما با موفقیت اجرا شد 🚀"
+
+#: UI/templates/ui/index.html:22
+msgctxt "index.swagger"
+msgid "View APIs (Swagger)"
+msgstr "  (سوَگر)  "
+
+#: UI/templates/ui/index.html:26
+msgctxt "index.ui"
+msgid "View APIs (UI)"
+msgstr "(رابط کاربری)"
+
+#: UI/templates/ui/index.html:30
+msgctxt "index.admin"
+msgid "Admin Login"
+msgstr "ورود مدیر"
+
+#: UI/templates/ui/index.html:34
+#, fuzzy
+#| msgctxt "index.logs"
+#| msgid "View Logs"
+msgctxt "index.Docs"
+msgid "View Docs"
+msgstr "مشاهده گزارش‌ها"
+
+#: UI/templates/ui/index.html:39
+#, python-format
+msgid "%(project_name)s Project"
+msgstr " %(project_name)sپروژه "
+
+#~ msgid "Inputs"
+#~ msgstr "ورودی‌ها"
+
+#~ msgid "Total Users"
+#~ msgstr "تعداد کاربران"
+
+#~ msgid "Pending Tasks"
+#~ msgstr "وظایف در انتظار"
+
+#~ msgid "Recent Activity"
+#~ msgstr "فعالیت اخیر"
+
+#~ msgid "Workflow “Import Data” completed 5 minutes ago."
+#~ msgstr "گردش‌کار «وارد کردن داده» پنج دقیقه پیش کامل شد."
+
+#~ msgid "New user registered: alice@example.com."
+#~ msgstr "کاربر جدید ثبت‌نام کرد: alice@example.com."
+
+#~ msgid "Task “Generate Report” is pending review."
+#~ msgstr "وظیفه «تولید گزارش» در انتظار بررسی است."
 
 #~ msgid "Change Language"
 #~ msgstr "تغییر زبان"
 
 # Quick action
- msgid "quick.dashboard.title"
- msgstr "ایجاد آیتم داشبورد"
+#~ msgid "quick.dashboard.title"
+#~ msgstr "ایجاد آیتم داشبورد"
 
- msgid "quick.dashboard.description"
- msgstr "افزودن آیتمی به داشبورد."
+#~ msgid "quick.dashboard.description"
+#~ msgstr "افزودن آیتمی به داشبورد."
 
- msgid "quick.dashboard.summery"
- msgstr "به داشبورد اضافه شد"
+#~ msgid "quick.dashboard.summery"
+#~ msgstr "به داشبورد اضافه شد"
 
- msgid "quick.workflow.title"
- msgstr "ایجاد گردش‌کار"
+#~ msgid "quick.workflow.title"
+#~ msgstr "ایجاد گردش‌کار"
 
- msgid "quick.workflow.description"
- msgstr "یک گردش‌کار جدید برای خودکارسازی فرایندها ایجاد کنید."
+#~ msgid "quick.workflow.description"
+#~ msgstr "یک گردش‌کار جدید برای خودکارسازی فرایندها ایجاد کنید."
 
- msgid "quick.workflow.summery"
- msgstr "گردش‌کار جدید شروع شد"
+#~ msgid "quick.workflow.summery"
+#~ msgstr "گردش‌کار جدید شروع شد"
 
- msgid "quick.analytics.title"
- msgstr "مشاهده گزارش‌ها"
+#~ msgid "quick.analytics.title"
+#~ msgstr "مشاهده گزارش‌ها"
 
- msgid "quick.analytics.description"
- msgstr "گزارش‌های تحلیلی و عملکرد خود را بررسی کنید."
+#~ msgid "quick.analytics.description"
+#~ msgstr "گزارش‌های تحلیلی و عملکرد خود را بررسی کنید."
 
- msgid "quick.analytics.summery"
- msgstr "تحلیل‌ها مشاهده شد"
+#~ msgid "quick.analytics.summery"
+#~ msgstr "تحلیل‌ها مشاهده شد"
 
- msgid "quick.inputs.title"
- msgstr "وارد کردن داده‌ها"
+#~ msgid "quick.inputs.title"
+#~ msgstr "وارد کردن داده‌ها"
 
- msgid "quick.inputs.description"
- msgstr "فایل‌های داده خود را بارگذاری کنید تا پردازش شوند."
+#~ msgid "quick.inputs.description"
+#~ msgstr "فایل‌های داده خود را بارگذاری کنید تا پردازش شوند."
 
- msgid "quick.inputs.summery"
- msgstr "فایل‌های داده بارگذاری شد"
+#~ msgid "quick.inputs.summery"
+#~ msgstr "فایل‌های داده بارگذاری شد"
 
- msgid "quick.settings.title"
- msgstr "پاک کردن تنظیمات"
+#~ msgid "quick.settings.title"
+#~ msgstr "پاک کردن تنظیمات"
 
- msgid "quick.settings.description"
- msgstr "پاک کردن تاریخچه اقدامات اخیر."
+#~ msgid "quick.settings.description"
+#~ msgstr "پاک کردن تاریخچه اقدامات اخیر."
 
- msgid "quick.settings.summery"
- msgstr "تاریخچه اقدامات پاک شد"
+#~ msgid "quick.settings.summery"
+#~ msgstr "تاریخچه اقدامات پاک شد"
 
- msgid "Recent_Actions_Log"
- msgstr "لاگ های جدید"
+#~ msgid "Recent_Actions_Log"
+#~ msgstr "لاگ های جدید"
 
+# calender
+#~ msgid "inputs.date.title"
+#~ msgstr "انتخاب تاریخ جلالی"
 
+#~ msgid "inputs.date.jalali_label"
+#~ msgstr "تاریخ جلالی"
 
- # calender
+#~ msgid "inputs.date.submit"
+#~ msgstr "ثبت"
 
+#~ msgid "inputs.date.selected_jalali"
+#~ msgstr "تاریخ جلالی انتخاب‌شده"
 
- msgid "inputs.date.title"
-msgstr "انتخاب تاریخ جلالی"
+#~ msgid "inputs.date.selected_gregorian"
+#~ msgstr "تاریخ میلادی انتخاب‌شده"
 
-msgid "inputs.date.jalali_label"
-msgstr "تاریخ جلالی"
+#~ msgid "Read"
+#~ msgstr "خوانده‌شده؟"
 
-msgid "inputs.date.submit"
-msgstr "ثبت"
+#~ msgid "Class"
+#~ msgstr "کلاس"
 
-msgid "inputs.date.selected_jalali"
-msgstr "تاریخ جلالی انتخاب‌شده"
+#~ msgid "Type"
+#~ msgstr "نوع"
 
-msgid "inputs.date.selected_gregorian"
-msgstr "تاریخ میلادی انتخاب‌شده"
+#~ msgid "Created At"
+#~ msgstr "تاریخ ایجاد"
 
+#~ msgid "Actions"
+#~ msgstr "عملیات"
 
-# messages 
-msgid "Messages"
-msgstr "پیام‌ها"
- 
-msgid "Read"
-msgstr "خوانده‌شده؟"
- 
-msgid "Device"
-msgstr "دستگاه"
- 
-msgid "Class"
-msgstr "کلاس"
- 
-msgid "Type"
-msgstr "نوع"
- 
-msgid "Title"
-msgstr "عنوان"
- 
-msgid "Created At"
-msgstr "تاریخ ایجاد"
- 
-msgid "Actions"
-msgstr "عملیات"
+#~ msgid "nonewmessages"
+#~ msgstr "بدون پیغام جدید"
 
-msgid "nonewmessages"
-msgstr "بدون پیغام جدید"
+#~ msgid "Translating content..."
+#~ msgstr "در حال ترجمه محتوا..."
 
+#~ msgid "items translated"
+#~ msgstr "آیتم ترجمه شد"
 
+# ترجمه‌های بخش داشبورد
+msgid "TempBoiler – Django Boilerplate"
+msgstr "تمپ‌بویلر – فریم‌ورک جنگو"
 
-msgid "Translating content..."
-msgstr "در حال ترجمه محتوا..."
+msgid "A modern Django foundation for building web apps with advanced UI, analytics, and automation. Get started quickly and scale with confidence."
+msgstr "پایه‌ای مدرن از جنگو برای ساخت وب‌اپ با رابط کاربری پیشرفته، تحلیل‌ها و خودکارسازی. سریع شروع کنید و با اطمینان مقیاس بدهید."
 
-msgid "items translated"
-msgstr "آیتم ترجمه شد"
+msgid "Advanced UI"
+msgstr "رابط کاربری پیشرفته"
+
+msgid "Modular dashboards, tab navigation, dark/light themes"
+msgstr "داشبورد ماژولار، ناوبری تب‌محور، حالت تیره/روشن"
+
+msgid "Real-time Analytics"
+msgstr "تحلیل‌های بلادرنگ"
+
+msgid "Instantly monitor API usage, user activity, and system health"
+msgstr "مصرف API، فعالیت کاربر و سلامت سیستم را فوری پایش کنید"
+
+msgid "Smart CLI Tools"
+msgstr "ابزارهای CLI هوشمند"
+
+msgid "Automate app creation, UI generation, and dashboard management"
+msgstr "ساخت اپ، تولید UI و مدیریت داشبورد را خودکار کنید"
+
+msgid "Multi-language"
+msgstr "چندزبانه"
+
+msgid "Built-in i18n (English & Persian)"
+msgstr "بومی‌سازی داخلی (انگلیسی و فارسی)"
+
+msgid "Authentication & SSO"
+msgstr "احراز هویت و ورود یکپارچه"
+
+msgid "Secure user management and single sign-on"
+msgstr "مدیریت کاربر امن و ورود یکپارچه"
+
+msgid "Performance Monitoring"
+msgstr "پایش عملکرد"
+
+msgid "Track system and API performance with ease"
+msgstr "عملکرد سیستم و API را به‌سادگی رصد کنید"
+
+msgid "Responsive Design"
+msgstr "طراحی واکنش‌گرا"
+
+msgid "Works on all devices, powered by Tailwind CSS"
+msgstr "روی همه دستگاه‌ها کار می‌کند، با Tailwind CSS"
+
+msgid "How you benefit:"
+msgstr "مزایای شما:"
+
+msgid "Save development time, gain instant insights, automate repetitive tasks, and deliver a professional user experience out of the box."
+msgstr "زمان توسعه را کاهش دهید، بینش‌های فوری بگیرید، کارهای تکراری را خودکار کنید و تجربه‌ای حرفه‌ای ارائه دهید."
+
+msgid "Quick Start:"
+msgstr "شروع سریع:"
+
+msgid "Memory"
+msgstr "حافظه"
+
+msgid "Disk"
+msgstr "دیسک"

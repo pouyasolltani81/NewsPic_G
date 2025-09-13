@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-16 11:56+0330\n"
+"POT-Creation-Date: 2025-09-07 15:59+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,180 +18,592 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: LogModel/templates/dashboard/partials/dashboard_section.html:8
-msgid "Total Users"
-msgstr "Total Users"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:13
-msgid "Active Workflows"
-msgstr "Active Workflows"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:18
-msgid "Pending Tasks"
-msgstr "Pending Tasks"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:23
-msgid "System Uptime"
-msgstr "System Uptime"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:29
-msgid "Recent Activity"
-msgstr "Recent Activity"
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:31
-msgid "Workflow “Import Data” completed 5 minutes ago."
-msgstr "Workflow “Import Data” completed 5 minutes ago."
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:32
-msgid "New user registered: alice@example.com."
-msgstr "New user registered: alice@example.com."
-
-#: LogModel/templates/dashboard/partials/dashboard_section.html:33
-msgid "Task “Generate Report” is pending review."
-msgstr "Task “Generate Report” is pending review."
-
-#: ui/templates/ui/user_base.html:125
+#: UI/templates/Dashboard/Dashboard.html:44
 msgid "Dashboard"
 msgstr ""
 
-#: ui/templates/ui/user_base.html:126
+#: UI/templates/Dashboard/Dashboard.html:45
 #, fuzzy
 #| msgid "Active Workflows"
 msgid "Workflows"
 msgstr "Active Workflows"
 
-#: ui/templates/ui/user_base.html:127
+#: UI/templates/Dashboard/Dashboard.html:46
 msgid "Analytics"
 msgstr ""
 
-#: ui/templates/ui/user_base.html:128
-msgid "Inputs"
+#: UI/templates/Dashboard/Dashboard.html:47
+msgid "logs"
 msgstr ""
 
-#: ui/templates/ui/user_base.html:129
+# messages
+#: UI/templates/Dashboard/Dashboard.html:48
+msgid "Messages"
+msgstr "Messages"
+
+#: UI/templates/Dashboard/Dashboard.html:49
 msgid "Settings"
 msgstr ""
 
-#: ui/templates/ui/user_base.html:163
+# Dashboard overview translations
+#: UI/templates/Dashboard/partials/dashboard_section.html:8
+msgid "TempBoiler – Django Boilerplate"
+msgstr "TempBoiler – Django Boilerplate"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:9
+msgid ""
+"A modern Django foundation for building web apps with advanced UI, "
+"analytics, and automation. Get started quickly and scale with confidence."
+msgstr ""
+"A modern Django foundation for building web apps with advanced UI, "
+"analytics, and automation. Get started quickly and scale with confidence."
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:11
+msgid "Advanced UI"
+msgstr "Advanced UI"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:11
+msgid "Modular dashboards, tab navigation, dark/light themes"
+msgstr "Modular dashboards, tab navigation, dark/light themes"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:12
+msgid "Real-time Analytics"
+msgstr "Real-time Analytics"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:12
+msgid "Instantly monitor API usage, user activity, and system health"
+msgstr "Instantly monitor API usage, user activity, and system health"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:13
+msgid "Smart CLI Tools"
+msgstr "Smart CLI Tools"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:13
+msgid "Automate app creation, UI generation, and dashboard management"
+msgstr "Automate app creation, UI generation, and dashboard management"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:14
+msgid "Multi-language"
+msgstr "Multi-language"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:14
+msgid "Built-in i18n (English & Persian)"
+msgstr "Built-in i18n (English & Persian)"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:15
+msgid "Authentication & SSO"
+msgstr "Authentication & SSO"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:15
+msgid "Secure user management and single sign-on"
+msgstr "Secure user management and single sign-on"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:16
+msgid "Performance Monitoring"
+msgstr "Performance Monitoring"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:16
+msgid "Track system and API performance with ease"
+msgstr "Track system and API performance with ease"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:17
+msgid "Responsive Design"
+msgstr "Responsive Design"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:17
+msgid "Works on all devices, powered by Tailwind CSS"
+msgstr "Works on all devices, powered by Tailwind CSS"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:20
+msgid "How you benefit:"
+msgstr "How you benefit:"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:20
+msgid ""
+"Save development time, gain instant insights, automate repetitive tasks, and "
+"deliver a professional user experience out of the box."
+msgstr ""
+"Save development time, gain instant insights, automate repetitive tasks, and "
+"deliver a professional user experience out of the box."
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:23
+msgid "Quick Start:"
+msgstr "Quick Start:"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:35
+msgid "API Requests (24h)"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:39
+#, fuzzy
+#| msgid "Active Workflows"
+msgid "Active Users"
+msgstr "Active Workflows"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:43
+msgid "Error Rate"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:47
+msgid "Avg. Response Time"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:56
+msgid "Requests Trend"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:62
+#, fuzzy
+#| msgid "System Uptime"
+msgid "System Health"
+msgstr "System Uptime"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:70
+msgid "Memory"
+msgstr "Memory"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:74
+msgid "Disk"
+msgstr "Disk"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:88
+msgid "Top Endpoints"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:94
+msgid "Endpoint"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:95
+msgid "Method"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:96
+#: UI/templates/Dashboard/partials/dashboard_section.html:128
+#, fuzzy
+#| msgid "guest"
+msgid "Requests"
+msgstr "Guest"
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:97
+msgid "Avg. Time (ms)"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:101
+msgid "Loading..."
+msgstr ""
+
+#: UI/templates/Dashboard/partials/dashboard_section.html:120
+msgid "No data"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:12
+msgid "Search messages..."
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:35
+#, fuzzy
+#| msgid "Device"
+msgid "Device/ID"
+msgstr "Device"
+
+#: UI/templates/Dashboard/partials/messages_section.html:37
+msgid "Sender"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:38
+msgid "Title"
+msgstr "Title"
+
+#: UI/templates/Dashboard/partials/messages_section.html:39
+msgid "Status"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/messages_section.html:40
+msgid "sent Time"
+msgstr ""
+
+# messages
+#: UI/templates/Dashboard/partials/messages_section.html:41
+#, fuzzy
+#| msgid "Messages"
+msgid "Message Type"
+msgstr "Messages"
+
+# messages
+#: UI/templates/Dashboard/partials/messages_section.html:42
+#, fuzzy
+#| msgid "Messages"
+msgid "Message Class"
+msgstr "Messages"
+
+#: UI/templates/Dashboard/partials/messages_section.html:43
+msgid "View"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:9
+msgid "Dark Mode"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:20
+msgid "RTL Direction"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:31
+msgid "Show Profile"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/setting_section.html:42
+#, fuzzy
+#| msgid "new_notification"
+msgid "Show Notifications"
+msgstr "New Notification"
+
+#: UI/templates/Dashboard/partials/setting_section.html:53
+msgid "Show Language Selector"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:12
+msgid "Search apps, services, or templates..."
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:33
+msgid "services"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:49
+msgid "endpoints"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:59
+msgid "Endpoints"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:73
+msgid "Templates"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:92
+msgid "Other Templates"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:106
+msgid "No services or templates found"
+msgstr ""
+
+#: UI/templates/Dashboard/partials/workflows_section.html:113
+msgid "No applications found"
+msgstr ""
+
+#: UI/templates/ui/dashboard.html:68
+msgid "close"
+msgstr ""
+
+#: UI/templates/ui/dashboard.html:173
 msgid "no_new_messages"
 msgstr "No New Messages"
 
-#: ui/templates/ui/user_base.html:164
+#: UI/templates/ui/dashboard.html:174
 msgid "new_notification"
 msgstr "New Notification"
 
-#: ui/templates/ui/user_base.html:165
+#: UI/templates/ui/dashboard.html:175
 msgid "no_content_available"
 msgstr "No Content Available"
 
 # messages
-#: ui/templates/ui/user_base.html:166
+#: UI/templates/ui/dashboard.html:176
 msgid "navigation.messages.show_all_messages"
 msgstr "Show all messages"
 
- msgid "Change Language"
- msgstr "Change Language"
+# Added UI auth/menu translations
+#: UI/templates/ui/dashboard.html:180
+msgid "account"
+msgstr "Account"
+
+#: UI/templates/ui/dashboard.html:181
+msgid "login"
+msgstr "Login"
+
+#: UI/templates/ui/dashboard.html:182
+msgid "register"
+msgstr "Register"
+
+#: UI/templates/ui/dashboard.html:183
+msgid "email_or_phone"
+msgstr "Email or Phone"
+
+#: UI/templates/ui/dashboard.html:184
+msgid "password"
+msgstr "Password"
+
+#: UI/templates/ui/dashboard.html:185
+msgid "first_name"
+msgstr "First Name"
+
+#: UI/templates/ui/dashboard.html:186
+msgid "last_name"
+msgstr "Last Name"
+
+#: UI/templates/ui/dashboard.html:187
+msgid "phone_number"
+msgstr "Phone Number"
+
+#: UI/templates/ui/dashboard.html:188
+msgid "create_account"
+msgstr "Create Account"
+
+#: UI/templates/ui/dashboard.html:189
+msgid "change_password"
+msgstr "Change Password"
+
+#: UI/templates/ui/dashboard.html:190
+msgid "current_password"
+msgstr "Current Password"
+
+#: UI/templates/ui/dashboard.html:191
+msgid "new_password"
+msgstr "New Password"
+
+#: UI/templates/ui/dashboard.html:192
+msgid "confirm_new_password"
+msgstr "Confirm New Password"
+
+#: UI/templates/ui/dashboard.html:193
+msgid "login_success"
+msgstr "Login successful"
+
+#: UI/templates/ui/dashboard.html:194
+msgid "register_success"
+msgstr "Account created successfully"
+
+#: UI/templates/ui/dashboard.html:195
+msgid "password_change_success"
+msgstr "Password changed successfully"
+
+#: UI/templates/ui/dashboard.html:196
+msgid "logout_success"
+msgstr "Logged out successfully"
+
+#: UI/templates/ui/dashboard.html:197 UI/templates/ui/dashboard.html:287
+msgid "admin_panel"
+msgstr "Admin Panel"
+
+#: UI/templates/ui/dashboard.html:198 UI/templates/ui/dashboard.html:286
+msgid "settings"
+msgstr "Settings"
+
+#: UI/templates/ui/dashboard.html:199 UI/templates/ui/dashboard.html:288
+msgid "sign_out"
+msgstr "Sign Out"
+
+#: UI/templates/ui/dashboard.html:200 UI/templates/ui/dashboard.html:275
+msgid "user_id"
+msgstr "User ID"
+
+#: UI/templates/ui/dashboard.html:201 UI/templates/ui/dashboard.html:276
+msgid "email"
+msgstr "Email"
+
+#: UI/templates/ui/dashboard.html:202 UI/templates/ui/dashboard.html:277
+msgid "name"
+msgstr "Name"
+
+#: UI/templates/ui/dashboard.html:203 UI/templates/ui/dashboard.html:278
+msgid "status"
+msgstr "Status"
+
+#: UI/templates/ui/dashboard.html:204 UI/templates/ui/dashboard.html:279
+msgid "active"
+msgstr "Active"
+
+#: UI/templates/ui/dashboard.html:205 UI/templates/ui/dashboard.html:280
+msgid "inactive"
+msgstr "Inactive"
+
+#: UI/templates/ui/dashboard.html:206 UI/templates/ui/dashboard.html:281
+msgid "joined"
+msgstr "Joined"
+
+#: UI/templates/ui/dashboard.html:207 UI/templates/ui/dashboard.html:282
+msgid "last_login"
+msgstr "Last Login"
+
+#: UI/templates/ui/dashboard.html:208 UI/templates/ui/dashboard.html:283
+msgid "never"
+msgstr "Never"
+
+#: UI/templates/ui/dashboard.html:209 UI/templates/ui/dashboard.html:290
+msgid "guest"
+msgstr "Guest"
+
+#: UI/templates/ui/dashboard.html:210 UI/templates/ui/dashboard.html:291
+msgid "guest_user"
+msgstr "Guest User"
+
+#: UI/templates/ui/dashboard.html:284
+msgid "staff"
+msgstr "Staff"
+
+#: UI/templates/ui/dashboard.html:285
+msgid "superuser"
+msgstr "Superuser"
+
+#: UI/templates/ui/dashboard.html:289
+msgid "user_menu"
+msgstr "User Menu"
+
+#: UI/templates/ui/dashboard.html:292
+msgid "sign_in"
+msgstr "Sign In"
+
+#: UI/templates/ui/index.html:7
+msgid "BackBoiler | Welcome"
+msgstr "BackBoiler | Welcome"
+
+#: UI/templates/ui/index.html:13
+#, python-format
+msgid "Welcome to <span class=\"text-blue-600\">%(project_name)s</span>"
+msgstr "Welcome to <span class=\"text-blue-600\">%(project_name)s</span>"
+
+#: UI/templates/ui/index.html:17
+msgid "Your backend is up and running 🚀"
+msgstr "Your backend is up and running 🚀"
+
+#: UI/templates/ui/index.html:22
+msgctxt "index.swagger"
+msgid "View APIs (Swagger)"
+msgstr "View APIs (Swagger)"
+
+#: UI/templates/ui/index.html:26
+msgctxt "index.ui"
+msgid "View APIs (UI)"
+msgstr "View APIs (UI)"
+
+#: UI/templates/ui/index.html:30
+msgctxt "index.admin"
+msgid "Admin Login"
+msgstr "Admin Login"
+
+#: UI/templates/ui/index.html:34
+#, fuzzy
+#| msgctxt "index.logs"
+#| msgid "View Logs"
+msgctxt "index.Docs"
+msgid "View Docs"
+msgstr "View Logs"
+
+#: UI/templates/ui/index.html:39
+#, python-format
+msgid "%(project_name)s Project"
+msgstr "%(project_name)s Project"
+
+#~ msgid "Total Users"
+#~ msgstr "Total Users"
+
+#~ msgid "Pending Tasks"
+#~ msgstr "Pending Tasks"
+
+#~ msgid "Recent Activity"
+#~ msgstr "Recent Activity"
+
+#~ msgid "Workflow “Import Data” completed 5 minutes ago."
+#~ msgstr "Workflow “Import Data” completed 5 minutes ago."
+
+#~ msgid "New user registered: alice@example.com."
+#~ msgstr "New user registered: alice@example.com."
+
+#~ msgid "Task “Generate Report” is pending review."
+#~ msgstr "Task “Generate Report” is pending review."
+
+#~ msgid "Change Language"
+#~ msgstr "Change Language"
 
 # quick navigation
- msgid "quick.dashboard.title"
- msgstr "Create Dashboard Item"
+#~ msgid "quick.dashboard.title"
+#~ msgstr "Create Dashboard Item"
 
- msgid "quick.dashboard.description"
- msgstr "Add something to the dashboard."
+#~ msgid "quick.dashboard.description"
+#~ msgstr "Add something to the dashboard."
 
- msgid "quick.dashboard.summery"
- msgstr "Added to dashboard"
+#~ msgid "quick.dashboard.summery"
+#~ msgstr "Added to dashboard"
 
- msgid "quick.workflow.title"
- msgstr "Create Workflow"
+#~ msgid "quick.workflow.title"
+#~ msgstr "Create Workflow"
 
- msgid "quick.workflow.description"
- msgstr "Start a new workflow to automate your processes."
+#~ msgid "quick.workflow.description"
+#~ msgstr "Start a new workflow to automate your processes."
 
- msgid "quick.workflow.summery"
- msgstr "Started a new workflow"
+#~ msgid "quick.workflow.summery"
+#~ msgstr "Started a new workflow"
 
- msgid "quick.analytics.title"
- msgstr "View Reports"
+#~ msgid "quick.analytics.title"
+#~ msgstr "View Reports"
 
- msgid "quick.analytics.description"
- msgstr "Check your analytics and performance reports."
+#~ msgid "quick.analytics.description"
+#~ msgstr "Check your analytics and performance reports."
 
- msgid "quick.analytics.summery"
- msgstr "Viewed analytics"
+#~ msgid "quick.analytics.summery"
+#~ msgstr "Viewed analytics"
 
- msgid "quick.inputs.title"
- msgstr "Import Data"
+#~ msgid "quick.inputs.title"
+#~ msgstr "Import Data"
 
- msgid "quick.inputs.description"
- msgstr "Upload your data files to process them."
+#~ msgid "quick.inputs.description"
+#~ msgstr "Upload your data files to process them."
 
- msgid "quick.inputs.summery"
- msgstr "Uploaded data files"
+#~ msgid "quick.inputs.summery"
+#~ msgstr "Uploaded data files"
 
- msgid "quick.settings.title"
- msgstr "Clear Settings"
+#~ msgid "quick.settings.title"
+#~ msgstr "Clear Settings"
 
- msgid "quick.settings.description"
- msgstr "Reset the recent actions log."
+#~ msgid "quick.settings.description"
+#~ msgstr "Reset the recent actions log."
 
- msgid "quick.settings.summery"
- msgstr "Cleared action history"
+#~ msgid "quick.settings.summery"
+#~ msgstr "Cleared action history"
 
- msgid "Recent_Actions_Log"
- msgstr "Recent Actions Log"
+#~ msgid "Recent_Actions_Log"
+#~ msgstr "Recent Actions Log"
 
+# calender
+#~ msgid "inputs.date.title"
+#~ msgstr "Select a Jalali Date"
 
- # calender
- msgid "inputs.date.title"
-msgstr "Select a Jalali Date"
+#~ msgid "inputs.date.jalali_label"
+#~ msgstr "Jalali Date"
 
-msgid "inputs.date.jalali_label"
-msgstr "Jalali Date"
+#~ msgid "inputs.date.submit"
+#~ msgstr "Submit"
 
-msgid "inputs.date.submit"
-msgstr "Submit"
+#~ msgid "inputs.date.selected_jalali"
+#~ msgstr "Selected Jalali"
 
-msgid "inputs.date.selected_jalali"
-msgstr "Selected Jalali"
+#~ msgid "inputs.date.selected_gregorian"
+#~ msgstr "Selected Gregorian"
 
-msgid "inputs.date.selected_gregorian"
-msgstr "Selected Gregorian"
- 
+#~ msgid "Read"
+#~ msgstr "Read"
 
- # messages
- msgid "Messages"
-msgstr "Messages"
- 
-msgid "Read"
-msgstr "Read"
- 
-msgid "Device"
-msgstr "Device"
- 
-msgid "Class"
-msgstr "Class"
- 
-msgid "Type"
-msgstr "Type"
- 
-msgid "Title"
-msgstr "Title"
- 
-msgid "Created At"
-msgstr "Created At"
- 
-msgid "Actions"
-msgstr "Actions"
+#~ msgid "Class"
+#~ msgstr "Class"
 
-msgid "nonewmessages"
-msgstr "no new messages"
+#~ msgid "Type"
+#~ msgstr "Type"
 
+#~ msgid "Created At"
+#~ msgstr "Created At"
 
+#~ msgid "Actions"
+#~ msgstr "Actions"
 
-msgid "Translating content..."
-msgstr "no new messages"
+#~ msgid "nonewmessages"
+#~ msgstr "no new messages"
 
+#~ msgid "Translating content..."
+#~ msgstr "no new messages"
 
-msgid "items translated"
-msgstr "no new messages"
+#~ msgid "items translated"
+#~ msgstr "no new messages"

@@ -56,14 +56,59 @@ def format_round_price(price, precision):
     return formatted_price        
 ##############################################
 def get_client_ip(request):
-    """Get client IP address"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip_addresses = [ip.strip() for ip in x_forwarded_for.split(',')]
-        for ip in ip_addresses:
-            try:
-                ipaddress.ip_address(ip)
+    """Get client IP address from various headers"""
+    # Check headers in order of preference
+    headers = [
+        'HTTP_CF_CONNECTING_IP',  # Cloudflare
+        'HTTP_X_REAL_IP',         # Nginx
+        'HTTP_X_FORWARDED_FOR',   # Standard proxy header
+        'HTTP_X_FORWARDED',       # Less common
+        'HTTP_X_CLUSTER_CLIENT_IP',
+        'HTTP_FORWARDED_FOR',
+        'HTTP_FORWARDED',
+        'REMOTE_ADDR'             # Direct connection
+    ]
+    
+    for header in headers:
+        ip = request.META.get(header)
+        if ip:
+            # Handle comma-separated IPs (proxy chains)
+            if ',' in ip:
+                ip = ip.split(',')[0].strip()
+            # Remove port if present
+            if ':' in ip and not ip.count(':') > 1:  # Not IPv6
+                ip = ip.split(':')[0]
+            # Skip localhost/private IPs if we have better options
+            if ip and not ip.startswith(('127.', '10.', '192.168.', '172.')):
                 return ip
-            except ValueError:
-                pass
-    return request.META.get('REMOTE_ADDR')
+            elif ip and header == 'REMOTE_ADDR':  # Use as fallback
+                return ip
+    
+    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+#################################################
+
+
+############################################
+def get_phonenumber_start_with_zero(phonenumber):
+    try:
+        if not CheckPhonenumberValidty(phonenumber):
+            return None
+
+        # Ensure the phone number starts with '0'
+        if phonenumber.startswith('00'):
+            phonenumber = phonenumber[2:]
+        if phonenumber.startswith('0'):
+            phonenumber = phonenumber[1:]
+        if phonenumber.startswith('+'):
+            phonenumber = phonenumber[1:]
+        if phonenumber.startswith('98'):
+            phonenumber = phonenumber[2:]
+        if phonenumber.startswith('+98'):
+            phonenumber = phonenumber[3:]
+        
+        return '0' + phonenumber
+        
+    except Exception as e:
+        print(f"Error in get_phonenumber_start_with_zero: {e}")
+        return None

@@ -1,0 +1,50 @@
+{
+  "project": {
+    "name": "TempBoiler",
+    "display_name": "TempBoiler",
+    "description": "Django Boilerplate with Advanced UI & Analytics",
+    "version": "1.0.0",
+    "author": "Pouya Soltani",
+    "email": "pouyasoltani81@gmail.com",
+    "website": "https://pouyasoltani.com",
+    "github": "https://github.com/pouyasolltani81/TempBoiler"
+  },
+  "ui": {
+    "theme": "light",
+    "default_language": "en",
+    "supported_languages": [
+      "en",
+      "fa"
+    ],
+    "company_logo": "",
+    "favicon": "",
+    "primary_color": "#3B82F6",
+    "secondary_color": "#6B7280"
+  },
+  "analytics": {
+    "enabled": true,
+    "sample_rate": 0.5,
+    "geoip_enabled": false,
+    "session_tracking": true,
+    "error_tracking": true
+  },
+  "api": {
+    "title": "TempBoiler API",
+    "description": "API documentation for TempBoiler project",
+    "version": "v1",
+    "contact_name": "Pouya Soltani",
+    "contact_email": "pouyasoltani81@gmail.com"
+  },
+  "database": {
+    "default": "sqlite:///src/dbs/main.sqlite3",
+    "logs": "sqlite:///src/dbs/Logs.sqlite3"
+  },
+  "security": {
+    "debug": true,
+    "allowed_hosts": [
+      "79.175.177.113" , "aimoonhub.ir" ,"*"
+    ],
+    "cors_enabled": true,
+    "csrf_enabled": true
+  }
+}

@@ -1,0 +1,177 @@
+{% block dashboard_section_tab %}
+  {% load i18n %}
+
+  <div id="dashboard-content" class="tab-content p-6 bg-gray-50 min-h-screen">
+    <!-- Project Overview (Minimal, No Gradient, No Author) -->
+    <div class="bg-white rounded-xl p-6 mb-8 shadow border border-gray-100">
+      <h1 class="text-2xl font-bold mb-2 text-gray-900">{% trans 'TempBoiler – Django Boilerplate' %}</h1>
+      <p class="text-gray-600 mb-4 text-sm">
+        {% trans 'A modern Django foundation for building web apps with advanced UI, analytics, and automation. Get started quickly and scale with confidence.' %}
+      </p>
+      <ul class="list-disc ml-6 text-gray-700 text-sm space-y-1 mb-2">
+        <li>
+          <b>{% trans 'Advanced UI' %}</b>:{% trans 'Modular dashboards, tab navigation, dark/light themes' %}
+        </li>
+        <li>
+          <b>{% trans 'Real-time Analytics' %}</b>:{% trans 'Instantly monitor API usage, user activity, and system health' %}
+        </li>
+        <li>
+          <b>{% trans 'Smart CLI Tools' %}</b>:{% trans 'Automate app creation, UI generation, and dashboard management' %}
+        </li>
+        <li>
+          <b>{% trans 'Multi-language' %}</b>:{% trans 'Built-in i18n (English & Persian)' %}
+        </li>
+        <li>
+          <b>{% trans 'Authentication & SSO' %}</b>:{% trans 'Secure user management and single sign-on' %}
+        </li>
+        <li>
+          <b>{% trans 'Performance Monitoring' %}</b>:{% trans 'Track system and API performance with ease' %}
+
+        </li>
+        <li>
+          <b>{% trans 'If you want Gpu Monitoring Install one of these libraries' %}</b>:{% trans '1- pynvml 2- GPUtil' %}
+        </li>
+        <li>
+          <b>{% trans 'Responsive Design' %}</b>:{% trans 'Works on all devices, powered by Tailwind CSS' %}
+        </li>
+      </ul>
+      <div class="mt-4 text-xs text-gray-500">
+        <b>{% trans 'How you benefit:' %}</b> <span class="ml-1">{% trans 'Save development time, gain instant insights, automate repetitive tasks, and deliver a professional user experience out of the box.' %}</span>
+      </div>
+      <div class="mt-2">
+        <span class="font-semibold text-gray-700">{% trans 'Quick Start:' %}</span>
+        <pre class="bg-gray-50 border border-gray-100 rounded p-2 text-xs mt-1 mb-0 overflow-x-auto">pip install -r requirements.txt python src/manage.py TempBoilerInit python src/manage.py runserver</pre>
+      </div>
+    </div>
+    <!-- End Project Showcase -->
+
+    {% if user.is_authenticated %}
+
+    
+      <!-- Top Metrics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col items-start">
+          <span class="text-gray-500 text-sm mb-2">{% trans 'API Requests (24h)' %}</span>
+          <span class="text-3xl font-bold text-blue-600" id="api-requests">--</span>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col items-start">
+          <span class="text-gray-500 text-sm mb-2">{% trans 'Active Users' %}</span>
+          <span class="text-3xl font-bold text-green-600" id="active-users">--</span>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col items-start">
+          <span class="text-gray-500 text-sm mb-2">{% trans 'Error Rate' %}</span>
+          <span class="text-3xl font-bold text-red-500" id="error-rate">--</span>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col items-start">
+          <span class="text-gray-500 text-sm mb-2">{% trans 'Avg. Response Time' %}</span>
+          <span class="text-3xl font-bold text-purple-600" id="avg-response">--</span>
+        </div>
+      </div>
+
+      <!-- Trends & Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">{% trans 'Requests Trend' %}</h2>
+          </div>
+          <canvas id="requestsTrend" height="120"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">{% trans 'System Health' %}</h2>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col items-start">
+              <span class="text-gray-500 text-xs">CPU</span>
+              <span class="font-bold text-blue-700" id="cpu-usage">--</span>
+            </div>
+            <div class="flex flex-col items-start">
+              <span class="text-gray-500 text-xs">{% trans 'Memory' %}</span>
+              <span class="font-bold text-green-700" id="memory-usage">--</span>
+            </div>
+            <div class="flex flex-col items-start">
+              <span class="text-gray-500 text-xs">{% trans 'Disk' %}</span>
+              <span class="font-bold text-purple-700" id="disk-usage">--</span>
+            </div>
+            <div class="flex flex-col items-start">
+              <span class="text-gray-500 text-xs">GPU</span>
+              <span class="font-bold text-yellow-700" id="gpu-usage">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Endpoints Table -->
+      <div class="bg-white rounded-xl shadow p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800">{% trans 'Top Endpoints' %}</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-gray-500 border-b">
+                <th class="py-2 px-4 text-left">
+                  {% trans 'Endpoint' %}
+                </th>
+                <th class="py-2 px-4 text-left">
+                  {% trans 'Method' %}
+                </th>
+                <th class="py-2 px-4 text-left">
+                  {% trans 'Requests' %}
+                </th>
+                <th class="py-2 px-4 text-left">
+                  {% trans 'Avg. Time (ms)' %}
+                </th>
+              </tr>
+            </thead>
+            <tbody id="top-endpoints">
+              <tr>
+                <td colspan="4" class="py-4 text-center text-gray-400">
+                  {% trans 'Loading...' %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Minimal JS for AJAX (Chart.js required) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/analytics/api/overview?range=24h')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('api-requests').textContent = data.total_requests;
+          document.getElementById('active-users').textContent = data.active_users;
+          document.getElementById('error-rate').textContent = data.error_rate + '%';
+          document.getElementById('avg-response').textContent = data.avg_response_time + ' ms';
+          // Top endpoints
+          let endpoints = data.top_endpoints || [];
+          let tbody = document.getElementById('top-endpoints');
+          tbody.innerHTML = endpoints.length ? endpoints.map(e => `<tr><td class='py-2 px-4'>${e.endpoint__path||'-'}</td><td class='py-2 px-4'>${e.endpoint__method||'-'}</td><td class='py-2 px-4'>${e.count||'-'}</td><td class='py-2 px-4'>${Math.round(e.avg_time||0)}</td></tr>`).join('') : `<tr><td colspan='4' class='py-4 text-center text-gray-400'>{% trans 'No data' %}</td></tr>`;
+          // Requests trend chart
+          if(window.Chart && data.trend_data) {
+            let ctx = document.getElementById('requestsTrend').getContext('2d');
+            let labels = data.trend_data.map(d => d.hour ? d.hour.slice(11,16) : d.day ? d.day.slice(5,10) : '');
+            let values = data.trend_data.map(d => d.requests);
+            new Chart(ctx, {
+              type: 'line',
+              data: { labels, datasets: [{ label: '{% trans "Requests" %}', data: values, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true }] },
+              options: { plugins: { legend: { display: false } }, scales: { x: { display: true }, y: { beginAtZero: true } } }
+            });
+          }
+        });
+      // System health metrics
+      fetch('/analytics/SystemCheckAPIView/')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('cpu-usage').textContent = (data.system?.cpu?.usage_percent || '--') + '%';
+          document.getElementById('gpu-usage').textContent = data.gpu ? (data.gpu?.memory?.used_percent + '%') : '--';
+          document.getElementById('memory-usage').textContent = data.system ? (data.system?.memory?.used_percent + '%') : '--';
+          document.getElementById('disk-usage').textContent = data.system ? (data.system?.disk?.usage_percent + '%') : '--';
+        });
+    });
+  </script>
+    {% endif %}
+  </div>
+{% endblock %}

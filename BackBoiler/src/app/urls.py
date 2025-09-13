@@ -1,15 +1,35 @@
 from django.contrib import admin
 from django.urls import path
-from django.urls import re_path
 from django.urls import include
-
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from django.urls import re_path
 from django.conf.urls.i18n import i18n_patterns
 import os
 from django.views.static import serve
-
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+from .config_utils import get_api_title, get_api_description , get_api_version
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title=get_api_title(),
+        default_version=get_api_version(),
+        description=get_api_description(),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
+
+
+
+
 
 BASE_EXTERNAL_PATH = '/home/anews/PS/gan'
 
@@ -32,6 +52,25 @@ urlpatterns = [
     path('Log/', include('LogModel.urls')),
     path('Connect/', include('ConnectModel.urls')),
     path('Sso/', include('SsoModel.urls')),
+   
+
+
+    path('', include('UI.urls')),  
+    path('i18n/', include('django.conf.urls.i18n')),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    
+    
+    
+    path('analytics/', include('AnalyticsModel.urls')),
+    
+    
+    
+    
+    
+    
+    
+    
+    
     path('News_Picture_Generator/', include('News_Picture_Generator.urls')),  
     path('Translate/', include('Translate.urls')),  
     
@@ -42,18 +81,14 @@ urlpatterns = [
     path('crypto_news_images/<path:path>/', serve, {'document_root': images_dir}),
     path('custom_images/<path:path>/', serve, {'document_root': custom_images_dir}),
     
-   
-    path('i18n/', include('django.conf.urls.i18n')),
-    
-    
-    re_path(r'^static/(?P<path>.*)$', serve, {
-        'document_root': '/home/anews/NewsPic_G/BackBoiler/src/static',
-    }),  
-    
-] + static('/static/', document_root='/home/anews/NewsPic_G/BackBoiler/src/static')
+  
+
+    # re_path(r'^static/(?P<path>.*)$', serve, {
+    #     'document_root': '',
+    # }),  
+
+]
 
 
-# if settings.DEBUG:
-#     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -16,7 +16,7 @@ RATE_LIMIT_ENDPOINTS = {
     'user_uuid_rate': {'limit': 5, 'window_minutes': 1},
     'data_fetch_rate': {'limit': 50, 'window_minutes': 60},
     'data_upload_rate': {'limit': 30, 'window_minutes': 60},
-    'api_search_rate': {'limit': 20, 'window_minutes': 10},
+    'api_search_rate': {'limit': 100, 'window_minutes': 2},
     'api_user_auth_rate': {'limit': 10, 'window_minutes': 5},
 }
 

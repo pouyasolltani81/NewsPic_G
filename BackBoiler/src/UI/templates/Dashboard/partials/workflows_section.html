@@ -1,0 +1,119 @@
+{% block workflows_section_tab %}
+{% load i18n %}
+{% load app_discovery %}
+
+<div id="workflows-content" class="bg-white h-dvh p-4 hidden">
+ 
+    <!-- Search Box -->
+    <div class="mb-6">
+        <div class="relative">
+            <input type="text" 
+                   id="workflow-search"
+                   placeholder="{% trans 'Search apps, services, or templates...' %}" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   onkeyup="filterWorkflows()">
+            <i data-lucide="search" class="absolute right-3 top-2.5 text-gray-400 w-5 h-5"></i>
+        </div>
+    </div>
+
+    <!-- Apps Tree Structure -->
+    <div class="space-y-3" id="apps-container">
+        {% discover_apps_and_services as discovered_apps %}
+        
+        {% for app in discovered_apps %}
+        <div class="app-item border border-gray-200 rounded-md overflow-hidden" data-app-name="{{ app.name|lower }}">
+            <div class="app-header bg-gray-50 p-4 flex justify-between items-center cursor-pointer" onclick="toggleApp('{{ app.name }}')">
+                <div class="flex items-center">
+                    <i data-lucide="package" class="w-5 h-5 text-blue-500 mr-3"></i>
+                    <span class="font-medium">{{ app.verbose_name }}</span>
+                    <span class="text-xs text-gray-500 ml-2">({{ app.name }})</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-600 mr-3">
+                        {{ app.services|length }} {% trans "services" %}
+                    </span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" id="{{ app.name }}-icon"></i>
+                </div>
+            </div>
+            
+            <div class="app-content hidden" id="{{ app.name }}-content">
+                {% if app.services %}
+                    {% for service in app.services %}
+                    <div class="service-item border-t border-gray-200" data-service-name="{{ service.name|lower }}">
+                        <div class="service-header bg-white p-4 pl-8 flex justify-between items-center cursor-pointer" 
+                             onclick="toggleService('{{ app.name }}-{{ forloop.counter }}')">
+                            <div class="flex items-center">
+                                <i data-lucide="server" class="w-5 h-5 text-purple-500 mr-3"></i>
+                                <span>{{ service.name }}</span>
+                                <span class="text-xs text-gray-500 ml-2">
+                                    ({{ service.urls|length }} {% trans "endpoints" %})
+                                </span>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" 
+                               id="{{ app.name }}-{{ forloop.counter }}-icon"></i>
+                        </div>
+                        
+                        <div class="service-content hidden" id="{{ app.name }}-{{ forloop.counter }}-content">
+                            <!-- URLs -->
+                            <div class="px-8 py-2 bg-gray-50">
+                                <div class="text-xs font-semibold text-gray-600 mb-2">{% trans "Endpoints" %}:</div>
+                                {% for url in service.urls %}
+                                <div class="flex items-center justify-between py-1">
+                                    <code class="text-xs bg-gray-200 px-2 py-1 rounded">{{ url.pattern }}</code>
+                                    {% if url.name %}
+                                    <span class="text-xs text-gray-500">{{ url.name }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Templates -->
+                            {% if service.templates %}
+                            <div class="px-8 py-2">
+                                <div class="text-xs font-semibold text-gray-600 mb-2">{% trans "Templates" %}:</div>
+                                {% for template in service.templates %}
+                                <div class="template-item flex items-center py-2" 
+                                     data-template-name="{{ template.name|lower }}">
+                                    <i data-lucide="file-text" class="w-4 h-4 text-orange-500 mr-2"></i>
+                                    <span class="text-sm">{{ template.name }}</span>
+                                    <span class="text-xs text-gray-400 ml-2">({{ template.path }})</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- App-level templates (not associated with specific services) -->
+                {% if app.templates %}
+                <div class="border-t border-gray-200 p-4 pl-8 bg-gray-50">
+                    <div class="text-sm font-semibold text-gray-600 mb-2">{% trans "Other Templates" %}:</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        {% for template in app.templates %}
+                        <div class="flex items-center text-sm" data-template-name="{{ template.name|lower }}">
+                            <i data-lucide="file-text" class="w-4 h-4 text-gray-400 mr-2"></i>
+                            <span>{{ template.name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if not app.services and not app.templates %}
+                <div class="p-4 text-center text-gray-500">
+                    {% trans "No services or templates found" %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center text-gray-500 py-8">
+            {% trans "No applications found" %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heatmap.js@2.0.5/build/heatmap.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <i data-lucide="bar-chart-3" class="w-8 h-8 text-blue-600 mr-3"></i>
+                        <h1 class="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- Time Range Selector -->
+                        <select id="timeRange" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="1h">Last Hour</option>
+                            <option value="24h" selected>Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d">Last 30 Days</option>
+                        </select>
+                        <button id="refreshBtn" class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Requests Card -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Requests</p>
+                            <p id="totalRequests" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                            <p id="requestsTrend" class="text-sm text-gray-500 mt-1"></p>
+                        </div>
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <i data-lucide="activity" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Response Time Card -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Avg Response Time</p>
+                            <p id="avgResponseTime" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                            <p class="text-sm text-gray-500 mt-1">milliseconds</p>
+                        </div>
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <i data-lucide="zap" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Rate Card -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Error Rate</p>
+                            <p id="errorRate" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                            <p id="errorCount" class="text-sm text-gray-500 mt-1"></p>
+                        </div>
+                        <div class="p-3 bg-red-100 rounded-lg">
+                            <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Users Card -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Active Users</p>
+                            <p id="activeUsers" class="text-3xl font-bold text-gray-900 mt-2">-</p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <span id="onlineUsers" class="text-green-600 font-medium">-</span> online now
+                            </p>
+                        </div>
+                        <div class="p-3 bg-purple-100 rounded-lg">
+                            <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Request Trend Chart -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Request Trend</h3>
+                    <canvas id="requestTrendChart" class=' max-h-[15rem]' height="200"></canvas>
+                </div>
+
+                <!-- Response Time Distribution -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Response Time Distribution</h3>
+                    <canvas id="responseTimeChart" class=' max-h-[15rem]' height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabs Section -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <button class="tab-btn active px-6 py-3 border-b-2 border-blue-500 text-blue-600 font-medium" data-tab="endpoints">
+                            <i data-lucide="globe" class="w-4 h-4 inline mr-2"></i>
+                            Endpoints
+                        </button>
+                        <button class="tab-btn px-6 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="users">
+                            <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>
+                            Users
+                        </button>
+                        <button class="tab-btn px-6 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="realtime">
+                            <i data-lucide="radio" class="w-4 h-4 inline mr-2"></i>
+                            Real-time
+                        </button>
+                        <button class="tab-btn px-6 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="errors">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 inline mr-2"></i>
+                            Errors
+                        </button>
+                        <button class="tab-btn px-6 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="performance">
+                            <i data-lucide="gauge" class="w-4 h-4 inline mr-2"></i>
+                            Performance
+                        </button>
+                        <button class="tab-btn px-6 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="geographic">
+                            <i data-lucide="map" class="w-4 h-4 inline mr-2"></i>
+                            Geographic
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-6">
+                    <!-- Endpoints Tab -->
+                    <div id="endpoints-tab" class="tab-content">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endpoint</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requests</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Time</th>
+    
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Errors</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Success Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="endpointsTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Users Tab -->
+                    <div id="users-tab" class="tab-content hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">User Statistics</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">New Users</span>
+                                        <span id="newUsers" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Returning Users</span>
+                                        <span id="returningUsers" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Retention Rate</span>
+                                        <span id="retentionRate" class="font-medium">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Activity Heatmap</h4>
+                                <div id="activityHeatmapContainer" style="position: relative; height: 200px;">
+                                    <canvas id="activityHeatmap" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                                    <div id="heatmapOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requests</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Response Time</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sessions</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Seen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Tab -->
+                    <div id="realtime-tab" class="tab-content hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Online Users -->
+                            <div class="lg:col-span-1">
+                                <h4 class="font-semibold text-gray-900 mb-4">Online Users</h4>
+                                <div id="onlineUsersList" class="space-y-2 max-h-96 overflow-y-auto">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                            
+                            <!-- Recent Requests -->
+                            <div class="lg:col-span-2">
+                                <h4 class="font-semibold text-gray-900 mb-4">Recent Requests</h4>
+                                <div id="recentRequestsList" class="space-y-2 max-h-96 overflow-y-auto">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Real-time Chart -->
+                        <div class="mt-6">
+                            <h4 class="font-semibold text-gray-900 mb-4">Real-time Activity</h4>
+                            <canvas id="realtimeChart" class=' max-h-[15rem]' height="150"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Errors Tab -->
+                    <div id="errors-tab" class="tab-content hidden">
+                        <div class=" mb-6">
+                            
+                            
+                            <!-- Problematic Endpoints -->
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Most Problematic Endpoints</h4>
+                                <div id="problematicEndpoints" class="space-y-2">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+               
+                    </div>
+
+                    <!-- Performance Tab -->
+                    <div id="performance-tab" class="tab-content hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            <!-- Response Time Percentiles -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-gray-900 mb-4">Response Time Percentiles</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">P50 (Median)</span>
+                                        <span id="p50" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">P75</span>
+                                        <span id="p75" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">P90</span>
+                                        <span id="p90" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">P95</span>
+                                        <span id="p95" class="font-medium">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">P99</span>
+                                        <span id="p99" class="font-medium">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Response Time Distribution Chart -->
+                            <div class="lg:col-span-2">
+                                <h4 class="font-semibold text-gray-900 mb-4">Response Time Distribution</h4>
+                                <canvas id="performanceDistChart" class=' max-h-[15rem]' height="200"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Slowest Endpoints -->
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Slowest Endpoints</h4>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endpoint</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Time (ms)</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Time (ms)</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="slowEndpointsTableBody" class="bg-white divide-y divide-gray-200">
+                                        <!-- Dynamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Geographic Tab -->
+                    <div id="geographic-tab" class="tab-content hidden">
+                        {% comment %} <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Countries -->
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Requests by Country</h4>
+                                <canvas id="countriesChart" class=' max-h-[27rem]' height="300"></canvas>
+                            </div>
+                            
+                            <!-- Cities -->
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Top Cities</h4>
+                                <div id="citiesList" class="space-y-2 max-h-96 overflow-y-auto">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div> {% endcomment %}
+                        
+                        <!-- Device & Browser Stats -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Device Types</h4>
+                                <canvas id="deviceTypesChart" class=' max-h-[15rem]' height="200"></canvas>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Browsers</h4>
+                                <canvas id="browsersChart" class=' max-h-[15rem]' height="200"></canvas>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Operating Systems</h4>
+                                <canvas id="osChart" class=' max-h-[15rem]' height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Global variables
+        let charts = {};
+        let currentTimeRange = '24h';
+        let refreshInterval;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            setupEventListeners();
+            startAutoRefresh();
+        });
+
+        function initializeDashboard() {
+            currentTimeRange = document.getElementById('timeRange').value;
+            loadAllData();
+        }
+
+        function setupEventListeners() {
+            // Time range selector
+            document.getElementById('timeRange').addEventListener('change', function(e) {
+                currentTimeRange = e.target.value;
+                loadAllData();
+            });
+
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                loadAllData();
+                // Rotate refresh icon
+                this.querySelector('i').style.transform = 'rotate(360deg)';
+                setTimeout(() => {
+                    this.querySelector('i').style.transform = 'rotate(0deg)';
+                }, 500);
+            });
+
+            // Tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            // Update button states
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            event.target.closest('.tab-btn').classList.remove('border-transparent', 'text-gray-500');
+            event.target.closest('.tab-btn').classList.add('active', 'border-blue-500', 'text-blue-600');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            
+            // Load tab-specific data
+            loadTabData(tabName);
+        }
+
+        function loadAllData() {
+            loadOverviewData();
+            loadTabData('endpoints'); // Load default tab
+        }
+
+        function loadOverviewData() {
+            axios.get(`/analytics/api/overview/?range=${currentTimeRange}`)
+                .then(response => {
+                    updateOverviewCards(response.data);
+                    updateRequestTrendChart(response.data.trend_data);
+                })
+                .catch(error => console.error('Error loading overview data:', error));
+        }
+
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'endpoints':
+                    loadEndpointsData();
+                    break;
+                case 'users':
+                    loadUsersData();
+                    break;
+                case 'realtime':
+                    loadRealtimeData();
+                    break;
+                case 'errors':
+                    loadErrorsData();
+                    break;
+                case 'performance':
+                    loadPerformanceData();
+                    break;
+                case 'geographic':
+                    loadGeographicData();
+                    break;
+            }
+        }
+
+
+        function updateOverviewCards(data) {
+            document.getElementById('totalRequests').textContent = data.total_requests.toLocaleString();
+            document.getElementById('avgResponseTime').textContent = data.avg_response_time.toFixed(2);
+            document.getElementById('errorRate').textContent = data.error_rate.toFixed(2) + '%';
+            document.getElementById('errorCount').textContent = `${Math.round(data.total_requests * data.error_rate / 100)} errors`;
+            document.getElementById('activeUsers').textContent = data.active_users.toLocaleString();
+            document.getElementById('onlineUsers').textContent = data.online_users.toLocaleString();
+        }
+
+        function updateRequestTrendChart(trendData) {
+            const ctx = document.getElementById('requestTrendChart').getContext('2d');
+            
+            if (charts.requestTrend) {
+                charts.requestTrend.destroy();
+            }
+
+            const labels = trendData.map(item => {
+                const date = new Date(item.hour || item.day);
+                return currentTimeRange === '24h' || currentTimeRange === '1h' 
+                    ? date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    : date.toLocaleDateString();
+            });
+
+            charts.requestTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Requests',
+                        data: trendData.map(item => item.requests),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Errors',
+                        data: trendData.map(item => item.errors),
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadEndpointsData() {
+            axios.get(`/analytics/api/endpoints/?range=${currentTimeRange}`)
+                .then(response => {
+                    updateEndpointsTable(response.data.endpoints);
+                    updateResponseTimeDistribution(response.data);
+                })
+                .catch(error => console.error('Error loading endpoints data:', error));
+        }
+
+        function updateEndpointsTable(endpoints) {
+            const tbody = document.getElementById('endpointsTableBody');
+            tbody.innerHTML = '';
+
+            endpoints.forEach(endpoint => {
+                const successRate = ((endpoint.success_count / endpoint.total_requests) * 100).toFixed(2);
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="px-2 py-1 text-xs font-medium rounded ${getMethodColor(endpoint.endpoint__method)}">
+                                    ${endpoint.endpoint__method}
+                                </span>
+                                <span class="ml-2 text-sm text-gray-900">${endpoint.endpoint__path}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${endpoint.total_requests.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${endpoint.avg_response_time.toFixed(2)} ms</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${endpoint.error_count}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="text-sm text-gray-900">${successRate}%</span>
+                                <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: ${successRate}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${endpoint.unique_users || 0}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function updateResponseTimeDistribution(data) {
+            const ctx = document.getElementById('responseTimeChart').getContext('2d');
+            
+            if (charts.responseTime) {
+                charts.responseTime.destroy();
+            }
+
+            // Aggregate response times by status code ranges
+            const statusRanges = {
+                '2xx': { count: 0, color: 'rgb(34, 197, 94)' },
+                '3xx': { count: 0, color: 'rgb(59, 130, 246)' },
+                '4xx': { count: 0, color: 'rgb(251, 146, 60)' },
+                '5xx': { count: 0, color: 'rgb(239, 68, 68)' }
+            };
+
+            Object.values(data.status_codes).forEach(endpointCodes => {
+                endpointCodes.forEach(item => {
+                    const range = `${Math.floor(item.status_code / 100)}xx`;
+                    if (statusRanges[range]) {
+                        statusRanges[range].count += item.count;
+                    }
+                });
+            });
+
+            charts.responseTime = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusRanges),
+                    datasets: [{
+                        data: Object.values(statusRanges).map(r => r.count),
+                        backgroundColor: Object.values(statusRanges).map(r => r.color)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadUsersData() {
+            axios.get(`/analytics/api/users/?range=${currentTimeRange}`)
+                .then(response => {
+                    updateUserStats(response.data);
+                    updateUsersTable(response.data.active_users);
+                    updateActivityHeatmap(response.data.heatmap_data);
+                })
+                .catch(error => console.error('Error loading users data:', error));
+        }
+
+        function updateUserStats(data) {
+            document.getElementById('newUsers').textContent = data.new_users.toLocaleString();
+            document.getElementById('returningUsers').textContent = data.returning_users.toLocaleString();
+            document.getElementById('retentionRate').textContent = data.retention_rate + '%';
+        }
+
+        function updateUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            ${user.user__username ? user.user__username.charAt(0).toUpperCase() : '?'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">${user.user__username || 'Unknown'}</div>
+                                    <div class="text-sm text-gray-500">${user.user__email || ''}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.total_requests.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.avg_response_time ? user.avg_response_time.toFixed(2) + ' ms' : '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.session_count}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(user.last_seen).toLocaleString()}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+ 
+        function updateActivityHeatmap(heatmapData) {
+            const container = document.getElementById('activityHeatmapContainer');
+            const canvas = document.getElementById('activityHeatmap');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = container.offsetWidth;
+            canvas.height = 200;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const cellWidth = canvas.width / 24;
+            const cellHeight = canvas.height / 7;
+            
+            // Find max value for normalization
+            const maxValue = Math.max(...Object.values(heatmapData), 1);
+            
+            // Draw heatmap cells
+            Object.entries(heatmapData).forEach(([key, value]) => {
+                const [day, hour] = key.split('_').map(Number);
+                const x = hour * cellWidth;
+                const y = day * cellHeight;
+                
+                // Calculate color intensity
+                const intensity = value / maxValue;
+                const opacity = 0.1 + (intensity * 0.9);
+                
+                // Draw cell
+                ctx.fillStyle = `rgba(59, 130, 246, ${opacity})`;
+                ctx.fillRect(x, y, cellWidth - 1, cellHeight - 1);
+                
+                // Add text for high values
+                if (value > 0) {
+                    ctx.fillStyle = intensity > 0.5 ? 'white' : 'black';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(value.toString(), x + cellWidth/2, y + cellHeight/2);
+                }
+            });
+            
+            // Draw labels
+            ctx.fillStyle = 'black';
+            ctx.font = '12px Arial';
+            
+            // Hour labels
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            for (let hour = 0; hour < 24; hour += 3) {
+                ctx.fillText(`${hour}:00`, hour * cellWidth + cellWidth/2, canvas.height - 20);
+            }
+            
+            // Day labels
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            days.forEach((day, index) => {
+                ctx.fillText(day, -5, index * cellHeight + cellHeight/2);
+            });
+        }
+
+
+        function loadRealtimeData() {
+            axios.get(`/analytics/api/realtime/`)
+                .then(response => {
+                    updateOnlineUsers(response.data.online_users);
+                    updateRecentRequests(response.data.recent_requests);
+                    updateRealtimeChart(response.data.metrics_timeline);
+                })
+                .catch(error => console.error('Error loading realtime data:', error));
+        }
+
+        function updateOnlineUsers(users) {
+            const container = document.getElementById('onlineUsersList');
+            container.innerHTML = '';
+
+            users.forEach(user => {
+                const userCard = `
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                <span class="font-medium text-sm">${user.user__username || 'Anonymous'}</span>
+                            </div>
+                            <span class="text-xs text-gray-500">${getTimeAgo(user.last_seen)}</span>
+                        </div>
+                        <div class="mt-1 text-xs text-gray-600">${user.ip_address}</div>
+                    </div>
+                `;
+                container.innerHTML += userCard;
+            });
+        }
+
+        function updateRecentRequests(requests) {
+            const container = document.getElementById('recentRequestsList');
+            container.innerHTML = '';
+
+            requests.forEach(request => {
+                const statusColor = request.status_code < 400 ? 'text-green-600' : 'text-red-600';
+                const requestCard = `
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 text-xs font-medium rounded ${getMethodColor(request.endpoint__method)}">
+                                    ${request.endpoint__method}
+                                </span>
+                                <span class="text-sm">${request.endpoint__path}</span>
+                            </div>
+                            <span class="${statusColor} font-medium text-sm">${request.status_code}</span>
+                        </div>
+                        <div class="mt-1 flex items-center justify-between text-xs text-gray-600">
+                            <span>${request.user__username || 'Anonymous'}</span>
+                            <span>${request.response_time.toFixed(2)} ms</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += requestCard;
+            });
+        }
+
+        function updateRealtimeChart(metricsTimeline) {
+            const ctx = document.getElementById('realtimeChart').getContext('2d');
+            
+            if (charts.realtime) {
+                charts.realtime.destroy();
+            }
+
+            const labels = metricsTimeline.map(m => {
+                const date = new Date(m.timestamp);
+                return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            });
+
+            charts.realtime = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Requests/min',
+                        data: metricsTimeline.map(m => m.requests),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+
+                function loadErrorsData() {
+            axios.get(`/analytics/api/errors/?range=${currentTimeRange}`)
+                .then(response => {
+                    console.log(response)
+                    
+                    updateProblematicEndpoints(response.data.problematic_endpoints);
+                })
+                .catch(error => console.error('Error loading errors data:', error));
+        }
+
+        function updateProblematicEndpoints(endpoints) {
+            
+            const container = document.getElementById('problematicEndpoints');
+            container.innerHTML = '';
+
+            endpoints.forEach(endpoint => {
+                const card = `
+                    <div class="bg-red-50 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 text-xs font-medium rounded ${getMethodColor(endpoint.endpoint__method)}">
+                                    ${endpoint.endpoint__method}
+                                </span>
+                                <span class="text-sm font-medium">${endpoint.endpoint__path}</span>
+                            </div>
+                            <span class="text-red-600 font-bold">${endpoint.error_count}</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+
+        function loadPerformanceData() {
+            axios.get(`/analytics/api/performance/?range=${currentTimeRange}`)
+                .then(response => {
+                    updatePercentiles(response.data.percentiles);
+                    updatePerformanceDistribution(response.data.response_time_distribution);
+                    updateSlowEndpoints(response.data.slow_endpoints);
+                })
+                .catch(error => console.error('Error loading performance data:', error));
+        }
+
+        function updatePercentiles(percentiles) {
+            Object.entries(percentiles).forEach(([key, value]) => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = value.toFixed(2) + ' ms';
+                }
+            });
+        }
+
+        function updatePerformanceDistribution(distribution) {
+            const ctx = document.getElementById('performanceDistChart').getContext('2d');
+            
+            if (charts.performanceDist) {
+                charts.performanceDist.destroy();
+            }
+
+            charts.performanceDist = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(distribution),
+                    datasets: [{
+                        label: 'Request Count',
+                        data: Object.values(distribution),
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSlowEndpoints(endpoints) {
+            const tbody = document.getElementById('slowEndpointsTableBody');
+            tbody.innerHTML = '';
+
+            endpoints.forEach(endpoint => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 text-xs font-medium rounded ${getMethodColor(endpoint.endpoint__method)}">
+                                    ${endpoint.endpoint__method}
+                                </span>
+                                <span class="text-sm">${endpoint.endpoint__path}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${endpoint.avg_time.toFixed(2)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${endpoint.max_time.toFixed(2)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${endpoint.request_count.toLocaleString()}
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function loadGeographicData() {
+            // axios.get(`/analytics/api/geographic/?range=${currentTimeRange}`)
+                // .then(response => {
+                    // updateCountriesChart(response.data.countries);
+                    // updateCitiesList(response.data.cities);
+                // })
+                // .catch(error => console.error('Error loading geographic data:', error));
+
+            // Also load device data
+            axios.get(`/analytics/api/devices/?range=${currentTimeRange}`)
+                .then(response => {
+                    updateDeviceCharts(response.data);
+                })
+                .catch(error => console.error('Error loading device data:', error));
+        }
+
+
+        function updateCountriesChart(countries) {
+                
+                
+                const ctx = document.getElementById('countriesChart').getContext('2d');
+                
+                
+                if (charts.countries) {
+                    
+                    charts.countries.destroy();
+                }
+
+                // Take top 10 countries
+                const topCountries = countries.slice(0, 10);
+                
+
+                // Check if we have data to display
+                if (topCountries.length === 0) {
+                    console.error('No countries data available for chart');
+                    return;
+                }
+
+                try {
+                    charts.countries = new Chart(ctx, {
+                        type: 'bar',  // Changed from 'horizontalBar'
+                        data: {
+                            labels: topCountries.map(c => c.country),
+                            datasets: [{
+                                label: 'Requests',
+                                data: topCountries.map(c => c.request_count),
+                                backgroundColor: 'rgba(59, 130, 246, 0.8)'
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',  // This makes it horizontal
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Requests'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Countries'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                    
+                    
+                } catch (error) {
+                    console.error('Error creating chart:', error);
+                    
+                    // Fallback to try with the old type
+                    try {
+                        console.log('Trying fallback with horizontalBar type...');
+                        charts.countries = new Chart(ctx, {
+                            type: 'horizontalBar',
+                            data: {
+                                labels: topCountries.map(c => c.country),
+                                datasets: [{
+                                    label: 'Requests',
+                                    data: topCountries.map(c => c.request_count),
+                                    backgroundColor: 'rgba(59, 130, 246, 0.8)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                        console.log('Fallback chart created with horizontalBar type');
+                    } catch (fallbackError) {
+                        console.error('Fallback also failed:', fallbackError);
+                    }
+                }
+            }
+
+        function updateCitiesList(cities) {
+            const container = document.getElementById('citiesList');
+            container.innerHTML = '';
+
+            cities.forEach((city, index) => {
+                const card = `
+                    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <span class="text-gray-500 font-medium mr-3">${index + 1}</span>
+                            <div>
+                                <div class="font-medium">${city.city}</div>
+                                <div class="text-sm text-gray-500">${city.country}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium">${city.request_count.toLocaleString()}</div>
+                            <div class="text-sm text-gray-500">${city.unique_users} users</div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        function updateDeviceCharts(data) {
+            // Device Types Chart
+            const deviceCtx = document.getElementById('deviceTypesChart').getContext('2d');
+            if (charts.deviceTypes) charts.deviceTypes.destroy();
+            
+            charts.deviceTypes = new Chart(deviceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.device_types.map(d => d.device_type),
+                    datasets: [{
+                        data: data.device_types.map(d => d.count),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(168, 85, 247, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Browsers Chart
+            const browserCtx = document.getElementById('browsersChart').getContext('2d');
+            if (charts.browsers) charts.browsers.destroy();
+            
+            charts.browsers = new Chart(browserCtx, {
+                type: 'pie',
+                data: {
+                    labels: data.browsers.slice(0, 5).map(b => b.browser),
+                    datasets: [{
+                        data: data.browsers.slice(0, 5).map(b => b.count),
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(168, 85, 247, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // OS Chart
+            const osCtx = document.getElementById('osChart').getContext('2d');
+            if (charts.os) charts.os.destroy();
+            
+            charts.os = new Chart(osCtx, {
+                type: 'pie',
+                data: {
+                    labels: data.operating_systems.slice(0, 5).map(os => os.os),
+                    datasets: [{
+                        data: data.operating_systems.slice(0, 5).map(os => os.count),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(168, 85, 247, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(251, 146, 60, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Utility functions
+        function getMethodColor(method) {
+            const colors = {
+                'GET': 'bg-blue-100 text-blue-800',
+                'POST': 'bg-green-100 text-green-800',
+                'PUT': 'bg-yellow-100 text-yellow-800',
+                'PATCH': 'bg-orange-100 text-orange-800',
+                'DELETE': 'bg-red-100 text-red-800'
+            };
+            return colors[method] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const then = new Date(timestamp);
+            const seconds = Math.floor((now - then) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            return Math.floor(seconds / 86400) + ' days ago';
+        }
+
+        function startAutoRefresh() {
+            // Refresh every 30 seconds
+            refreshInterval = setInterval(() => {
+                const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                if (activeTab === 'realtime') {
+                    loadRealtimeData();
+                }
+                loadOverviewData();
+            }, 30000);
+        }
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
