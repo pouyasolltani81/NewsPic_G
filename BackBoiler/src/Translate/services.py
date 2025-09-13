@@ -51,7 +51,7 @@ from django.apps import apps
     }
 )
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def translate_text(request):
     """Translate text using small100 multilingual model"""
     
@@ -180,7 +180,7 @@ def translate_text(request):
     }
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def list_supported_languages(request):
     """Get list of supported languages"""
     

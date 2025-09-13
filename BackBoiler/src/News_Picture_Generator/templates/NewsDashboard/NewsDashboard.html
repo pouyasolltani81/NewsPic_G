@@ -1,4 +1,4 @@
-{% extends "ui/user_base.html" %}
+{% extends "ui/dashboard.html" %}
 {% load i18n %}
 
 {% block title %}NewsDashboard –  UI{% endblock %}
@@ -122,15 +122,7 @@ input[type="range"]:hover::-moz-range-thumb {
   
 
   
-    
-     {# ─────────────────────── MESSAGES TAB ─────────────────────── #}
-    {% include "./partials/messages_section.html" %}
 
-
-
-    
-     {# ─────────────────────── CONFIGS TAB ─────────────────────── #}
-    {% include "./partials/configs_section.html" %}
 
    
   </div>
@@ -142,15 +134,11 @@ input[type="range"]:hover::-moz-range-thumb {
 
   const navItems = [
   { key: '1', section: "dashboard", label: "{{ _('Dashboard') }}", icon: "layout-dashboard", active: true },
-  { key: '2', section: "Prompt_engineeing", label: "{{ _('Prompt engineeing') }}", icon: "brain-circuit" },
+  { key: '2', section: "Prompt_engineeing", label: "{{ _('Prompt engineeing') }}", icon: "brain-circuit" , access: 'user'  },
   
-  { key: '3', section: "Speech2text", label: "{{ _('Speech2text') }}", icon: "audio-lines" },
-  { key: '4', section: "Text2Image", label: "{{ _('Text2Image') }}", icon: "image-plus" },
-  { key: '5', section: "Translation", label: "{{ _('Translation') }}", icon: "languages" },
-
-  { key: '6', section: "messages", label: "{{ _('Messages') }}", icon: "mails" },
-
-  { key: '7', section: "configs", label: "{{ _('configs') }}", icon: "bolt" },
+  { key: '3', section: "Speech2text", label: "{{ _('Speech2text') }}", icon: "audio-lines" , access: 'user' },
+  { key: '4', section: "Text2Image", label: "{{ _('Text2Image') }}", icon: "image-plus", access: 'user'},
+  { key: '5', section: "Translation", label: "{{ _('Translation') }}", icon: "languages",access: 'user' },
 
 
 
@@ -159,12 +147,10 @@ input[type="range"]:hover::-moz-range-thumb {
 
     const contentSections = {
       dashboard: document.getElementById('dashboard-content'),
-      messages: document.getElementById('messages-content'),
       Prompt_engineeing: document.getElementById('Prompt_engineeing-content'),
       Speech2text: document.getElementById('Speech2text-content'),
       Text2Image: document.getElementById('Text2Image-content'),
       Translation: document.getElementById('Translation-content'),
-      configs: document.getElementById('configs-content'),
 
 
 
@@ -185,13 +171,12 @@ input[type="range"]:hover::-moz-range-thumb {
 
 <script>
 
-  {% include "./partials/messages.js" %}
   {% include "./partials/components.js" %}
   {% include "./partials/qwen.js" %}
   {% include "./partials/whisper.js" %}
   {% include "./partials/Text2Image.js" %}
   {% include "./partials/Translate_section.js" %}
-  {% include "./partials/configs.js" %}
+
   
 </script>
 
