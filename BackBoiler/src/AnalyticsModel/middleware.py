@@ -162,6 +162,7 @@ class AnalyticsMiddleware:
             '/.well-known/',
             '/robots.txt',
             '/analytics/api/',
+            '/analytics/',
             '/Dashoboard/',
         ]
         return any(request.path.startswith(path) for path in skip_paths)
