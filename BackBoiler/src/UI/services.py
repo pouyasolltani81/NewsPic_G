@@ -76,7 +76,7 @@ class DaemonServiceView(LoginRequiredMixin, View):
                 return JsonResponse({'error': 'Invalid service name format'}, status=400)
             
             success = self.manager.create_service(service_name, config)
-            return JsonResponse({'success': success})
+            return JsonResponse({'return': success})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
@@ -100,14 +100,14 @@ class DaemonServiceDetailView(LoginRequiredMixin, View):
         
         try:
             success = actions[action](service_name)
-            return JsonResponse({'success': success})
+            return JsonResponse({'return': success})
         except Exception as e:
-            return JsonResponse({'error': str(e), 'success': False}, status=500)
+            return JsonResponse({'error': str(e), 'return': False}, status=500)
     
     def delete(self, request, service_name):
         """Delete a service"""
         try:
             success = self.manager.delete_service(service_name)
-            return JsonResponse({'success': success})
+            return JsonResponse({'return': success})
         except Exception as e:
-            return JsonResponse({'error': str(e), 'success': False}, status=500)
+            return JsonResponse({'error': str(e), 'return': False}, status=500)

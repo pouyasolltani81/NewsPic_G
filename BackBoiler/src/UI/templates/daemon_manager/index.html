@@ -382,9 +382,7 @@
                         'X-CSRFToken': csrfToken
                     }
                 });
-                console.log(response)
                 const data = await response.json();
-                console.log(data)
 
                 if (data.success) {
                     showToast(`Service ${serviceName} deleted successfully`, 'success');

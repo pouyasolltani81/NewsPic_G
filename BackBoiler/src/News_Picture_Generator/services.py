@@ -75,13 +75,13 @@ def download_image_by_title(request):
             break
     
     if not item:
-        return Response({'error': "Image with the given title not found"}, status=404)
+        return Response({'error': "Image with the given title not found" , 'return': False}, status=404)
     
     filename = os.path.basename(item['filepath'])
     image_path = os.path.join(images_dir, filename)
     
     if not os.path.exists(image_path):
-        return Response({'error': "Image file not found on server"}, status=404)
+        return Response({'return': False,'error': "Image file not found on server"}, status=404)
     
     # Return image as FileResponse for download
     response = FileResponse(open(image_path, 'rb'), content_type='image/png')
@@ -126,7 +126,7 @@ def check_image_exists(request):
     """Check if image exists for given title"""
     title = request.data.get('title', '').strip()
     if not title:
-        return Response({'error': "Missing 'title' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'title' parameter"}, status=400)
     
     # Reload the JSON file to get latest data
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -143,6 +143,7 @@ def check_image_exists(request):
         filename = os.path.basename(item.get('filepath', ''))
         image_url = request.build_absolute_uri(f'/crypto_news_images/{filename}')
         return Response({
+            'return': True,
             'exists': True,
             'metadata': {
                 'prompt': item.get('prompt'),
@@ -156,6 +157,7 @@ def check_image_exists(request):
         })
     
     return Response({
+        'return': True,
         'exists': False,
         'metadata': None,
         'message': 'Image will be generated in the next cycle (every 30 minutes)'
@@ -205,6 +207,7 @@ def list_generated_images(request):
     images.sort(key=lambda x: x.get('generated_at', ''), reverse=True)
     
     return Response({
+        'return': True,
         'count': len(images),
         'images': images
     })
@@ -240,6 +243,7 @@ def news_image_stats(request):
     # Check if generated_history.json exists
     if not os.path.exists(json_path):
         return Response({
+            'return': True,
             'total_images': 0,
             'total_size_mb': 0,
             'unique_clusters': [],
@@ -255,6 +259,7 @@ def news_image_stats(request):
     
     if not data_dict:
         return Response({
+            'return': True,
             'total_images': 0,
             'total_size_mb': 0,
             'unique_clusters': [],
@@ -330,6 +335,7 @@ def news_image_stats(request):
         format_count[ext] = format_count.get(ext, 0) + 1
     
     return Response({
+        'return': True,
         'total_images': len(data_dict),
         'total_size_mb': round(total_size / (1024 * 1024), 2),
         'total_size_gb': round(total_size / (1024 * 1024 * 1024), 2),
@@ -427,23 +433,23 @@ def generate_custom_image(request):
     height = request.data.get('height')
     
     if not prompt:
-        return Response({'error': "Missing 'prompt' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'prompt' parameter"}, status=400)
     
     if not width or not height:
-        return Response({'error': "Missing 'width' or 'height' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'width' or 'height' parameter"}, status=400)
     
     try:
         width = int(width)
         height = int(height)
     except ValueError:
-        return Response({'error': "Width and height must be integers"}, status=400)
+        return Response({'return': False,'error': "Width and height must be integers"}, status=400)
     
     # Validate dimensions
     if width < 64 or width > 2048 or height < 64 or height > 2048:
-        return Response({'error': "Width and height must be between 64 and 2048"}, status=400)
+        return Response({'return': False,'error': "Width and height must be between 64 and 2048"}, status=400)
     
     if width % 8 != 0 or height % 8 != 0:
-        return Response({'error': "Width and height must be divisible by 8"}, status=400)
+        return Response({'return': False,'error': "Width and height must be divisible by 8"}, status=400)
     
     # Get optional parameters
     negative_prompt = request.data.get('negative_prompt', '')
@@ -519,6 +525,7 @@ def generate_custom_image(request):
     thread.start()
     
     return Response({
+        'return': True,
         'status': 'started',
         'message': 'Image generation started. Check status or list custom images to see results.',
         'generation_id': generation_id,
@@ -603,6 +610,7 @@ def list_custom_images(request):
         })
     
     return Response({
+        'return': True,
         'count': len(custom_data.get('generations', [])),
         'displayed': len(images),
         'images': images
@@ -714,11 +722,12 @@ def search_custom_images(request):
     include_negative = request.data.get('include_negative', False)
     
     if not search_text and not generation_id:
-        return Response({'error': "Must provide either 'search_text' or 'generation_id'"}, status=400)
+        return Response({'return': False,'error': "Must provide either 'search_text' or 'generation_id'"}, status=400)
     
     # Check if custom_pics.json exists
     if not os.path.exists(custom_json_path):
         return Response({
+            'return': True,
             'count': 0,
             'results': [],
             'message': 'No custom images to search'
@@ -803,6 +812,7 @@ def search_custom_images(request):
         })
     
     return Response({
+        'return': True,
         'count': len(formatted_results),
         'search_criteria': {
             'text': search_text if search_text else None,
@@ -838,6 +848,7 @@ def custom_image_stats(request):
     # Check if custom_pics.json exists
     if not os.path.exists(custom_json_path):
         return Response({
+            'return': True,
             'total_images': 0,
             'total_size_mb': 0,
             'most_common_dimensions': [],
@@ -854,6 +865,7 @@ def custom_image_stats(request):
     
     if not generations:
         return Response({
+            'return': True,
             'total_images': 0,
             'total_size_mb': 0,
             'most_common_dimensions': [],
@@ -886,6 +898,7 @@ def custom_image_stats(request):
     most_common_dimensions = [{'dimensions': k, 'count': v} for k, v in sorted_dimensions[:5]]
     
     return Response({
+        'return': True,
         'total_images': len(generations),
         'total_size_mb': round(total_size / (1024 * 1024), 2),
         'most_common_dimensions': most_common_dimensions,
@@ -925,11 +938,11 @@ def delete_custom_image(request):
     filename = request.data.get('filename', '').strip()
     
     if not filename:
-        return Response({'error': "Missing 'filename' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'filename' parameter"}, status=400)
     
     # Check if custom_pics.json exists
     if not os.path.exists(custom_json_path):
-        return Response({'error': "No custom images found"}, status=404)
+        return Response({'return': False,'error': "No custom images found"}, status=404)
     
     # Load custom images data
     with open(custom_json_path, 'r', encoding='utf-8') as f:
@@ -951,7 +964,7 @@ def delete_custom_image(request):
             updated_generations.append(gen)
     
     if not found:
-        return Response({'error': "Image not found in history"}, status=404)
+        return Response({'return': False,'error': "Image not found in history"}, status=404)
     
     # Update the JSON file
     custom_data['generations'] = updated_generations
@@ -959,6 +972,7 @@ def delete_custom_image(request):
         json.dump(custom_data, f, indent=2, ensure_ascii=False)
     
     return Response({
+        'return': True,
         'status': 'success',
         'message': f'Image {filename} deleted successfully'
     })
@@ -1056,7 +1070,7 @@ def download_image_with_logo(request):
     """Download news image with adaptive vertical logo overlay"""
     title = request.data.get('title', '').strip()
     if not title:
-        return Response({'error': "Missing 'title' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'title' parameter"}, status=400)
     
     # Get parameters
     light_logo_path = request.data.get('light_logo_path')
@@ -1073,7 +1087,7 @@ def download_image_with_logo(request):
     try:
         strip_width_percentage = int(strip_width_percentage)
         if not 3 <= strip_width_percentage <= 15:
-            return Response({'error': "strip_width_percentage must be between 3 and 15"}, status=400)
+            return Response({'return': False,'error': "strip_width_percentage must be between 3 and 15"}, status=400)
     except ValueError:
         return Response({'error': "strip_width_percentage must be an integer"}, status=400)
     
@@ -1081,33 +1095,33 @@ def download_image_with_logo(request):
         logo_opacity = float(logo_opacity)
         strip_opacity = float(strip_opacity)
         if not 0.0 <= logo_opacity <= 1.0 or not 0.0 <= strip_opacity <= 1.0:
-            return Response({'error': "opacity values must be between 0.0 and 1.0"}, status=400)
+            return Response({'return': False,'error': "opacity values must be between 0.0 and 1.0"}, status=400)
     except ValueError:
-        return Response({'error': "opacity must be a number"}, status=400)
+        return Response({'return': False,'error': "opacity must be a number"}, status=400)
     
     try:
         font_size_percentage = int(font_size_percentage)
         if not 40 <= font_size_percentage <= 80:
-            return Response({'error': "font_size_percentage must be between 40 and 80"}, status=400)
+            return Response({'return': False,'error': "font_size_percentage must be between 40 and 80"}, status=400)
     except ValueError:
-        return Response({'error': "font_size_percentage must be an integer"}, status=400)
+        return Response({'return': False,'error': "font_size_percentage must be an integer"}, status=400)
     
     try:
         brightness_threshold = int(brightness_threshold)
         if not 0 <= brightness_threshold <= 255:
-            return Response({'error': "brightness_threshold must be between 0 and 255"}, status=400)
+            return Response({'return': False,'error': "brightness_threshold must be between 0 and 255"}, status=400)
     except ValueError:
-        return Response({'error': "brightness_threshold must be an integer"}, status=400)
+        return Response({'return': False,'error': "brightness_threshold must be an integer"}, status=400)
     
     if output_format not in ['png', 'jpg']:
-        return Response({'error': "output_format must be 'png' or 'jpg'"}, status=400)
+        return Response({'return': False,'error': "output_format must be 'png' or 'jpg'"}, status=400)
     
     try:
         output_quality = int(output_quality)
         if not 1 <= output_quality <= 100:
-            return Response({'error': "output_quality must be between 1 and 100"}, status=400)
+            return Response({'return': False,'error': "output_quality must be between 1 and 100"}, status=400)
     except ValueError:
-        return Response({'error': "output_quality must be an integer"}, status=400)
+        return Response({'return': False,'error': "output_quality must be an integer"}, status=400)
     
     # Reload the JSON file to get latest data
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -1121,14 +1135,14 @@ def download_image_with_logo(request):
             break
     
     if not item:
-        return Response({'error': "Image with the given title not found"}, status=404)
+        return Response({'return': False,'error': "Image with the given title not found"}, status=404)
     
     # Get the original image
     filename = os.path.basename(item['filepath'])
     image_path = os.path.join(images_dir, filename)
     
     if not os.path.exists(image_path):
-        return Response({'error': "Image file not found on server"}, status=404)
+        return Response({'return': False,'error': "Image file not found on server"}, status=404)
     
     # Set default logo paths if not provided
     if not light_logo_path or not dark_logo_path:
@@ -1170,9 +1184,9 @@ def download_image_with_logo(request):
     
     # Validate logo paths
     if not os.path.exists(light_logo_path):
-        return Response({'error': f"Light logo file not found at: {light_logo_path}"}, status=404)
+        return Response({'return': False,'error': f"Light logo file not found at: {light_logo_path}"}, status=404)
     if not os.path.exists(dark_logo_path):
-        return Response({'error': f"Dark logo file not found at: {dark_logo_path}"}, status=404)
+        return Response({'return': False,'error': f"Dark logo file not found at: {dark_logo_path}"}, status=404)
     
     try:
         # Open the main image
@@ -1423,7 +1437,7 @@ def analyze_image_brightness(request):
     """Analyze image brightness for adaptive logo placement"""
     title = request.data.get('title', '').strip()
     if not title:
-        return Response({'error': "Missing 'title' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'title' parameter"}, status=400)
     
     strip_width_percentage = request.data.get('strip_width_percentage', 8)
     brightness_threshold = request.data.get('brightness_threshold', 128)
@@ -1432,16 +1446,16 @@ def analyze_image_brightness(request):
     try:
         strip_width_percentage = int(strip_width_percentage)
         if not 3 <= strip_width_percentage <= 15:
-            return Response({'error': "strip_width_percentage must be between 3 and 15"}, status=400)
+            return Response({'return': False,'error': "strip_width_percentage must be between 3 and 15"}, status=400)
     except ValueError:
-        return Response({'error': "strip_width_percentage must be an integer"}, status=400)
+        return Response({'return': False,'error': "strip_width_percentage must be an integer"}, status=400)
     
     try:
         brightness_threshold = int(brightness_threshold)
         if not 0 <= brightness_threshold <= 255:
-            return Response({'error': "brightness_threshold must be between 0 and 255"}, status=400)
+            return Response({'return': False,'error': "brightness_threshold must be between 0 and 255"}, status=400)
     except ValueError:
-        return Response({'error': "brightness_threshold must be an integer"}, status=400)
+        return Response({'return': False,'error': "brightness_threshold must be an integer"}, status=400)
     
     # Find the image
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -1454,14 +1468,14 @@ def analyze_image_brightness(request):
             break
     
     if not item:
-        return Response({'error': "Image with the given title not found"}, status=404)
+        return Response({'return': False,'error': "Image with the given title not found"}, status=404)
     
     # Get image path
     filename = os.path.basename(item['filepath'])
     image_path = os.path.join(images_dir, filename)
     
     if not os.path.exists(image_path):
-        return Response({'error': "Image file not found on server"}, status=404)
+        return Response({'return': False,'error': "Image file not found on server"}, status=404)
     
     try:
         # Open the image
@@ -1502,6 +1516,7 @@ def analyze_image_brightness(request):
             }
         
         return Response({
+            'return': True,
             'average_brightness': round(avg_brightness, 2),
             'min_brightness': min_brightness,
             'max_brightness': max_brightness,
@@ -1518,6 +1533,7 @@ def analyze_image_brightness(request):
         
     except Exception as e:
         return Response({
+            'return': False,
             'error': f"Failed to analyze image: {str(e)}"
         }, status=500)
 
@@ -1575,7 +1591,7 @@ def preview_logo_placement(request):
     """Preview logo placement on image"""
     title = request.data.get('title', '').strip()
     if not title:
-        return Response({'error': "Missing 'title' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'title' parameter"}, status=400)
     
     logo_size_percentage = request.data.get('logo_size_percentage', 15)
     logo_padding = request.data.get('logo_padding', 20)
@@ -1584,9 +1600,9 @@ def preview_logo_placement(request):
     try:
         logo_size_percentage = int(logo_size_percentage)
         if not 5 <= logo_size_percentage <= 30:
-            return Response({'error': "logo_size_percentage must be between 5 and 30"}, status=400)
+            return Response({'return': False,'error': "logo_size_percentage must be between 5 and 30"}, status=400)
     except ValueError:
-        return Response({'error': "logo_size_percentage must be an integer"}, status=400)
+        return Response({'return': False,'error': "logo_size_percentage must be an integer"}, status=400)
     
     # Find the image
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -1599,14 +1615,14 @@ def preview_logo_placement(request):
             break
     
     if not item:
-        return Response({'error': "Image with the given title not found"}, status=404)
+        return Response({'return': False,'error': "Image with the given title not found"}, status=404)
     
     # Get image dimensions
     filename = os.path.basename(item['filepath'])
     image_path = os.path.join(images_dir, filename)
     
     if not os.path.exists(image_path):
-        return Response({'error': "Image file not found on server"}, status=404)
+        return Response({'return': False,'error': "Image file not found on server"}, status=404)
     
     try:
         with Image.open(image_path) as img:
@@ -1622,6 +1638,7 @@ def preview_logo_placement(request):
             new_logo_width = new_logo_height = max_size
         
         return Response({
+            'return': True,
             'original_size': {
                 'width': main_width,
                 'height': main_height
@@ -1641,6 +1658,7 @@ def preview_logo_placement(request):
         
     except Exception as e:
         return Response({
+            'return': False,
             'error': f"Failed to read image: {str(e)}"
         }, status=500)
 
@@ -1694,7 +1712,7 @@ def transcribe_audio(request):
     """Transcribe Persian audio using Whisper Large-v3 on demand, then free GPU memory."""
     audio_file = request.FILES.get('audio_file')
     if not audio_file:
-        return Response({'error': "Missing 'audio_file' parameter"}, status=400)
+        return Response({'return': False,'error': "Missing 'audio_file' parameter"}, status=400)
 
     language = request.data.get('language', 'fa')
 
@@ -1718,12 +1736,13 @@ def transcribe_audio(request):
 
         # Return transcription
         return Response({
+            'return': True,
             'text': result['text'],
             'language': result.get('language', language)
         })
 
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({'return': False,'error': str(e)}, status=500)
 
     finally:
         # Delete model and free GPU memory
@@ -1781,7 +1800,7 @@ def get_system_prompt(request):
 def set_system_prompt(request):
     new_value = request.data.get("SYSTEM_PROMPT")
     if not new_value:
-        return Response({"error": "SYSTEM_PROMPT required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'return': False,"error": "SYSTEM_PROMPT required"}, status=status.HTTP_400_BAD_REQUEST)
     return Response(handle_config_field("SYSTEM_PROMPT", new_value))
 
 
@@ -1806,7 +1825,7 @@ def get_user_prompt(request):
 def set_user_prompt(request):
     new_value = request.data.get("USER_PROMPT")
     if not new_value:
-        return Response({"error": "USER_PROMPT required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'return': False,"error": "USER_PROMPT required"}, status=status.HTTP_400_BAD_REQUEST)
     return Response(handle_config_field("USER_PROMPT", new_value))
 
 
