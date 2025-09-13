@@ -426,7 +426,6 @@ def news_image_stats(request):
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 @user_credential
 def generate_custom_image(request):
     """Generate a custom image with specified parameters"""
