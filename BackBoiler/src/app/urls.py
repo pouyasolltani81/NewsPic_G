@@ -76,8 +76,6 @@ urlpatterns = [
     
     
     
-    
-    path('', include('ui.urls')),  
     path('crypto_news_images/<path:path>/', serve, {'document_root': images_dir}),
     path('custom_images/<path:path>/', serve, {'document_root': custom_images_dir}),
     
