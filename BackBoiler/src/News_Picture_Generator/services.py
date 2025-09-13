@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser , IsAuthenticated
+from AuthModel.models import user_credential
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse , OpenApiExample
 from django.utils import timezone
@@ -426,6 +427,7 @@ def news_image_stats(request):
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_credential
 def generate_custom_image(request):
     """Generate a custom image with specified parameters"""
     prompt = request.data.get('prompt', '').strip()
