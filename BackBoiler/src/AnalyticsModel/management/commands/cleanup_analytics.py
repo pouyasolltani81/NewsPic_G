@@ -33,10 +33,6 @@ class Command(BaseCommand):
             count = UserSession.objects.all().delete()[0]
             self.stdout.write(self.style.SUCCESS(f'✓ Deleted {count} user sessions'))
 
-            # Delete all error logs
-            count = ErrorLog.objects.all().delete()[0]
-            self.stdout.write(self.style.SUCCESS(f'✓ Deleted {count} error logs'))
-
             # Delete all system metrics
             count = SystemMetrics.objects.all().delete()[0]
             self.stdout.write(self.style.SUCCESS(f'✓ Deleted {count} system metrics'))
