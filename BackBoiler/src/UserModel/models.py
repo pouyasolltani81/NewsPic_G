@@ -67,37 +67,23 @@ class User(AbstractUser, PermissionsMixin):
             return cls.objects.filter(phone_number__in = cleaned_ph).first()
     #########################################################################
     @classmethod
-    @classmethod
-    def get_user_auth(cls, email=None, phone=None, password=None):
-        """
-        Authenticate user with email or phone number.
-        Either 'email' or 'phone' must be provided.
-        """
-        if email:
-            identifier = email
-        elif phone:
-            identifier = phone
-        else:
-            return None, {'return': False, 'error': 'Email or phone number required.'}
-
+    def get_user_auth(cls, identifier, password):
+        """Authenticate user with email or phone number"""
         user = cls.get_user_by_identifier(identifier)
 
         if not user:
             return None, {'return': False, 'error': 'Invalid email or phone number.'}
-
+        
         if not user.check_password(password):
             return None, {'return': False, 'error': 'Invalid password.'}
-
+        
         if not user.is_active:
             return None, {'return': False, 'error': 'User is not active.'}
-
-        # Check if token is expired
-        auth_status = user.auth().check_auth_expiration()
-        if not auth_status.get('return', False):
+        
+        if not user.auth().check_auth_expiration()['return']:
             return None, {'return': False, 'error': 'Token expired.'}
-
+        
         return user, {'return': True}
-
     #########################################################################
     def get_user_asp_message(self):
         from SsoModel.models import AppServiceProvider
