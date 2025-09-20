@@ -45,6 +45,6 @@
       "79.175.177.113" , "aimoonhub.ir" ,"*"
     ],
     "cors_enabled": true,
-    "csrf_enabled": true
+    "csrf_enabled": false
   }
 }
