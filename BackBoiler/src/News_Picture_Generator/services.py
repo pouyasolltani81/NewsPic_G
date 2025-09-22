@@ -456,9 +456,20 @@ def generate_custom_image(request):
     seed = request.data.get('seed')
     steps = request.data.get('steps', 20)
     guidance_scale = request.data.get('guidance_scale', 7.5)
+    add_logo = request.data.get('add_logo', False)
     
-    # Generate unique ID for this generation
-    generation_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{hash(prompt) % 10000}"
+    
+    # Generate unique ID for this generation with enhanced uniqueness
+    import uuid
+    import hashlib
+    
+    # Create a unique identifier using multiple factors
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]  # Include milliseconds
+    prompt_hash = hashlib.md5(prompt.encode()).hexdigest()[:8]
+    random_component = str(uuid.uuid4()).split('-')[0]  # First 8 chars of UUID
+    
+    # Combine all components for absolute uniqueness
+    generation_id = f"{timestamp}_{prompt_hash}_{random_component}"
     
     # Build command - FIX: Define app_dir properly
     current_dir = BASE_EXTERNAL_PATH
@@ -479,9 +490,13 @@ def generate_custom_image(request):
         prompt,  # This will be properly quoted by subprocess
         str(width),
         str(height),
+        '--filename', generation_id,  # Use generation_id as filename
         '--steps', str(steps),
         '--guidance', str(guidance_scale)
     ]
+    
+    if add_logo:
+        cmd.extend('--add-logo')
     
     if negative_prompt:
         cmd.extend(['--negative', negative_prompt])
@@ -499,6 +514,10 @@ def generate_custom_image(request):
     if not os.path.exists(custom_images_dir):
         os.makedirs(custom_images_dir, exist_ok=True)
     
+    # Store the expected filename for reference
+    expected_filename = f"{generation_id}.png"
+    expected_filepath = os.path.join(custom_images_dir, expected_filename)
+    
     # Run generation in background thread
     def run_generation():
         try:
@@ -508,9 +527,10 @@ def generate_custom_image(request):
                 capture_output=True, 
                 text=True, 
                 check=True,
-                cwd=current_dir  # Set working directory
+                cwd=current_dir 
             )
             print(f"Generation completed successfully")
+            print(f"Generated file: {expected_filename}")
             if result.stdout:
                 print(f"Output: {result.stdout}")
         except subprocess.CalledProcessError as e:
@@ -529,6 +549,8 @@ def generate_custom_image(request):
         'status': 'started',
         'message': 'Image generation started. Check status or list custom images to see results.',
         'generation_id': generation_id,
+        'filename': expected_filename,
+        'filepath': expected_filepath,
         'estimated_time': '30-60 seconds',
         'prompt': prompt,
         'dimensions': f"{width}x{height}"
@@ -563,6 +585,8 @@ def generate_custom_image(request):
         ),
     }
 )
+
+
 @api_view(['GET'])
 @user_credential
 def list_custom_images(request):
@@ -740,48 +764,21 @@ def search_custom_images(request):
     results = []
     
     if generation_id:
-        # Search by generation_id
-        # Extract the timestamp part from generation_id (before the underscore)
-        gen_id_parts = generation_id.split('_')
-        if gen_id_parts:
-            gen_timestamp = gen_id_parts[0]  # This is "20250810144624"
+        # Search by generation_id - now it's the filename!
+        # The filename should be generation_id.png
+        expected_filename = f"{generation_id}.png"
+        
+        for gen in custom_data.get('generations', []):
+            # Direct filename match - absolutely unique
+            if gen.get('filename', '') == expected_filename:
+                results.append(gen)
+                break  # Found the unique match, no need to continue
             
-            # Convert to the format used in filename: YYYYMMDD_HHMMSS
-            if len(gen_timestamp) == 14:  # Format: YYYYMMDDHHMMSS
-                gen_date = gen_timestamp[:8]  # 20250810
-                gen_time = gen_timestamp[8:]  # 144624
-                
-                for gen in custom_data.get('generations', []):
-                    filename = gen.get('filename', '')
-                    
-                    # Check if the filename starts with the same date and has similar time
-                    # The filename format is: YYYYMMDD_HHMMSS_hash_dimensions.png
-                    if filename.startswith(gen_date):
-                        # Extract time from filename
-                        filename_parts = filename.split('_')
-                        if len(filename_parts) >= 2:
-                            file_time = filename_parts[1]  # This is "144643"
-                            
-                            # Check if times are close (within a minute or so)
-                            # Or check if this entry was created around the same time
-                            if abs(int(file_time) - int(gen_time)) < 100:  # Within 1 minute
-                                results.append(gen)
-                                break
-                    
-                    # Also check timestamp field if it exists
-                    if gen.get('timestamp'):
-                        # Parse ISO timestamp and compare
-                        import datetime
-                        try:
-                            entry_time = datetime.datetime.fromisoformat(gen['timestamp'].replace('Z', '+00:00'))
-                            gen_datetime = datetime.datetime.strptime(gen_timestamp, '%Y%m%d%H%M%S')
-                            
-                            # If within 1 minute
-                            if abs((entry_time - gen_datetime).total_seconds()) < 60:
-                                results.append(gen)
-                                break
-                        except:
-                            pass
+            # Also check if generation_id is stored in the entry (for backward compatibility)
+            # or if the filename contains the generation_id
+            elif generation_id in gen.get('filename', ''):
+                results.append(gen)
+                break
     else:
         # Search by text (keep existing logic)
         for gen in custom_data.get('generations', []):
@@ -790,25 +787,40 @@ def search_custom_images(request):
             elif include_negative and search_text in gen.get('negative_prompt', '').lower():
                 results.append(gen)
     
-    # Sort by timestamp (newest first)
-    results.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+    # Sort by timestamp (newest first) - only for text search
+    if not generation_id:
+        results.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
     
     # Format response
     formatted_results = []
     for gen in results:
-        filename = os.path.basename(gen.get('filepath', ''))
+        filename = gen.get('filename', '')
+        filepath = gen.get('filepath', '')
+        
+        # Extract generation_id from filename if searching by generation_id
+        if generation_id and filename:
+            found_generation_id = generation_id
+        else:
+            # Try to extract generation_id from filename (remove .png extension)
+            found_generation_id = filename.replace('.png', '') if filename else None
+        
+        # Build image URL
         image_url = request.build_absolute_uri(f'/custom_images/{filename}')
         
         formatted_results.append({
-            'filename': gen.get('filename'),
-            'generation_id': generation_id if generation_id else None,
+            'filename': filename,
+            'generation_id': found_generation_id,
             'prompt': gen.get('prompt'),
             'negative_prompt': gen.get('negative_prompt'),
             'width': gen.get('width'),
             'height': gen.get('height'),
             'seed': gen.get('seed'),
+            'steps': gen.get('steps'),
+            'guidance_scale': gen.get('guidance_scale'),
             'generated_at': gen.get('generated_at'),
-            'url': image_url
+            'timestamp': gen.get('timestamp'),
+            'url': image_url,
+            'filepath': filepath
         })
     
     return Response({
@@ -816,7 +828,8 @@ def search_custom_images(request):
         'count': len(formatted_results),
         'search_criteria': {
             'text': search_text if search_text else None,
-            'generation_id': generation_id if generation_id else None
+            'generation_id': generation_id if generation_id else None,
+            'include_negative': include_negative if search_text else None
         },
         'results': formatted_results
     })
