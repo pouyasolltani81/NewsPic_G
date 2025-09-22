@@ -456,7 +456,6 @@ def generate_custom_image(request):
     seed = request.data.get('seed')
     steps = request.data.get('steps', 20)
     guidance_scale = request.data.get('guidance_scale', 7.5)
-    add_logo = request.data.get('add_logo', False)
     
     
     # Generate unique ID for this generation with enhanced uniqueness
@@ -495,8 +494,6 @@ def generate_custom_image(request):
         '--guidance', str(guidance_scale)
     ]
     
-    if add_logo:
-        cmd.extend('--add-logo')
     
     if negative_prompt:
         cmd.extend(['--negative', negative_prompt])
