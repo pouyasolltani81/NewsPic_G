@@ -401,9 +401,16 @@ def news_image_stats(request):
                 },
                 'guidance_scale': {
                     'type': 'number',
-                    'description': 'Guidance scale (default: 4.5)',
-                    'example': 4.5,
-                    'default': 4.5
+                    'description': 'Guidance scale (default: 7.5)',
+                    'example': 7.5,
+                    'default': 7.5
+                },
+                'add_logo': {
+                    'type': 'boolean',
+                    'description': 'Whether to add AimoonHub logo to the generated image',
+                    'example': False,
+                    'default': False,
+                    'nullable': True
                 }
             },
             'required': ['prompt', 'width', 'height'],
@@ -415,15 +422,52 @@ def news_image_stats(request):
             response={
                 'type': 'object',
                 'properties': {
-                    'status': {'type': 'string'},
-                    'message': {'type': 'string'},
-                    'generation_id': {'type': 'string'}
+                    'return': {'type': 'boolean', 'example': True},
+                    'status': {'type': 'string', 'example': 'started'},
+                    'message': {'type': 'string', 'example': 'Image generation started. Check status or list custom images to see results.'},
+                    'generation_id': {'type': 'string', 'example': '20250122143025123_a1b2c3d4_12345678'},
+                    'filename': {'type': 'string', 'example': '20250122143025123_a1b2c3d4_12345678.png'},
+                    'filepath': {'type': 'string', 'example': '/path/to/custom_images/20250122143025123_a1b2c3d4_12345678.png'},
+                    'estimated_time': {'type': 'string', 'example': '30-60 seconds'},
+                    'prompt': {'type': 'string', 'example': 'A futuristic city with flying cars'},
+                    'dimensions': {'type': 'string', 'example': '1024x768'},
+                    'add_logo': {'type': 'boolean', 'example': False},
+                    'parameters': {
+                        'type': 'object',
+                        'properties': {
+                            'negative_prompt': {'type': 'string', 'nullable': True},
+                            'seed': {'type': 'integer', 'nullable': True},
+                            'steps': {'type': 'integer'},
+                            'guidance_scale': {'type': 'number'}
+                        }
+                    }
                 }
             }
         ),
-        400: OpenApiResponse(description='Bad request - invalid parameters'),
+        400: OpenApiResponse(
+            description='Bad request - invalid parameters',
+            response={
+                'type': 'object',
+                'properties': {
+                    'return': {'type': 'boolean', 'example': False},
+                    'error': {'type': 'string', 'example': 'Width and height must be divisible by 8'}
+                }
+            }
+        ),
+        500: OpenApiResponse(
+            description='Internal server error',
+            response={
+                'type': 'object',
+                'properties': {
+                    'return': {'type': 'boolean', 'example': False},
+                    'error': {'type': 'string', 'example': 'Generation script not found'},
+                    'hint': {'type': 'string', 'example': 'Make sure custom_image_gen.py is in the News_Picture_Generator directory'}
+                }
+            }
+        ),
     }
 )
+
 @api_view(['POST'])
 @user_credential
 def generate_custom_image(request):
@@ -456,7 +500,11 @@ def generate_custom_image(request):
     seed = request.data.get('seed')
     steps = request.data.get('steps', 20)
     guidance_scale = request.data.get('guidance_scale', 7.5)
+    add_logo = request.data.get('add_logo', False)  # New parameter
     
+    # Convert add_logo to boolean if it's a string
+    if isinstance(add_logo, str):
+        add_logo = add_logo.lower() in ['true', '1', 'yes', 'on']
     
     # Generate unique ID for this generation with enhanced uniqueness
     import uuid
@@ -477,6 +525,7 @@ def generate_custom_image(request):
     # Check if script exists
     if not os.path.exists(script_path):
         return Response({
+            'return': False,
             'error': f"Generation script not found at {script_path}",
             'hint': "Make sure custom_image_gen.py is in the News_Picture_Generator directory"
         }, status=500)
@@ -494,12 +543,15 @@ def generate_custom_image(request):
         '--guidance', str(guidance_scale)
     ]
     
-    
     if negative_prompt:
         cmd.extend(['--negative', negative_prompt])
     
     if seed is not None:
         cmd.extend(['--seed', str(seed)])
+    
+    # Add logo flag if requested
+    if add_logo:
+        cmd.append('--add-logo')
     
     # Add output and history paths
     cmd.extend([
@@ -524,7 +576,7 @@ def generate_custom_image(request):
                 capture_output=True, 
                 text=True, 
                 check=True,
-                cwd=current_dir 
+                cwd=current_dir  # Set working directory
             )
             print(f"Generation completed successfully")
             print(f"Generated file: {expected_filename}")
@@ -550,7 +602,14 @@ def generate_custom_image(request):
         'filepath': expected_filepath,
         'estimated_time': '30-60 seconds',
         'prompt': prompt,
-        'dimensions': f"{width}x{height}"
+        'dimensions': f"{width}x{height}",
+        'add_logo': add_logo,
+        'parameters': {
+            'negative_prompt': negative_prompt,
+            'seed': seed,
+            'steps': steps,
+            'guidance_scale': guidance_scale
+        }
     }, status=202)
 
 @extend_schema(
