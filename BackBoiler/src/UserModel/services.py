@@ -13,6 +13,11 @@ from app.app_lib import get_phonenumber_start_with_zero, CheckPhonenumberValidty
 from AuthModel.models import user_credential , admin_credential
 
 
+from AuthModel.models import UserAuth
+from django.utils import timezone
+from datetime import timedelta
+
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 
@@ -160,6 +165,9 @@ def RegisterUser(request):
     except Exception as e:
         return JsonResponse({'return': False, 'error': str(e)})
 ####################################################################
+
+
+
 @extend_schema(
     description='User login with email or phone number',
     summary='Authenticate user and get access token',
@@ -177,7 +185,7 @@ def RegisterUser(request):
     },
     responses={
         200: OpenApiResponse(
-            response={'return': 'boolean', 'user': 'dict', 'user_token': 'str'},
+            response={'return': 'boolean', 'user': 'dict', 'user_token': 'str', 'token_extended': 'boolean'},
             description='Successful login',
         ),
     },
@@ -224,10 +232,37 @@ def LoginUser(request):
         # Login user using Django's login
         login(request, user)
         
+        # Handle authentication token
+        token_extended = False
+        user_token = None
+        
+        try:
+            # Get or create UserAuth
+            user_auth, created = UserAuth.objects.get_or_create(user=user)
+            
+            if not created:
+                # Check if token is expired or about to expire (within 30 days)
+                expiry_check = user_auth.check_auth_expiration()
+                days_until_expiry = (user_auth.expired_at - timezone.now()).days
+                
+                if not expiry_check['return'] or days_until_expiry <= 30:
+                    # Extend token by 1 year from now
+                    user_auth.expired_at = timezone.now() + timedelta(days=365)
+                    user_auth.save()
+                    token_extended = True
+            
+            user_token = user_auth.token
+            
+        except Exception as e:
+            # If there's an error with auth, still allow login but log the error
+            print(f"Error handling user auth token: {str(e)}")
+        
         return JsonResponse({
             'return': True,
             'user': UserSerializer(user).data,
-            'user_token': user.auth().token if hasattr(user, 'auth') else None
+            'user_token': user_token,
+            'token_extended': token_extended,
+            'token_expiry': user_auth.expired_at.isoformat() if user_auth else None
         })
         
     except Exception as e:
@@ -357,64 +392,7 @@ def ChangePassword(request):
         return JsonResponse({'return': False, 'error': str(e)})
 
 
-    email = request.data.get('email')
-    phone_number = request.data.get('phone_number')
-    password = request.data.get('password')
-    
-    if not email and not phone_number:
-        return JsonResponse({'return': False, 'error': 'Email or phone number required'})
-    
-    if not password:
-        return JsonResponse({'return': False, 'error': 'Password required'})
-    
-    try:
-        user = None
-        username = None
-        
-        # Find user by email or phone
-        if email:
-            if not CheckEmailValidty(email):
-                return JsonResponse({'return': False, 'error': 'Invalid email format'})
-            user_obj = User.objects.filter(email=email).first()
-            if user_obj:
-                username = user_obj.username
-            
-        elif phone_number:
-            if not CheckPhonenumberValidty(phone_number):
-                return JsonResponse({'return': False, 'error': f'Invalid phone number {phone_number}'})
-            cleaned_phone = get_phonenumber_start_with_zero(phone_number)
-            user_obj = User.objects.filter(phone_number=cleaned_phone).first()
-            if user_obj:
-                username = user_obj.username
-        
-        if not username:
-            return JsonResponse({'return': False, 'error': 'User not found'})
-        
-        # Authenticate user
-        user = authenticate(request, username=username, password=password)
-        
-        if user is None:
-            return JsonResponse({'return': False, 'error': 'Invalid credentials'})
-        
-        if not user.is_active:
-            return JsonResponse({'return': False, 'error': 'Account is disabled'})
-        
-        # Login user
-        login(request, user)
-        
-        # Get session key for API clients
-        session_key = request.session.session_key
-        
-        return JsonResponse({
-            'return': True,
-            'user': UserSerializer(user).data,
-            'user_token': user.auth().token,
-            'session_key': session_key  # Can be used for subsequent API calls
-        })
-        
-    except Exception as e:
-        return JsonResponse({'return': False, 'error': str(e)})
-    
+
     
 User = get_user_model()
 
