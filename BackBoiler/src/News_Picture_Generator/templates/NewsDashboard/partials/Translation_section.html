@@ -3,33 +3,39 @@
 {% load static %}
 <div id="Translation-content" class="hidden tab-content p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
+        <!-- Header with Status Indicator -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Text Translation</h1>
-            <p class="text-gray-600 dark:text-gray-400">Translate text between multiple languages using AI</p>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">AI Translation Service</h1>
+                    <p class="text-gray-600 dark:text-gray-400">Translate text between 32+ languages using advanced AI</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- Service Status -->
+                    <div id="serviceStatus" class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <div id="statusIndicator" class="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></div>
+                        <span id="statusText" class="text-sm text-gray-600 dark:text-gray-400">Checking...</span>
+                    </div>
+                    <!-- Settings Button -->
+                    <button id="settingsBtn" class="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Translation Interface -->
+        <!-- Main Translation Interface -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <!-- Language Selection Bar -->
             <div class="flex flex-col sm:flex-row gap-4 mb-6">
                 <div class="flex-1">
                     <label for="sourceLang" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From</label>
                     <select id="sourceLang" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                        <option value="">Auto-detect</option>
-                        <option value="fa_IR">Persian</option>
-                        <option value="en_XX">English</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="it">Italian</option>
-                        <option value="pt">Portuguese</option>
-                        <option value="ru">Russian</option>
-                        <option value="ja">Japanese</option>
-                        <option value="ko">Korean</option>
-                        <option value="zh">Chinese</option>
-                        <option value="ar">Arabic</option>
-                        <option value="hi">Hindi</option>
+                        <option value="auto">Auto-detect</option>
+                        <!-- Languages will be populated dynamically -->
                     </select>
                 </div>
 
@@ -45,84 +51,112 @@
                 <div class="flex-1">
                     <label for="targetLang" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">To</label>
                     <select id="targetLang" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                        <option value="en_XX">English</option>
-                        <option value="fa_IR" selected>Persian</option>
-                        <option value="es" >Spanish</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="it">Italian</option>
-                        <option value="pt">Portuguese</option>
-                        <option value="ru">Russian</option>
-                        <option value="ja">Japanese</option>
-                        <option value="ko">Korean</option>
-                        <option value="zh">Chinese</option>
-                        <option value="ar">Arabic</option>
-                        <option value="hi">Hindi</option>
+                        <!-- Languages will be populated dynamically -->
                     </select>
                 </div>
             </div>
 
-            <!-- Translation Areas -->
-            <div class="grid lg:grid-cols-2 gap-6">
-                <!-- Source Text Area -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Source Text</label>
-                        <div class="flex items-center gap-2">
-                            <span id="charCount" class="text-sm text-gray-500">0 / 5000</span>
-                            <button id="clearSource" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                                Clear
+            <!-- Translation Mode Tabs -->
+            <div class="flex gap-2 mb-4">
+                <button class="translation-mode-tab px-4 py-2 rounded-lg font-medium transition-colors active" data-mode="single">
+                    Single Text
+                </button>
+                <button class="translation-mode-tab px-4 py-2 rounded-lg font-medium transition-colors" data-mode="batch">
+                    Batch Translation
+                </button>
+                <button class="translation-mode-tab px-4 py-2 rounded-lg font-medium transition-colors" data-mode="json">
+                    JSON Mode
+                </button>
+            </div>
+
+            <!-- Single Translation Mode -->
+            <div id="singleMode" class="translation-mode">
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- Source Text Area -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Source Text</label>
+                            <div class="flex items-center gap-2">
+                                <span id="charCount" class="text-sm text-gray-500">0 / 5000</span>
+                                <button id="clearSource" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="sourceText" 
+                                  placeholder="Enter text to translate..." 
+                                  maxlength="5000"
+                                  class="w-full h-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                        
+                        <!-- Quick Actions -->
+                        <div class="mt-3 flex gap-2">
+                            <button id="pasteBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                Paste
+                            </button>
+                            <button id="uploadBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                Upload File
                             </button>
                         </div>
                     </div>
-                    <textarea id="sourceText" 
-                              placeholder="Enter text to translate..." 
-                              maxlength="5000"
-                              class="w-full h-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
-                    
-                    <!-- Quick Actions -->
-                    <div class="mt-3 flex gap-2">
-                        <button id="pasteBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            Paste
-                        </button>
-                        <button id="uploadBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            Upload File
-                        </button>
+
+                    <!-- Translated Text Area -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Translation</label>
+                            <button id="copyTranslation" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50" disabled>
+                                Copy
+                            </button>
+                        </div>
+                        <div id="translatedText" class="w-full h-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white overflow-y-auto">
+                            <p class="text-gray-500 dark:text-gray-400 italic">Translation will appear here...</p>
+                        </div>
+                        
+                        <!-- Translation Actions -->
+                        <div class="mt-3 flex gap-2">
+                            <button id="downloadBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors disabled:opacity-50" disabled>
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Download
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Translated Text Area -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Translation</label>
-                        <button id="copyTranslation" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50" disabled>
-                            Copy
-                        </button>
+            <!-- Batch Translation Mode -->
+            <div id="batchMode" class="translation-mode hidden">
+                <div class="mb-4">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Enter multiple texts (one per line)</label>
+                    <textarea id="batchSourceText" 
+                              placeholder="Enter texts to translate (one per line)..." 
+                              class="w-full h-48 mt-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                </div>
+                <div id="batchResults" class="hidden space-y-3 max-h-96 overflow-y-auto">
+                    <!-- Batch results will appear here -->
+                </div>
+            </div>
+
+            <!-- JSON Mode -->
+            <div id="jsonMode" class="translation-mode hidden">
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">JSON Input</label>
+                        <textarea id="jsonSourceText" 
+                                  placeholder='{"key": "value to translate"}' 
+                                  class="w-full h-64 mt-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"></textarea>
                     </div>
-                    <div id="translatedText" class="w-full h-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white overflow-y-auto">
-                        <p class="text-gray-500 dark:text-gray-400 italic">Translation will appear here...</p>
-                    </div>
-                    
-                    <!-- Translation Actions -->
-                    <div class="mt-3 flex gap-2">
-                        <button id="downloadBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors disabled:opacity-50" disabled>
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            Download
-                        </button>
-                        <button id="speakBtn" class="hidden px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors disabled:opacity-50" disabled>
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
-                            </svg>
-                            Listen
-                        </button>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Translated JSON</label>
+                        <div id="jsonTranslatedText" class="w-full h-64 mt-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white overflow-y-auto font-mono text-sm">
+                            <p class="text-gray-500 dark:text-gray-400 italic">Translated JSON will appear here...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,20 +173,156 @@
             </div>
         </div>
 
-        <!-- Translation History -->
-        <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Recent Translations</h2>
-            <div id="translationHistory" class="space-y-3">
-                <!-- History items will be added here dynamically -->
-                <p class="text-gray-500 dark:text-gray-400 text-center py-4">No translation history yet</p>
+        <!-- Advanced Features Row -->
+        <div class="grid lg:grid-cols-3 gap-6 mt-8">
+            <!-- Translation History -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Recent Translations</h2>
+                <div id="translationHistory" class="space-y-3 max-h-64 overflow-y-auto">
+                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">No translation history yet</p>
+                </div>
+            </div>
+
+            <!-- Glossary Management -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Glossary</h2>
+                    <button id="addGlossaryBtn" class="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                        Add Term
+                    </button>
+                </div>
+                <div id="glossaryList" class="space-y-2 max-h-64 overflow-y-auto">
+                    <p class="text-gray-500 dark:text-gray-400 text-center py-4">No glossary terms</p>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">System Status</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Model Status</span>
+                        <span id="modelStatus" class="text-sm font-medium">Loading...</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">GPU Memory</span>
+                        <span id="gpuMemory" class="text-sm font-medium">--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">CPU Memory</span>
+                        <span id="cpuMemory" class="text-sm font-medium">--</span>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button id="reloadModelBtn" class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors">
+                            Reload Model
+                        </button>
+                        <button id="freeMemoryBtn" class="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-md transition-colors">
+                            Free Memory
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Translation Settings</h2>
+                <button id="closeSettingsBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Generation Parameters -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Generation Parameters</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Max Tokens</label>
+                        <input type="number" id="maxTokens" min="1" max="2048" value="128" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Temperature</label>
+                        <input type="number" id="temperature" min="0.1" max="2.0" step="0.1" value="0.7" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Top P</label>
+                        <input type="number" id="topP" min="0.1" max="1.0" step="0.1" value="0.9" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Top K</label>
+                        <input type="number" id="topK" min="1" max="100" value="50" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Configuration -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Memory Configuration</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">GPU Memory</label>
+                        <input type="text" id="gpuMemoryConfig" placeholder="20GB" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">CPU Memory</label>
+                        <input type="text" id="cpuMemoryConfig" placeholder="30GB" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button id="cancelSettingsBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button id="saveSettingsBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Glossary Modal -->
+    <div id="glossaryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Add Glossary Term</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Term</label>
+                    <input type="text" id="glossaryTerm" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Translation</label>
+                    <input type="text" id="glossaryTranslation" class="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelGlossaryBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button id="saveGlossaryBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    Add Term
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Hidden file input -->
-    <input type="file" id="fileInput" accept=".txt,.doc,.docx" class="hidden">
+    <input type="file" id="fileInput" accept=".txt,.doc,.docx,.json" class="hidden">
 </div>
 
-
+<!-- Notification Toast -->
+<div id="notificationToast" class="hidden fixed bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-sm z-50 transform transition-transform duration-300 translate-y-full">
+    <div class="flex items-center">
+        <div id="toastIcon" class="flex-shrink-0 mr-3"></div>
+        <div class="flex-1">
+            <p id="toastMessage" class="text-sm text-gray-900 dark:text-white"></p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
