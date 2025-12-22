@@ -71,7 +71,7 @@ urlpatterns = [
     
     
     
-    path('News_Picture_Generator/', include('News_Picture_Generator.urls')),  
+    # path('News_Picture_Generator/', include('News_Picture_Generator.urls')),  
     path('Translate/', include('Translate.urls')),  
     
     

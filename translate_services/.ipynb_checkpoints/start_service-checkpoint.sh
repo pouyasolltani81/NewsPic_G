@@ -1,30 +1,33 @@
 #!/bin/bash
 
-# Disable PyTorch's CUDA graphs (causing the AssertionError)
+# ============================================================================
+# TRANSLATION SERVICE - 2 MODEL INSTANCES ON GPU
+# ============================================================================
+
+export CUDA_VISIBLE_DEVICES=0
+export PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:256,expandable_segments:True"
 export PYTORCH_DISABLE_CUDA_GRAPHS=1
 export TORCH_CUDNN_V8_API_DISABLED=1
-
-# CUDA error prevention
-export CUDA_LAUNCH_BLOCKING=1
-export TORCH_USE_CUDA_DSA=1
-export PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:512"
-
-# Force single GPU
-export CUDA_VISIBLE_DEVICES=0
-
-# Disable PyTorch compile mode
 export TORCH_COMPILE_DISABLE=1
-
-# Python settings
+export TORCHINDUCTOR_DISABLE=1
 export PYTHONUNBUFFERED=1
-export OMP_NUM_THREADS=1
-export MKL_NUM_THREADS=1
+export OMP_NUM_THREADS=4
+export MKL_NUM_THREADS=4
 
-# Start the service
-exec /home/anews/pytorch/bin/python -u /home/anews/pytorch/bin/uvicorn services:app \
+PORT=${PORT:-8001}
+
+echo "============================================"
+echo "Translation Service - 2 GPU Instances"
+echo "============================================"
+echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null)"
+echo "Port: $PORT"
+echo "Instances: 2"
+echo "============================================"
+
+exec /home/anews/pytorch/bin/python -u /home/anews/pytorch/bin/uvicorn \
+    services:app \
     --host 0.0.0.0 \
-    --port 8001 \
+    --port $PORT \
     --workers 1 \
     --loop asyncio \
-    --log-level info \
-    --no-access-log
+    --log-level info

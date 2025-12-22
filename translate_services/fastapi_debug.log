@@ -1,0 +1,57 @@
+2025-12-22 18:26:05,180 - model_service - INFO - [model_service.py:1391] - ============================================================
+2025-12-22 18:26:05,180 - model_service - INFO - [model_service.py:1392] - STARTING TRANSLATION SERVICE - MULTI-INSTANCE GPU MODE
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:1393] - ============================================================
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:901] - ============================================================
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:902] - Initializing MultiInstanceModelManager with 2 instances
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:903] - ============================================================
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:132] - AsyncTranslationQueue initialized with maxsize=100
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:257] - AsyncCacheManager initialized at /home/anews/NewsPic_G/translate_services/translation_cache.json
+2025-12-22 18:26:05,181 - model_service - INFO - [model_service.py:448] - AsyncTranslationStorage initialized at /home/anews/NewsPic_G/translate_services/async_translations.json
+2025-12-22 18:26:05,320 - model_service - INFO - [model_service.py:950] - GPU: NVIDIA GeForce RTX 3090
+2025-12-22 18:26:05,320 - model_service - INFO - [model_service.py:951] - GPU Memory: 23.6 GB
+2025-12-22 18:26:05,320 - model_service - INFO - [model_service.py:952] - Planned instances: 2 x ~8GB = ~16GB
+2025-12-22 18:26:05,321 - model_service - INFO - [model_service.py:1029] - ============================================================
+2025-12-22 18:26:05,321 - model_service - INFO - [model_service.py:1030] - Loading 2 model instances - FULL GPU
+2025-12-22 18:26:05,321 - model_service - INFO - [model_service.py:1031] - ============================================================
+2025-12-22 18:26:05,321 - model_service - INFO - [model_service.py:1300] - Freeing GPU memory...
+2025-12-22 18:26:05,477 - model_service - INFO - [model_service.py:1047] - Model: /home/anews/PS/translate/YanoljaNEXT-Rosetta-4B-2510
+2025-12-22 18:26:05,477 - model_service - INFO - [model_service.py:1048] - Dtype: torch.bfloat16
+2025-12-22 18:26:05,477 - model_service - INFO - [model_service.py:1051] - Loading tokenizer...
+2025-12-22 18:26:06,935 - model_service - INFO - [model_service.py:1055] - ✓ Tokenizer loaded
+2025-12-22 18:26:06,935 - model_service - INFO - [model_service.py:1059] - Loading model instance 0...
+2025-12-22 18:26:25,556 - model_service - INFO - [model_service.py:772] - ModelInstance 0 initialized on cuda:0
+2025-12-22 18:26:25,557 - model_service - INFO - [model_service.py:1082] - ✓ Instance 0 loaded. GPU Memory: 7.23 GB
+2025-12-22 18:26:25,557 - model_service - INFO - [model_service.py:1059] - Loading model instance 1...
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:772] - ModelInstance 1 initialized on cuda:0
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1082] - ✓ Instance 1 loaded. GPU Memory: 14.46 GB
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1120] - Starting 2 worker tasks...
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1125] - Worker 0 started
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1125] - Worker 1 started
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1089] - ============================================================
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1090] - All 2 instances loaded successfully!
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1091] - ============================================================
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1401] - ✓ Service started with multiple model instances
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1134] - [Worker 0] Started and waiting for tasks
+2025-12-22 18:26:26,955 - model_service - INFO - [model_service.py:1134] - [Worker 1] Started and waiting for tasks
+2025-12-22 18:27:43,945 - model_service - INFO - [model_service.py:507] - [STORAGE] Saved translation d66b1882-471f-4bbe-bbbe-0778aa92231b
+2025-12-22 18:27:43,977 - model_service - INFO - [model_service.py:173] - [QUEUE] Task 6ec32df4 enqueued. Queue size: 1
+2025-12-22 18:27:43,977 - model_service - INFO - [model_service.py:1276] - [TRANSLATE] Task 6ec32df4 submitted to queue
+2025-12-22 18:27:43,977 - model_service - INFO - [model_service.py:196] - [QUEUE] Task 6ec32df4 dequeued after 0.2ms wait
+2025-12-22 18:27:43,977 - model_service - INFO - [model_service.py:1155] - [Worker 0] Processing task 6ec32df4
+2025-12-22 18:27:46,787 - model_service - INFO - [model_service.py:1176] - [Worker 0] Completed task 6ec32df4 in 2809.6ms
+2025-12-22 18:27:46,820 - model_service - INFO - [model_service.py:395] - [CACHE] Stored result for key f03b4b56...
+2025-12-22 18:27:46,890 - model_service - INFO - [model_service.py:507] - [STORAGE] Saved translation d66b1882-471f-4bbe-bbbe-0778aa92231b
+2025-12-22 18:31:00,793 - model_service - INFO - [model_service.py:507] - [STORAGE] Saved translation 1059c8c8-b2a2-4d54-9221-5be88b1e93ae
+2025-12-22 18:31:00,826 - model_service - INFO - [model_service.py:173] - [QUEUE] Task 20405cf8 enqueued. Queue size: 1
+2025-12-22 18:31:00,826 - model_service - INFO - [model_service.py:1276] - [TRANSLATE] Task 20405cf8 submitted to queue
+2025-12-22 18:31:00,826 - model_service - INFO - [model_service.py:196] - [QUEUE] Task 20405cf8 dequeued after 0.2ms wait
+2025-12-22 18:31:00,826 - model_service - INFO - [model_service.py:1155] - [Worker 0] Processing task 20405cf8
+2025-12-22 18:31:11,466 - model_service - INFO - [model_service.py:1176] - [Worker 0] Completed task 20405cf8 in 10640.2ms
+2025-12-22 18:31:11,495 - model_service - INFO - [model_service.py:395] - [CACHE] Stored result for key 2886d4e7...
+2025-12-22 18:31:11,529 - model_service - INFO - [model_service.py:173] - [QUEUE] Task 5b391712 enqueued. Queue size: 1
+2025-12-22 18:31:11,529 - model_service - INFO - [model_service.py:1276] - [TRANSLATE] Task 5b391712 submitted to queue
+2025-12-22 18:31:11,529 - model_service - INFO - [model_service.py:196] - [QUEUE] Task 5b391712 dequeued after 0.2ms wait
+2025-12-22 18:31:11,529 - model_service - INFO - [model_service.py:1155] - [Worker 1] Processing task 5b391712
+2025-12-22 18:31:49,434 - model_service - INFO - [model_service.py:1176] - [Worker 1] Completed task 5b391712 in 37904.5ms
+2025-12-22 18:31:49,463 - model_service - INFO - [model_service.py:395] - [CACHE] Stored result for key 5e9ac6e6...
+2025-12-22 18:31:49,527 - model_service - INFO - [model_service.py:507] - [STORAGE] Saved translation 1059c8c8-b2a2-4d54-9221-5be88b1e93ae
