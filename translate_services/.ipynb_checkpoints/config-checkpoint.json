@@ -1,0 +1,29 @@
+{
+  "model": {
+    "model_id": "/home/anews/PS/translate/YanoljaNEXT-Rosetta-4B-2510",
+    "torch_dtype": "bfloat16",
+    "device_map": "auto",
+    "max_memory": {
+      "gpu": "4GB",
+      "cpu": "5GB"
+    },
+    "offload_folder": "/tmp/model_offload",
+    "offload_state_dict": true,
+    "low_cpu_mem_usage": true
+  },
+  "translation": {
+    "target_language": "Persian (Farsi)",
+    "context": {
+      "context": "Cryptocurrency market news and analysis.",
+      "tone": "Professional and informative"
+    },
+    "generation_params": {
+      "max_new_tokens": 2048,
+      "temperature": 0.8,
+      "do_sample": true,
+      "top_p": 0.95,
+      "top_k": 50
+    }
+  },
+  "glossary": {}
+}

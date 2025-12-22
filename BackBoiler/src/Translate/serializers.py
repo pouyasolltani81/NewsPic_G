@@ -45,13 +45,34 @@ class TranslationRequestSerializer(serializers.Serializer):
     )
     target_language = serializers.ChoiceField(
         choices=SUPPORTED_LANGUAGES,
-        required=True,
-        help_text="Target language for translation"
+        required=False,
+        help_text="Target language for translation (single)"
+    )
+    target_languages = serializers.ListField(
+        child=serializers.ChoiceField(choices=SUPPORTED_LANGUAGES),
+        required=False,
+        help_text="Target languages for translation (multiple)"
     )
     is_json = serializers.BooleanField(
         default=False,
         help_text="Whether the text is JSON formatted"
     )
+
+    def validate(self, attrs):
+        """Ensure at least one target language is specified"""
+        if not attrs.get('target_language') and not attrs.get('target_languages'):
+            raise serializers.ValidationError(
+                "Either 'target_language' or 'target_languages' must be specified"
+            )
+        return attrs
+
+    def get_target_languages_list(self):
+        """Get target languages as a list for API compatibility"""
+        if self.validated_data.get('target_languages'):
+            return self.validated_data['target_languages']
+        elif self.validated_data.get('target_language'):
+            return [self.validated_data['target_language']]
+        return []
 
     class Meta:
         examples = {
@@ -59,6 +80,13 @@ class TranslationRequestSerializer(serializers.Serializer):
                 'value': {
                     'text': 'Hello, how are you?',
                     'target_language': 'Persian',
+                    'is_json': False
+                }
+            },
+            'multi_language': {
+                'value': {
+                    'text': 'Hello, how are you?',
+                    'target_languages': ['Persian', 'Spanish', 'French'],
                     'is_json': False
                 }
             },
@@ -81,13 +109,34 @@ class TranslationBatchRequestSerializer(serializers.Serializer):
     )
     target_language = serializers.ChoiceField(
         choices=SUPPORTED_LANGUAGES,
-        required=True,
-        help_text="Target language for translation"
+        required=False,
+        help_text="Target language for translation (single)"
+    )
+    target_languages = serializers.ListField(
+        child=serializers.ChoiceField(choices=SUPPORTED_LANGUAGES),
+        required=False,
+        help_text="Target languages for translation (multiple)"
     )
     is_json = serializers.BooleanField(
         default=False,
         help_text="Whether the texts are JSON formatted"
     )
+
+    def validate(self, attrs):
+        """Ensure at least one target language is specified"""
+        if not attrs.get('target_language') and not attrs.get('target_languages'):
+            raise serializers.ValidationError(
+                "Either 'target_language' or 'target_languages' must be specified"
+            )
+        return attrs
+
+    def get_target_languages_list(self):
+        """Get target languages as a list for API compatibility"""
+        if self.validated_data.get('target_languages'):
+            return self.validated_data['target_languages']
+        elif self.validated_data.get('target_language'):
+            return [self.validated_data['target_language']]
+        return []
 
 class MemoryConfigSerializer(serializers.Serializer):
     gpu_memory = serializers.CharField(
@@ -227,24 +276,38 @@ class ConfigSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         """Allow flexible config input"""
-        # If data is already a dict with the right structure, return it
         if isinstance(data, dict):
             return data
         return super().to_internal_value(data)
 
 # Response serializers for documentation
 class TranslationResponseSerializer(serializers.Serializer):
-    translation = serializers.CharField(help_text="Translated text")
+    translations = serializers.DictField(
+        child=serializers.CharField(),
+        help_text="Dictionary of translations by language"
+    )
     original = serializers.CharField(help_text="Original text")
-    target_language = serializers.CharField(help_text="Target language used")
+    target_languages = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Target languages used"
+    )
+    successful_languages = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Languages successfully translated"
+    )
 
 class BatchTranslationResponseSerializer(serializers.Serializer):
     translations = serializers.ListField(
         child=serializers.DictField(),
         help_text="List of translation results"
     )
-    target_language = serializers.CharField(help_text="Target language used")
-    count = serializers.IntegerField(help_text="Number of translations")
+    target_languages = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Target languages used"
+    )
+    total_texts = serializers.IntegerField(help_text="Total number of texts")
+    successful = serializers.IntegerField(help_text="Number of successful translations")
+    failed = serializers.IntegerField(help_text="Number of failed translations")
 
 class MemoryUsageSerializer(serializers.Serializer):
     is_model_loaded = serializers.BooleanField(help_text="Whether model is loaded")
