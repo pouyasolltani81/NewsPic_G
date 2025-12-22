@@ -473,21 +473,53 @@
       "Ghana passes law to legalize crypto trading, central bank governor says",
       "Ghana has officially passed a law to legalize cryptocurrency trading, granting its central bank the authority to regulate and license providers. 🏛️ This move aims to reduce fraud and systemic risks in the crypto market. 📉 The decision reflects a growing trend of countries embracing digital assets while implementing safeguards. 🌍 It could boost financial innovation and investor confidence in Ghana's economy. 💰"
     ],
-    "translations": {},
+    "translations": {
+      "text_0": {
+        "original": "Ghana passes law to legalize crypto trading, central bank governor says",
+        "translations": {
+          "Persian": "رئیس بانک مرکزی غنا می‌گوید: این کشور قانونی را برای قانونی کردن معاملات ارزهای دیجیتال تصویب کرد.",
+          "Japanese": "ガーナが仮想通貨取引の合法化法を可決したと、中央銀行総裁が発表しました。",
+          "Arabic": "غانا تسري قانونًا لإضفاء الشرعية على تداول العملات المشفرة، حسبما صرح محافظ البنك المركزي."
+        },
+        "success": true,
+        "successful_languages": [
+          "Persian",
+          "Japanese",
+          "Arabic"
+        ],
+        "failed_languages": []
+      },
+      "text_1": {
+        "original": "Ghana has officially passed a law to legalize cryptocurrency trading, granting its central bank the authority to regulate and license providers. 🏛️ This move aims to reduce fraud and systemic risks in the crypto market. 📉 The decision reflects a growing trend of countries embracing digital assets while implementing safeguards. 🌍 It could boost financial innovation and investor confidence in Ghana's economy. 💰",
+        "translations": {
+          "Persian": "غنا رسماً قانونی را برای قانونی کردن معاملات ارز دیجیتال تصویب کرده است و به بانک مرکزی این کشور اختیار داده تا ارائه‌دهندگان خدمات ارز دیجیتال را تنظیم و مجوز دهد. 🏛️ این اقدام با هدف کاهش کلاهبرداری و ریسک‌های سیستمی در بازار ارزهای دیجیتال صورت گرفته است. 📉 این تصمیم نشان‌دهنده روند رو به رشد پذیرش دارایی‌های دیجیتال توسط کشورها و همزمان اجرای تدابیر حفاظتی است. 🌍 این امر می‌تواند نوآوری مالی و اعتماد سرمایه‌گذاران به اقتصاد غنا را تقویت کند. 💰",
+          "Japanese": "ガーナは、暗号通貨取引を合法化する法案を正式に可決し、中央銀行に規制およびライセンス供与の権限を付与しました。 🏛️ この動きは、暗号通貨市場における詐欺やシステムリスクの低減を目的としています。 📉 この決定は、各国がデジタル資産を受け入れつつも、安全対策を講じるという傾向の高まりを反映したものです。 🌍 これにより、ガーナ経済における金融イノベーションと投資家の信頼が高まる可能性があります。 💰",
+          "Arabic": "لقد أقرت غانا رسميًا قانونًا لإضفاء الشرعية على تداول العملات المشفرة، مما يمنح بنكها المركزي سلطة تنظيم وترخيص مقدمي الخدمات. 🏛️ ويهدف هذا الإجراء إلى الحد من الاحتيال والمخاطر النظامية في سوق العملات المشفرة. 📉 ويعكس هذا القرار اتجاهًا متزايدًا للبلدان لاعتناق الأصول الرقمية مع تطبيق الضمانات اللازمة. 🌍 ومن شأنه أن يعزز الابتكار المالي وثقة المستثمرين في الاقتصاد الغاني. 💰"
+        },
+        "success": true,
+        "successful_languages": [
+          "Persian",
+          "Japanese",
+          "Arabic"
+        ],
+        "failed_languages": []
+      }
+    },
     "target_languages": [
       "Persian",
       "Japanese",
       "Arabic"
     ],
-    "timestamp": "2025-12-22T14:23:27.108742",
+    "timestamp": "2025-12-22T15:04:24.886316",
     "metadata": {
       "is_json": false,
       "is_batch": true,
       "text_count": 2,
-      "total_length": 483,
-      "status": "processing",
-      "started_at": "2025-12-22T14:23:27.089434",
-      "estimated_completion": "2025-12-22T14:23:41.577989"
+      "successful_count": 2,
+      "failed_count": 0,
+      "errors": [],
+      "status": "completed",
+      "completed_at": "2025-12-22T15:04:24.863112"
     }
   },
   "91a36c81-1ce3-4b11-9ce0-91e7ed39e1a0": {
